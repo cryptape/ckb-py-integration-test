@@ -94,8 +94,7 @@ def get_project_root():
     pattern = r"(.*ckb-py-integration-test)"
     matches = re.findall(pattern, current_path)
     if matches:
-        longest_string = max(matches, key=len)
-        print("longest_string:",longest_string)
-        return longest_string
+        root_dir = max(matches, key=len)
+        return root_dir
     else:
         raise Exception("not found ckb-py-integration-test dir")
