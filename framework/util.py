@@ -91,4 +91,10 @@ def run_command(cmd):
 
 def get_project_root():
     current_path = os.path.dirname(os.path.abspath(__file__))
-    return "{path}/ckb-py-integration-test".format(path=current_path.split("/ckb-py-integration-test")[0])
+    pattern = r"(.*ckb-py-integration-test)"
+    matches = re.findall(pattern, current_path)
+    if matches:
+        longest_string = max(matches, key=len)
+        return longest_string
+    else:
+        raise Exception("not found ckb-py-integration-test dir")
