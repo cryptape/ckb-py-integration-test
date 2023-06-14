@@ -37,6 +37,7 @@ def get_ckb_configs(p2p_port, rpc_port, spec='{ file = "dev.toml" }'):
 
 
 def create_config_file(config_values, template_path, output_file):
+    print("get_project_root:{get_project_root}".format(get_project_root=get_project_root()))
     file_loader = FileSystemLoader(get_project_root())
     # 创建一个环境
     env = Environment(
