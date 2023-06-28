@@ -87,8 +87,13 @@ class CkbNode:
         time.sleep(3)
 
     def stop(self):
-        run_command("kill {pid}".format(pid=self.ckb_pid))
+        # run_command("kill {pid}".format(pid=self.ckb_pid))
+        # self.ckb_pid = -1
+        port = self.rpcUrl.split(":")[-1]
+        run_command(f"kill $(lsof -t -i:{port})")
         self.ckb_pid = -1
+        time.sleep(3)
+
 
     def prepare(self, check_file=False):
         # check file exist
