@@ -1,5 +1,4 @@
 import time
-from abc import ABC, abstractmethod
 from enum import Enum
 from framework.util import create_config_file, get_project_root, run_command, get_ckb_configs
 from framework.config import get_tmp_path, CKB_DEFAULT_CONFIG, CKB_MINER_CONFIG
@@ -8,11 +7,22 @@ import shutil
 
 
 class CkbNodeConfigPath(Enum):
-    CURRENT_TEST = ("template/ckb/v110/ckb.toml.j2",
-                    "template/ckb/v110/ckb-miner.toml.j2",
-                    "template/ckb/v110/specs/dev.toml",
-                    "download/0.110.0")
-    V110 = ("", "", "", "")
+    CURRENT_TEST = ("source/template/ckb/v111/ckb.toml.j2",
+                    "source/template/ckb/v111/ckb-miner.toml.j2",
+                    "source/template/ckb/v111/specs/dev.toml",
+                    "download/0.111.0")
+    V111 = (
+        "source/template/ckb/v111/ckb.toml.j2",
+        "source/template/ckb/v111/ckb-miner.toml.j2",
+        "source/template/ckb/v111/specs/dev.toml",
+        "download/0.111.0"
+    )
+    V110 = (
+        "source/template/ckb/v110/ckb.toml.j2",
+        "source/template/ckb/v110/ckb-miner.toml.j2",
+        "source/template/ckb/v110/specs/dev.toml",
+        "download/0.110.0"
+    )
     V109 = ("", "", "", "")
     v108 = ("", "", "", "")
 
@@ -23,49 +33,7 @@ class CkbNodeConfigPath(Enum):
         self.ckb_bin_path = ckb_bin_path
 
 
-class LightCkbNodeConfigPath(Enum):
-    V1 = ('todo')
-
-    def __init__(self, ckb_light_ckb_config_path):
-        self.ckb_light_ckb_config_path = ckb_light_ckb_config_path
-
-
-class Node(ABC):
-
-    @abstractmethod
-    def start(self):
-        pass
-
-    @abstractmethod
-    def stop(self):
-        pass
-
-    @abstractmethod
-    def prepare(self):
-        pass
-
-    @abstractmethod
-    def clean(self):
-        pass
-
-    @abstractmethod
-    def miner(self, number):
-        pass
-
-    @abstractmethod
-    def version(self):
-        pass
-
-    @abstractmethod
-    def restart(self, config):
-        pass
-
-    @abstractmethod
-    def getClient(self):
-        pass
-
-
-class CkbNode(Node):
+class CkbNode:
 
     @classmethod
     def init_dev_by_port(cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port):
@@ -107,29 +75,23 @@ class CkbNode(Node):
         peer_address = node.get_peer_address()
         print("add node response:", self.getClient().add_node(peer_id, peer_address))
 
-    def getClient(self):
+    def getClient(self)->RPCClient:
         return self.client
 
     def restart(self, config):
-        self.stop()
-        self.start()
+        pass
 
     def start(self):
-        if self.ckb_pid != -1:
-            return
         self.ckb_pid = run_command("cd {ckb_dir} && ./ckb run --indexer > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
-        # wait ckb start
+        # //todo replace by rpc
         time.sleep(3)
 
     def stop(self):
-        if self.ckb_pid == -1:
-            return
         run_command("kill {pid}".format(pid=self.ckb_pid))
         self.ckb_pid = -1
-        # wait ckb close
-        time.sleep(3)
 
-    def prepare(self):
+    def prepare(self, check_file=False):
+        # check file exist
         create_config_file(self.ckb_config, self.ckb_config_path.ckb_config_path,
                            self.ckb_toml_path)
         create_config_file(self.ckb_miner_config, self.ckb_config_path.ckb_miner_config_path, self.ckb_miner_toml_path)
@@ -141,63 +103,22 @@ class CkbNode(Node):
                                                                 ckb_bin_path=self.ckb_config_path.ckb_bin_path),
                     self.ckb_dir)
 
-        shutil.copy("{root_path}/template/ckb/default.db-options".format(root_path=get_project_root()), self.ckb_dir)
+        shutil.copy("{root_path}/source/template/ckb/default.db-options".format(root_path=get_project_root()), self.ckb_dir)
         shutil.copy("{root_path}/{spec_path}".format(root_path=get_project_root(),
                                                      spec_path=self.ckb_config_path.ckb_spec_path), self.ckb_dir)
-        # create_config_file(self.ckb_miner_config, self.ckb_config_path.ckb_miner_config_path, dec_dir)
-        # create_config_file(self.ckb_specs_config, self.ckb_config_path.ckb_miner_config_path, dec_dir)
-        #     if self.ckb_config_path.ckb_spec_path == "dev":
-        #         pass
 
     def clean(self):
         run_command("rm -rf {ckb_dir}".format(ckb_dir=self.ckb_dir))
 
-    def miner(self, number):
-        pass
-
     def start_miner(self):
-        if self.ckb_miner_pid != -1:
-            return
         self.ckb_miner_pid = run_command(
-            "cd {ckb_dir} && ./ckb miner > ckb.miner.log 2>&1 &".format(ckb_dir=self.ckb_dir))
+            "cd {ckb_dir} && ./ckb miner > ckb.miner.log 2>&1  &".format(ckb_dir=self.ckb_dir))
         # replace check height upper
         time.sleep(3)
 
     def stop_miner(self):
-        if self.ckb_miner_pid == -1:
-            return
         run_command("kill {pid}".format(pid=self.ckb_miner_pid))
         self.ckb_miner_pid = -1
 
     def version(self):
-        pass
-
-
-class CkbLightClient(Node):
-
-    def restart(self, config):
-        pass
-
-    def __init__(self):
-        pass
-
-    def start(self):
-        pass
-
-    def stop(self):
-        pass
-
-    def prepare(self):
-        pass
-
-    def clean(self):
-        pass
-
-    def miner(self, number):
-        pass
-
-    def version(self):
-        pass
-
-    def getClient(self):
         pass

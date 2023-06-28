@@ -5,11 +5,18 @@ download ckb
 ```shell
 pip install -r requirements.txt
 python -m download
+sh prepare.sh
 ```
 ### run 
 run single test 
 ```shell
 python -m pytest test_cases/framework/test_01_node.py
+```
+
+### debug
+[pytest.ini](pytest.ini) add pytest debug log 
+```angular2html
+addopts = -s 
 ```
 
 ### add new test 

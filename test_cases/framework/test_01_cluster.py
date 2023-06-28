@@ -12,7 +12,7 @@ class TestCluster:
             CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "cluster/node{i}".format(i=i), 8114 + i, 8225 + i)
             for
             i in range(1, 5)]
-        cls.cluster = Cluster(nodes, [])
+        cls.cluster = Cluster(nodes)
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
 

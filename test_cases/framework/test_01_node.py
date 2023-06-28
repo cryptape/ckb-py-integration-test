@@ -14,10 +14,10 @@ class TestNode:
     @classmethod
     def teardown_class(cls):
         cls.node.stop()
-        cls.node.stop_miner()
         cls.node.clean()
 
     def test_miner(self):
+        time.sleep(10)
         self.node.start_miner()
         time.sleep(10)
         tip_number = self.node.getClient().get_tip_block_number()
