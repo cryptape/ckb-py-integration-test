@@ -1,32 +1,39 @@
-## CKB Test
+# ckb-py-integration-test
 
-### prepare 
-download ckb 
-```shell
-pip install -r requirements.txt
-python -m download
-sh prepare.sh
+ckb-py-integration-test is a project that uses Python for integrated testing. The goal is to automate the testing of operations on the CKB chain.
+
+## Dependencies
+
+This project requires Python and pip to be installed on your system. The Python libraries needed for this project are listed in `requirements.txt`. You can install them by running the following command:
 ```
-### run 
-run single test 
-```shell
-python -m pytest test_cases/framework/test_01_node.py
+make prepare
+```
+This `prepare` command will perform the following operations:
+
+1. Install the Python libraries listed in `requirements.txt`.
+2. Download and install the ckb binary.
+3. Download and install the ckb-cli.
+
+In addition, we also provide the following commands:
+
+- To run the tests for the project:
+  
+```
+    make test
 ```
 
-### debug
-[pytest.ini](pytest.ini) add pytest debug log 
+- To clean up temporary files and other generated project files:
+```
+    make clean
+```
+## Debugging
+
+You can add debug logging for pytest by modifying the [pytest.ini](pytest.ini) file:
+
 ```angular2html
 addopts = -s 
 ```
 
-### add new test 
-- test_cases/example/test_01_demo.py
-- test_cases/example/test_02_fixture_demo.py
+## Contributing
 
-
-## todo 
-- ckb-cli support 
-- test with ckb build 
-- ckb rpc support
-- ckb contract support 
-- etc..
+If you want to contribute to this project, you can fork this repository, create a feature branch, and send us a Pull Request. For more information, please see the CONTRIBUTING.md file.
