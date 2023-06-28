@@ -106,7 +106,7 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
         "lock": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
             "hash_type": "type",
-            "args": "0x0"
+            "args": "0x470dcdc5e44064909650113a274b3b36aecb6dc7"
         },
         "type": {
             "code_hash": contract_code_hash,
@@ -125,6 +125,8 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
     tx_add_multisig_config(account_address, tmp_tx_file, api_url)
     # add input
     tx_add_input(input_cell_out_point['tx_hash'], input_cell_out_point['index'], tmp_tx_file, api_url)
+
+
     # add output
     tx_add_type_out_put(output_cell["type"]["code_hash"], output_cell["type"]["hash_type"], output_cell["type"]["args"],
                         output_cell["capacity"], data, tmp_tx_file)

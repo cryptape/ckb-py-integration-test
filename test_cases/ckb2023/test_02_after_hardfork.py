@@ -2,8 +2,10 @@ import pytest
 
 from framework.config import ACCOUNT_PRIVATE_2, ACCOUNT_PRIVATE_1, MINER_PRIVATE_1
 from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
+from framework.helper.contract import invoke_ckb_contract
 from framework.helper.miner import make_tip_height_number, miner_with_version, miner_until_tx_committed
 from framework.helper.node import wait_cluster_height
+from framework.helper.spawn_contract import SpawnContract
 from framework.test_cluster import Cluster
 from framework.test_node import CkbNode, CkbNodeConfigPath
 
@@ -22,8 +24,14 @@ class TestAfterHardFork:
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
+        make_tip_height_number(cls.cluster.ckb_nodes[0], 500)
+        wait_cluster_height(cls.cluster, 500, 100)
+        spawn_contract = SpawnContract()
+        cls.spawn_contract = spawn_contract
+        cls.spawn_contract.deploy(ACCOUNT_PRIVATE_1,cls.cluster.ckb_nodes[0])
         make_tip_height_number(cls.cluster.ckb_nodes[0], 1000)
         wait_cluster_height(cls.cluster, 1000, 100)
+
 
     @classmethod
     def teardown_class(cls):
@@ -140,14 +148,66 @@ class TestAfterHardFork:
         print(f"tx response:{tx_response['tx_status']['status']}")
         assert tx_response['tx_status']['status'] == "committed"
 
-    def test__0049_spawn_use_data2(self):
-        pass
+    def test__0050_spawn_use_data2(self):
+        """
+            After a period of hard fork,send spawn tx by data2 .
+            - return tx_hash
+            - The transaction will be committed on the blockchain
+        :return:
+        """
+        for i in range(11):
+            miner_with_version(self.cluster.ckb_nodes[0], "0x0")
 
-    def test_0049_spawn_use_data1(self):
-        pass
+        code_tx_hash,code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        invoke_arg,invoke_data = self.spawn_contract.get_arg_and_data("demo")
+        tx_hash = invoke_ckb_contract(MINER_PRIVATE_1,code_tx_hash,code_tx_index,invoke_arg,"data2",invoke_data,api_url=self.cluster.ckb_nodes[0].getClient().url)
+        miner_until_tx_committed(self.cluster.ckb_nodes[0],tx_hash)
 
-    def test_0049_spawn_use_type(self):
-        pass
+    def test_0050_spawn_use_data1(self):
+        """
+        After a period of hard fork,send spawn tx by data1 .
+            - return Error: InvalidEcall(2101)
+        :return:
+        """
+        code_tx_hash,code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
+        with pytest.raises(Exception) as exc_info:
+            tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data1", invoke_data,
+                                      api_url=self.cluster.ckb_nodes[0].getClient().url)
+        expected_error_message = "InvalidEcall(2101)"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+
+    def test_0050_spawn_use_data(self):
+        """
+          After a period of hard fork,send spawn tx by data1 .
+            - return Error: InvalidInstruction
+        :return:
+        """
+        code_tx_hash,code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
+        with pytest.raises(Exception) as exc_info:
+            tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data", invoke_data,
+                                      api_url=self.cluster.ckb_nodes[0].getClient().url)
+        expected_error_message = "InvalidInstruction"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+
+    def test_0050_spawn_use_type(self):
+        """
+        After a period of hard fork,send spawn tx by data1 .
+        - return tx_hash
+        - The transaction will be committed on the blockchain
+        :return:
+        """
+        for i in range(11):
+            miner_with_version(self.cluster.ckb_nodes[0], "0x0")
+
+        code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
+        tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "type", invoke_data,
+                                      api_url=self.cluster.ckb_nodes[0].getClient().url)
+        miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
 
 
 def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
