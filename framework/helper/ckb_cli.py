@@ -11,7 +11,7 @@ cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
 
 def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
     """
-    guopenglin@MacBook-Pro-4 0.111.0 % ./ckb-cli  wallet get-capacity
+    MacBook-Pro-4 0.111.0 % ./ckb-cli  wallet get-capacity
     --address ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqw6vjzy9kahx3lyvlgap8dp8ewd8g80pcgcexzrj
     total: 0.0 (CKB)
 
@@ -101,7 +101,7 @@ def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
 def wallet_transfer_by_private_key(private_key, to_ckb_address, capacity, api_url="http://127.0.0.1:8114",
                                    fee_rate="1000"):
     """
-    guopenglin@MacBook-Pro-4 0.111.0 % guopenglin@MacBook-Pro-4 0.111.0 % export API_URL=http://127.0.0.1:8115 &&  echo
+    MacBook-Pro-4 0.111.0 % MacBook-Pro-4 0.111.0 % export API_URL=http://127.0.0.1:8115 &&  echo
     0xd00c06bfd800d27397002dca6fb0993d5ba6399b4238b2f29ee9deb97593d2bc > /tmp/tmp.data && ./ckb-cli wallet transfer --
     privkey-path address1.data --to-address
      ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq28phxutezqvjgfv5q38gn5kwek4m9km3cmajeqs  --capacity 88
@@ -126,7 +126,7 @@ def wallet_transfer_by_private_key(private_key, to_ckb_address, capacity, api_ur
 
 def version():
     """
-    guopenglin@MacBook-Pro-4 0.111.0 % ./ckb-cli --version
+    MacBook-Pro-4 0.111.0 % ./ckb-cli --version
     ckb-cli 1.4.0 (33bd1a1 2023-03-27)
 
     :return:
@@ -219,7 +219,7 @@ def deploy_apply_txs(tx_info_path, api_url="http://127.0.0.1:8114"):
 
 def util_key_info_by_private_key(account_private):
     """
-    guopenglin@MacBook-Pro-4 0.111.0 % echo 0xd00c06bfd800d27397002dca6fb0993d5ba6399b4238b2f29ee9deb97593d2bc >
+    MacBook-Pro-4 0.111.0 % echo 0xd00c06bfd800d27397002dca6fb0993d5ba6399b4238b2f29ee9deb97593d2bc >
     tmp.data && ./ckb-cli util key-info --privkey-path tmp.data --output-format json && rm tmp.data
 
     Put this config in < ckb.toml >:
@@ -258,7 +258,7 @@ def tx_init(tx_file, api_url="http://127.0.0.1:8114"):
     """
     ./ckb-cli tx init --tx-file tx.txt
     status: success
-    guopenglin@MacBook-Pro-4 0.111.0 % cat tx.txt
+    MacBook-Pro-4 0.111.0 % cat tx.txt
     {
       "transaction": {
         "version": "0x0",
@@ -330,7 +330,7 @@ def tx_add_multisig_config(ckb_address, tx_file, api_url="http://127.0.0.1:8114"
     """
     ./ckb-cli tx add-multisig-config --sighash-address ckt1qyqdfjzl8ju2vfwjtl4mttx6me09hayzfldq8m3a0y --tx-file tx.txt
     status: success
-    guopenglin@MacBook-Pro-4 0.111.0 % cat tx.txt
+    MacBook-Pro-4 0.111.0 % cat tx.txt
     {
       "transaction": {
         "version": "0x0",
