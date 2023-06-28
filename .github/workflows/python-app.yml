@@ -28,15 +28,18 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
-      run: |
-        pwd
-        python -m download
-        sh prepare.sh
-        python -m pytest
-    
+    - name: Install dependencies
+      run: make prepare
+
+    - name: Run tests
+      run: make test
+
     - name: Publish reports
       if: failure()
       uses: actions/upload-artifact@v2
       with:
         name: jfoa-build-reports-${{ runner.os }}
         path: /home/runner/work/ckb-py-integration-test/ckb-py-integration-test/report
+
+    - name: Cleanup
+        run: make clean
