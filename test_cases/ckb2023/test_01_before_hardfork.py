@@ -136,7 +136,6 @@ class TestBeforeHardFork:
                                                  self.cluster.ckb_nodes[0].client.url)
         print(f"txHash:{tx_hash}")
         miner_with_version(self.cluster.ckb_nodes[0], "0x0")
-        miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
         print(f"tx response:{tx_response['tx_status']['status']}")
         assert tx_response['tx_status']['status'] == "rejected" or tx_response['tx_status']['status'] == "unknown"
@@ -169,7 +168,7 @@ class TestBeforeHardFork:
                                                  140,
                                                  self.cluster.ckb_nodes[0].client.url)
         print(f"txHash:{tx_hash}")
-        miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
+        miner_with_version(self.cluster.ckb_nodes[0], '0x0')
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
         print(f"tx response:{tx_response['tx_status']['status']}")
         assert tx_response['tx_status']['status'] == 'unknown'
