@@ -40,6 +40,3 @@ jobs:
       with:
         name: jfoa-build-reports-${{ runner.os }}
         path: /home/runner/work/ckb-py-integration-test/ckb-py-integration-test/report
-
-    - name: Cleanup
-        run: make clean
