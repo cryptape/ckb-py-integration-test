@@ -2,3 +2,5 @@
 tmp
 .pytest_cache
 download
+pytest.ini
+reprot
