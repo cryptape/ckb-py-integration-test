@@ -1,7 +1,5 @@
 import json
 import re
-import shlex
-import subprocess
 
 from framework.test_node import CkbNodeConfigPath
 from framework.util import get_project_root
