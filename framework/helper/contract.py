@@ -32,6 +32,8 @@ def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_i
         api_url:
 
     Returns: tx_hash
+    :param api_url:
+    :param enable_type_id:
 
     """
     if enable_type_id:

@@ -1,11 +1,17 @@
+"""
+download.py
+
+This module downloads files from specified URLs and saves them locally.
+"""
+
 import os
 import platform
-import requests
 import tarfile
 import zipfile
+import requests
 from tqdm import tqdm
 
-versions = ['0.109.0','0.110.0','0.111.0-rc6']  # Replace with your versions
+versions = ['0.109.0', '0.110.0', '0.111.0-rc6']  # Replace with your versions
 DOWNLOAD_DIR = "download"
 SYSTEMS = {
     'Windows': {
@@ -52,25 +58,32 @@ def download_file(url, filename):
         requests.HTTPError: If an HTTP error occurs during the download.
 
     """
-    print("Downloading URL: {url}".format(url=url))
-    response = requests.get(url, stream=True)
+    print(f"Downloading URL: {url}")
+    response = requests.get(url, stream=True, timeout=30)
     response.raise_for_status()
 
     total_size = int(response.headers.get('content-length', 0))
     block_size = 1024  # 1 Kibibyte
-    t = tqdm(total=total_size, unit='iB', unit_scale=True)
+    tq_file = tqdm(total=total_size, unit='iB', unit_scale=True)
 
-    with open(filename, 'wb') as f:
+    with open(filename, 'wb') as file:
         for data in response.iter_content(block_size):
-            t.update(len(data))
-            f.write(data)
-    t.close()
+            tq_file.update(len(data))
+            file.write(data)
+    tq_file.close()
 
-    if total_size != 0 and t.n != total_size:
-        raise Exception("ERROR: Something went wrong during the download.")
+    if total_size not in (0, total_size):
+        raise requests.HTTPError("ERROR: Something went wrong during the download.")
 
 
 def extract_file(filename, path):
+    """
+        Extract a compressed file to the specified path.
+
+        Args:
+            filename (str): The name of the compressed file.
+            path (str): The path to extract the files to.
+    """
     temp_path = os.path.join(path, 'temp')
     os.makedirs(temp_path, exist_ok=True)
 
@@ -99,6 +112,11 @@ def extract_file(filename, path):
 
 
 def download_ckb(ckb_version):
+    """
+    download ckb from gitHub by ckb version
+    :param ckb_version: gitHub release ckb version
+    :return: None
+    """
     system = platform.system()
     architecture = platform.machine() if system in ['Linux', 'Darwin'] else ''
     print(f"system:{system},architecture:{architecture}"
