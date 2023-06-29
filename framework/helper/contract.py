@@ -1,4 +1,5 @@
 from framework.helper.ckb_cli import *
+from framework.test_node import CkbNode
 from framework.rpc import RPCClient
 import hashlib
 import time
