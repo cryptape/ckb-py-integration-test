@@ -7,6 +7,7 @@ from framework.test_node import CkbNode, CkbNodeConfigPath
 from framework.util import get_project_root
 
 
+
 @pytest.fixture(scope='module')
 def get_cluster():
     nodes = [
