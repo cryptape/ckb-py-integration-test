@@ -2,7 +2,9 @@ import pytest
 
 from framework.config import ACCOUNT_PRIVATE_1, ACCOUNT_PRIVATE_2, MINER_PRIVATE_1
 from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_get_capacity, wallet_transfer_by_private_key
-from framework.helper.miner import miner_with_version, make_tip_height_number, miner_until_tx_committed
+from framework.helper.contract import invoke_ckb_contract
+from framework.helper.contract_util import deploy_contracts
+from framework.helper.miner import miner_with_version, make_tip_height_number
 from framework.helper.node import wait_cluster_height
 from framework.test_cluster import Cluster
 from framework.test_node import CkbNode, CkbNodeConfigPath
@@ -22,6 +24,8 @@ class TestBeforeHardFork:
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
+        contracts = deploy_contracts(ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
+        cls.spawn_contract = contracts["SpawnContract"]
         make_tip_height_number(cls.cluster.ckb_nodes[0], 850)
         wait_cluster_height(cls.cluster, 850, 100)
 
@@ -106,6 +110,21 @@ class TestBeforeHardFork:
                                                      self.cluster.ckb_nodes[0].client.url)
         print(exc_info)
         expected_error_message = "the feature \"VM Version 2\" is used in current transaction but not enabled in current chain"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+
+    def test__0050_invoke_spawn_use_type(self):
+        """
+        Before the fork, send a transaction contains spawn , use  script:type invoke it.
+        - return error: InvalidEcall(2101)
+        :return:
+        """
+        code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
+        with pytest.raises(Exception) as exc_info:
+            tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "type", invoke_data,
+                                          api_url=self.cluster.ckb_nodes[0].getClient().url)
+        expected_error_message = "InvalidEcall(2101)"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 

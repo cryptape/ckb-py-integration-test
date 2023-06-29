@@ -1,7 +1,25 @@
 from framework.helper.ckb_cli import *
+from framework.test_node import CkbNode
 from framework.rpc import RPCClient
 import hashlib
 import time
+
+from abc import ABC, abstractmethod
+
+
+class CKbContract(ABC):
+
+    @abstractmethod
+    def deploy(self, account_private, node: CkbNode):
+        pass
+
+    @abstractmethod
+    def get_deploy_hash_and_index(self) -> (str, int):
+        pass
+
+    @abstractmethod
+    def get_arg_and_data(self, key) -> (str, str):
+        pass
 
 
 def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_id=True,
@@ -14,6 +32,8 @@ def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_i
         api_url:
 
     Returns: tx_hash
+    :param api_url:
+    :param enable_type_id:
 
     """
     if enable_type_id:
@@ -125,7 +145,6 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
     tx_add_multisig_config(account_address, tmp_tx_file, api_url)
     # add input
     tx_add_input(input_cell_out_point['tx_hash'], input_cell_out_point['index'], tmp_tx_file, api_url)
-
 
     # add output
     tx_add_type_out_put(output_cell["type"]["code_hash"], output_cell["type"]["hash_type"], output_cell["type"]["args"],
