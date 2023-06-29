@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from framework.helper.miner import make_tip_height_number
@@ -7,6 +5,7 @@ from framework.helper.node import wait_cluster_height
 from framework.test_cluster import Cluster
 from framework.test_node import CkbNode, CkbNodeConfigPath
 from framework.util import get_project_root
+
 
 @pytest.fixture(scope='module')
 def get_cluster():

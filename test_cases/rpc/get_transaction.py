@@ -10,6 +10,7 @@ class TestGetTransaction:
 
     def test_query_tx_only_commit_is_true(self, get_cluster):
         """
+        https://github.com/nervosnetwork/ckb/pull/3963
         pending tx
         - enable committed: tx_status = uni
         - not enable committed : tx_status = pending

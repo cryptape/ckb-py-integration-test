@@ -25,13 +25,16 @@ class RPCClient:
         return self.call("get_block_hash", [block_number_hex])
 
     def get_block(self, block_hash, verbosity=None, with_cycles=None):
-        return self.call("get_block",[block_hash,verbosity,with_cycles])
+        return self.call("get_block", [block_hash, verbosity, with_cycles])
 
     def truncate(self, block_hash):
         return self.call("truncate", [block_hash])
 
     def get_consensus(self):
         return self.call("get_consensus", [])
+
+    def get_deployments_info(self):
+        return self.call("get_deployments_info", [])
 
     def get_block_template(self, bytes_limit=None, proposals_limit=None, max_version=None):
         return self.call("get_block_template", [bytes_limit, proposals_limit, max_version])
