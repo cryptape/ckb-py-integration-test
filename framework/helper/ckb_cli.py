@@ -401,7 +401,7 @@ def tx_add_cell_dep(tx_hash, index_hex, tx_file):
 
     with open(tx_file, "w") as f:
         tx = json.loads(tx_info_str)
-        tx["transaction"]["cell_deps"].append(
+        tx["transaction"]["cell_deps"].insert(0,
             {
                 "out_point": {
                     "tx_hash": tx_hash,

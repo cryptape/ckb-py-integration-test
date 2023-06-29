@@ -10,6 +10,7 @@ test:
 	python -m pytest
 
 clean:
+	pkill ckb
 	rm -rf tmp
 	rm -rf download
 	rm -rf report

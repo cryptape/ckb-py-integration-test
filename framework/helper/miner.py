@@ -24,12 +24,17 @@ def make_tip_height_number(node, number):
 def miner_until_tx_committed(node, tx_hash):
     for i in range(100):
         tx_response = node.getClient().get_transaction(tx_hash)
-        if tx_response['tx_status']['status'] != "pending" and tx_response['tx_status']['status'] != "proposed":
-            # miner_with_version(node, "0x0")
+        if tx_response['tx_status']['status'] == "committed":
             return
-        miner_with_version(node, "0x0")
-        time.sleep(1)
-    assert f"miner 100 block ,but tx_response always pending:{tx_hash}"
+        if tx_response['tx_status']['status'] == "pending" or tx_response['tx_status']['status'] == "proposed":
+            miner_with_version(node, "0x0")
+            time.sleep(1)
+            continue
+
+        if tx_response['tx_status']['status'] == "rejected" or tx_response['tx_status']['status'] == "unknown":
+            raise Exception(f"status:{tx_response['tx_status']['status']},reason:{tx_response['tx_status']['reason']}")
+
+    raise Exception (f"miner 100 block ,but tx_response always pending:{tx_hash}")
 
 
 # https://github.com/nervosnetwork/rfcs/pull/416
