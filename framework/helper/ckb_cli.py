@@ -1,5 +1,7 @@
 import json
 import re
+import shlex
+import subprocess
 
 from framework.test_node import CkbNodeConfigPath
 from framework.util import get_project_root
@@ -8,6 +10,7 @@ from framework.util import run_command
 # cli_path = "cd {root_path}/{cli_path} && ./ckb-cli".format(root_path=get_project_root(),
 #                                                            cli_path=CkbNodeConfigPath.CURRENT_TEST.ckb_bin_path)
 cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
+
 
 def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
     """
@@ -433,3 +436,37 @@ code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
 args = "{account["lock_arg"]}"
 hash_type = "type"
     """
+
+
+def estimate_cycles(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
+                    output_format='yaml', api_url="http://127.0.0.1:8114"):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc estimate_cycles --json-path /tmp/tmp.json --output-format yaml
+    cycles: 0
+    :param json_path:
+    :param raw_data:
+    :param no_color:
+    :param debug:
+    :param local_only:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli estimate_cycles command
+    cmd = 'rpc estimate_cycles'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --json-path {json_path}'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    parts = run_command(cmd).split(":")
+    parts = [part.strip() for part in parts]
+    return int(parts[1])

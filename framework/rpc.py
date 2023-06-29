@@ -27,6 +27,20 @@ class RPCClient:
     def get_block(self, block_hash, verbosity=None, with_cycles=None):
         return self.call("get_block", [block_hash, verbosity, with_cycles])
 
+    def get_block_by_number(self, block_number, verbosity=None, with_cycles=None):
+        """
+        {
+          "id": 42,
+          "jsonrpc": "2.0",
+          "method": "get_block_by_number",
+          "params": [
+            "0x0"
+          ]
+        }
+        :return:
+        """
+        return self.call("get_block_by_number", [block_number, verbosity, with_cycles])
+
     def truncate(self, block_hash):
         return self.call("truncate", [block_hash])
 
