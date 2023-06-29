@@ -1,12 +1,8 @@
 import json
-import time
 
-import pytest
-
-from framework.helper.ckb_cli import version, estimate_cycles, get_deploy_toml_config
+from framework.helper.ckb_cli import version, estimate_cycles
 from framework.helper.miner import make_tip_height_number
 from framework.test_node import CkbNode, CkbNodeConfigPath
-from framework.util import get_project_root
 
 
 class TestCkbCliSupport110:
@@ -18,11 +14,11 @@ class TestCkbCliSupport110:
         cls.node.start()
         make_tip_height_number(cls.node, 20)
 
-    # @classmethod
-    # def teardown_class(cls):
-    #     print("stop node and clean")
-    #     cls.node.stop()
-    #     cls.node.clean()
+    @classmethod
+    def teardown_class(cls):
+        print("stop node and clean")
+        cls.node.stop()
+        cls.node.clean()
 
     def test_01_version(self):
         ckb_cli_version = version()
