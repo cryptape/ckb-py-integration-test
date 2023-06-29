@@ -3,9 +3,9 @@ import pytest
 from framework.config import ACCOUNT_PRIVATE_2, ACCOUNT_PRIVATE_1, MINER_PRIVATE_1
 from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
 from framework.helper.contract import invoke_ckb_contract
+from framework.helper.contract_util import deploy_contracts
 from framework.helper.miner import make_tip_height_number, miner_with_version, miner_until_tx_committed
 from framework.helper.node import wait_cluster_height
-from framework.helper.spawn_contract import SpawnContract
 from framework.test_cluster import Cluster
 from framework.test_node import CkbNode, CkbNodeConfigPath
 
@@ -24,14 +24,10 @@ class TestAfterHardFork:
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
-        make_tip_height_number(cls.cluster.ckb_nodes[0], 500)
-        wait_cluster_height(cls.cluster, 500, 100)
-        spawn_contract = SpawnContract()
-        cls.spawn_contract = spawn_contract
-        cls.spawn_contract.deploy(ACCOUNT_PRIVATE_1,cls.cluster.ckb_nodes[0])
+        contracts = deploy_contracts(ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
+        cls.spawn_contract = contracts["SpawnContract"]
         make_tip_height_number(cls.cluster.ckb_nodes[0], 1000)
         wait_cluster_height(cls.cluster, 1000, 100)
-
 
     @classmethod
     def teardown_class(cls):
@@ -158,10 +154,11 @@ class TestAfterHardFork:
         for i in range(11):
             miner_with_version(self.cluster.ckb_nodes[0], "0x0")
 
-        code_tx_hash,code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
-        invoke_arg,invoke_data = self.spawn_contract.get_arg_and_data("demo")
-        tx_hash = invoke_ckb_contract(MINER_PRIVATE_1,code_tx_hash,code_tx_index,invoke_arg,"data2",invoke_data,api_url=self.cluster.ckb_nodes[0].getClient().url)
-        miner_until_tx_committed(self.cluster.ckb_nodes[0],tx_hash)
+        code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
+        tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data2", invoke_data,
+                                      api_url=self.cluster.ckb_nodes[0].getClient().url)
+        miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
 
     def test_0050_spawn_use_data1(self):
         """
@@ -169,11 +166,12 @@ class TestAfterHardFork:
             - return Error: InvalidEcall(2101)
         :return:
         """
-        code_tx_hash,code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
         with pytest.raises(Exception) as exc_info:
-            tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data1", invoke_data,
-                                      api_url=self.cluster.ckb_nodes[0].getClient().url)
+            tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data1",
+                                          invoke_data,
+                                          api_url=self.cluster.ckb_nodes[0].getClient().url)
         expected_error_message = "InvalidEcall(2101)"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
@@ -184,11 +182,11 @@ class TestAfterHardFork:
             - return Error: InvalidInstruction
         :return:
         """
-        code_tx_hash,code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
+        code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
         with pytest.raises(Exception) as exc_info:
             tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data", invoke_data,
-                                      api_url=self.cluster.ckb_nodes[0].getClient().url)
+                                          api_url=self.cluster.ckb_nodes[0].getClient().url)
         expected_error_message = "InvalidInstruction"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
