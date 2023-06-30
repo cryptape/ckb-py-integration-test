@@ -18,7 +18,7 @@ class TestAfterCkb2023:
     node_110 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "node_compatible/current/node3", 8117,
                                         8227)
     nodes = [node_current, node_111, node_110]
-    le_111_nodes = [node_110]
+    lt_111_nodes = [node_110]
     ge_111_nodes = [node_current, node_111]
     cluster: Cluster = Cluster(nodes)
 
@@ -34,9 +34,15 @@ class TestAfterCkb2023:
         wait_cluster_height(cls.cluster, 1050, 300)
 
     def setup_method(self, method):
+        """
+        if tip number not eq
+        roll back to min block number and restart node
+        :param method:
+        :return:
+        """
         print("\nSetting up method", method.__name__)
 
-        lt_111_tip_number = self.le_111_nodes[0].getClient().get_tip_block_number()
+        lt_111_tip_number = self.lt_111_nodes[0].getClient().get_tip_block_number()
         gt_111_tip_number = self.ge_111_nodes[0].getClient().get_tip_block_number()
         if lt_111_tip_number == gt_111_tip_number:
             return
@@ -78,7 +84,7 @@ class TestAfterCkb2023:
         :param node:
         :return:
         """
-        for i in range(10):
+        for _ in range(10):
             miner_with_version(node, "0x0")
         tip_number = node.getClient().get_tip_block_number()
         wait_cluster_height(self.cluster, tip_number, 30)
@@ -90,26 +96,35 @@ class TestAfterCkb2023:
         in >=  v111 node ,miner block :block version "0x1"
         - v111: sync successful
         - v110: sync failed
-        :param version:
+        :param version: ckb version
         :param node:
         :return:
         """
 
-        for i in range(10):
+        for _ in range(10):
             miner_with_version(node, "0x1")
         tip_number = node.getClient().get_tip_block_number()
         for cnode in self.ge_111_nodes:
             wait_node_height(cnode, tip_number, 30)
         with pytest.raises(Exception) as exc_info:
-            for cnode in self.le_111_nodes:
+            for cnode in self.lt_111_nodes:
                 wait_node_height(cnode, tip_number, 10)
         expected_error_message = "time out"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        assert expected_error_message in \
+               exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' " \
+            f"not found in actual string '{exc_info.value.args[0]}'"
 
-    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in le_111_nodes])
-    def test_node_miner_0x0_in_le_111_node(self, version, node):
-        current_tip_number = node.getClient().get_tip_block_number()
+    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in lt_111_nodes])
+    def test_node_miner_0x0_in_lt_111_node(self, version, node):
+        """
+        node version < 111 ,miner block 0x0
+        - v111: sync successful
+        - v110: sync successful
+        :param version:
+        :param node:
+        :return:
+        """
         for i in range(10):
             miner_with_version(node, "0x0")
         tip_number = node.getClient().get_tip_block_number()
@@ -120,8 +135,8 @@ class TestAfterCkb2023:
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
-    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in le_111_nodes])
-    def test_node_miner_0x1_in_le_111_node(self, version, node):
+    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in lt_111_nodes])
+    def test_node_miner_0x1_in_lt_111_node(self, version, node):
         """
         node < v111, miner with version:0x1
         - error: BlockVersionError
@@ -160,7 +175,7 @@ class TestAfterCkb2023:
             wait_get_transaction(query_node, tx_hash, "pending")
 
         with pytest.raises(Exception) as exc_info:
-            for query_node in self.le_111_nodes:
+            for query_node in self.lt_111_nodes:
                 wait_get_transaction(query_node, tx_hash, "pending")
 
         expected_error_message = "Timeout"
@@ -171,7 +186,7 @@ class TestAfterCkb2023:
         for query_node in self.cluster.ckb_nodes:
             wait_get_transaction(query_node, tx_hash, "committed")
 
-    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in le_111_nodes])
+    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in lt_111_nodes])
     def test_transfer_in_lt_111_node(self, version, node):
         """
         node version < 111  ,transfer pending tx
@@ -189,7 +204,7 @@ class TestAfterCkb2023:
         print(f"txHash:{tx_hash}")
         transaction = node.getClient().get_transaction(tx_hash)
         assert transaction['tx_status']['status'] == 'pending'
-        for query_node in self.le_111_nodes:
+        for query_node in self.lt_111_nodes:
             wait_get_transaction(query_node, tx_hash, "pending")
 
         with pytest.raises(Exception) as exc_info:
@@ -200,7 +215,7 @@ class TestAfterCkb2023:
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
-    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in le_111_nodes])
+    @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in lt_111_nodes])
     @pytest.mark.skip("send spawn tx by type  return tx_hash")
     def test_spawn_tx_in_lt_111_node(self, version, node):
         """
@@ -263,7 +278,7 @@ class TestAfterCkb2023:
             wait_get_transaction(cnode, tx_hash, "pending")
 
         with pytest.raises(Exception) as exc_info:
-            for cnode in self.le_111_nodes:
+            for cnode in self.lt_111_nodes:
                 wait_get_transaction(cnode, tx_hash, "pending")
         expected_error_message = "Timeout"
         assert expected_error_message in exc_info.value.args[0], \
@@ -271,6 +286,6 @@ class TestAfterCkb2023:
         miner_until_tx_committed(node, tx_hash)
         for cnode in self.ge_111_nodes:
             wait_get_transaction(cnode, tx_hash, "committed")
-        lt_111_tip_number = self.le_111_nodes[0].getClient().get_tip_block_number()
+        lt_111_tip_number = self.lt_111_nodes[0].getClient().get_tip_block_number()
         current_tip_number = self.node_current.getClient().get_tip_block_number()
         assert current_tip_number > lt_111_tip_number
