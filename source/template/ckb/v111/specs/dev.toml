@@ -9,7 +9,7 @@ uncles_hash = "0x000000000000000000000000000000000000000000000000000000000000000
 nonce = "0x0"
 
 [genesis.genesis_cell]
-message = "1686905170402"
+message = "1688032132025"
 
 [genesis.genesis_cell.lock]
 code_hash = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -44,14 +44,14 @@ hash_type = "data"
 [[genesis.dep_groups]]
 name = "secp256k1_blake160_sighash_all"
 files = [
-    { bundled = "specs/cells/secp256k1_data" },
-    { bundled = "specs/cells/secp256k1_blake160_sighash_all" },
+  { bundled = "specs/cells/secp256k1_data" },
+  { bundled = "specs/cells/secp256k1_blake160_sighash_all" },
 ]
 [[genesis.dep_groups]]
 name = "secp256k1_blake160_multisig_all"
 files = [
-    { bundled = "specs/cells/secp256k1_data" },
-    { bundled = "specs/cells/secp256k1_blake160_multisig_all" },
+  { bundled = "specs/cells/secp256k1_data" },
+  { bundled = "specs/cells/secp256k1_blake160_multisig_all" },
 ]
 
 # For first 11 block

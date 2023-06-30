@@ -31,7 +31,7 @@ class Cluster:
         pass
 
     def remove_node(self, num1):
-        pass
+        self.ckb_nodes.remove(num1)
 
     def start_all_nodes(self):
         for node in self.ckb_nodes:
@@ -46,6 +46,11 @@ class Cluster:
     def clean_all_nodes(self):
         for node in self.ckb_nodes:
             node.clean()
+
+    def restart_all_node(self, clean_data=False):
+        for node in self.ckb_nodes:
+            node.restart(clean_data=True)
+        self.connected_all_nodes()
 
     def get_all_nodes_height(self):
         return [node.getClient().get_tip_block_number() for node in self.ckb_nodes]

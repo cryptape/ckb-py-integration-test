@@ -7,7 +7,7 @@ import time
 from abc import ABC, abstractmethod
 
 
-class CKbContract(ABC):
+class CkbContract(ABC):
 
     @abstractmethod
     def deploy(self, account_private, node: CkbNode):

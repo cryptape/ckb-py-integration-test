@@ -144,7 +144,7 @@ class TestAfterHardFork:
         print(f"tx response:{tx_response['tx_status']['status']}")
         assert tx_response['tx_status']['status'] == "committed"
 
-    def test__0050_spawn_use_data2(self):
+    def test_0050_spawn_use_data2(self):
         """
             After a period of hard fork,send spawn tx by data2 .
             - return tx_hash

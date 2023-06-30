@@ -32,6 +32,9 @@ class CkbNodeConfigPath(Enum):
         self.ckb_spec_path = ckb_spec_path
         self.ckb_bin_path = ckb_bin_path
 
+    def __str__(self):
+        return self.ckb_bin_path.split("/")[-1]
+
 
 class CkbNode:
 
@@ -60,6 +63,9 @@ class CkbNode:
         self.rpcUrl = "http://{url}".format(url=self.ckb_config.get("ckb_rpc_listen_address", "127.0.0.1:8114"))
         self.client = RPCClient(self.rpcUrl)
 
+    def __str__(self):
+        return self.ckb_config_path
+
     def get_peer_id(self):
         return self.client.local_node_info()["node_id"]
 
@@ -75,11 +81,24 @@ class CkbNode:
         peer_address = node.get_peer_address()
         print("add node response:", self.getClient().add_node(peer_id, peer_address))
 
-    def getClient(self)->RPCClient:
+    def getClient(self) -> RPCClient:
         return self.client
 
-    def restart(self, config):
-        pass
+    def restart(self, config={}, clean_data=False):
+        self.stop()
+        self.stop_miner()
+
+        if clean_data:
+            # rm -rf indexer
+            run_command(f"cd {self.ckb_dir} && rm -rf data/indexer")
+            # rm -rf network
+            run_command(f"cd {self.ckb_dir} && rm -rf data/network")
+            # rm -rf tx_pool
+            run_command(f"cd {self.ckb_dir} && rm -rf data/tx_pool")
+            # rm -rf tmp
+            run_command(f"cd {self.ckb_dir} && rm -rf data/tmp")
+
+        self.start()
 
     def start(self):
         self.ckb_pid = run_command("cd {ckb_dir} && ./ckb run --indexer > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
@@ -94,7 +113,6 @@ class CkbNode:
         self.ckb_pid = -1
         time.sleep(3)
 
-
     def prepare(self, check_file=False):
         # check file exist
         create_config_file(self.ckb_config, self.ckb_config_path.ckb_config_path,
@@ -108,7 +126,8 @@ class CkbNode:
                                                                 ckb_bin_path=self.ckb_config_path.ckb_bin_path),
                     self.ckb_dir)
 
-        shutil.copy("{root_path}/source/template/ckb/default.db-options".format(root_path=get_project_root()), self.ckb_dir)
+        shutil.copy("{root_path}/source/template/ckb/default.db-options".format(root_path=get_project_root()),
+                    self.ckb_dir)
         shutil.copy("{root_path}/{spec_path}".format(root_path=get_project_root(),
                                                      spec_path=self.ckb_config_path.ckb_spec_path), self.ckb_dir)
 
@@ -122,6 +141,8 @@ class CkbNode:
         time.sleep(3)
 
     def stop_miner(self):
+        if self.ckb_miner_pid == -1:
+            return
         run_command("kill {pid}".format(pid=self.ckb_miner_pid))
         self.ckb_miner_pid = -1
 

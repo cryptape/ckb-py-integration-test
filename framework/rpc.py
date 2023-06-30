@@ -60,7 +60,13 @@ class RPCClient:
         return self.call("get_tip_header", [])
 
     def get_transaction(self, tx_hash, verbosity=None, only_committed=None):
+        if verbosity is None and only_committed is None:
+            return self.call("get_transaction", [tx_hash])
         return self.call("get_transaction", [tx_hash, verbosity, only_committed])
+
+    def get_peers(self):
+        return self.call("get_peers", [])
+
 
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
