@@ -84,9 +84,11 @@ class TestBeforeCkb2023:
         print(cli_path)
 
     @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in cluster.ckb_nodes])
-    def test_spawn_tx_in_lt_111_node(self, version, node):
+    def test_spawn_tx(self, version, node):
         """
-         node version:<= 111, send spawn tx by data1 .
+         send spawn tx by data1 .
+        - return Error: InvalidEcall(2101)
+         send spawn tx by type .
         - return Error: InvalidEcall(2101)
         :param version:
         :param node:
@@ -97,7 +99,7 @@ class TestBeforeCkb2023:
         with pytest.raises(Exception) as exc_info:
             tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data1",
                                           invoke_data,
-                                          api_url=self.cluster.ckb_nodes[0].getClient().url)
+                                          api_url=node.getClient().url)
         expected_error_message = "InvalidEcall(2101)"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
@@ -105,7 +107,7 @@ class TestBeforeCkb2023:
         with pytest.raises(Exception) as exc_info:
             tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "type",
                                           invoke_data,
-                                          api_url=self.cluster.ckb_nodes[0].getClient().url)
+                                          api_url=node.getClient().url)
         expected_error_message = "InvalidEcall(2101)"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
