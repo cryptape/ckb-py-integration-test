@@ -216,7 +216,6 @@ class TestAfterCkb2023:
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
     @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in lt_111_nodes])
-    @pytest.mark.skip("send spawn tx by type  return tx_hash")
     def test_spawn_tx_in_lt_111_node(self, version, node):
         """
          node version:<= 111, send spawn tx by data1 .
@@ -233,19 +232,18 @@ class TestAfterCkb2023:
         with pytest.raises(Exception) as exc_info:
             tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "data1",
                                           invoke_data,
-                                          api_url=self.cluster.ckb_nodes[0].getClient().url)
+                                          api_url=node.getClient().url)
         expected_error_message = "InvalidEcall(2101)"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
-        # todo check why return tx_hash
-        # with pytest.raises(Exception) as exc_info:
-        #     tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "type",
-        #                                   invoke_data,
-        #                                   api_url=self.cluster.ckb_nodes[0].getClient().url)
-        # expected_error_message = "InvalidEcall(2101)"
-        # assert expected_error_message in exc_info.value.args[0], \
-        #     f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        with pytest.raises(Exception) as exc_info:
+            tx_hash = invoke_ckb_contract(MINER_PRIVATE_1, code_tx_hash, code_tx_index, invoke_arg, "type",
+                                          invoke_data,
+                                          api_url=node.getClient().url)
+        expected_error_message = "InvalidEcall(2101)"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
     @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in ge_111_nodes])
     def test_transfer_data2_tx_in_ge_111_nodes(self, version, node):
