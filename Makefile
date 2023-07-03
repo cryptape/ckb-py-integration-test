@@ -10,8 +10,14 @@ test:
 	python -m pytest
 
 clean:
-	pkill ckb
+	-pkill ckb
 	rm -rf tmp
 	rm -rf download
 	rm -rf report
 	rm -rf source/ckb-cli
+	rm -rf source/ckb-cli-old
+
+clean-tmp:
+	-pkill ckb
+	rm -rf tmp
+	rm -rf report
