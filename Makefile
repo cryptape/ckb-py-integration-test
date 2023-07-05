@@ -15,3 +15,4 @@ clean:
 	rm -rf download
 	rm -rf report
 	rm -rf source/ckb-cli
+	rm -rf ckb-cli

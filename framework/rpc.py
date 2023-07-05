@@ -41,6 +41,9 @@ class RPCClient:
         """
         return self.call("get_block_by_number", [block_number, verbosity, with_cycles])
 
+    def get_transaction_and_witness_proof(self, tx_hashes, block_hash=None):
+        return self.call("get_transaction_and_witness_proof", [tx_hashes, block_hash])
+
     def truncate(self, block_hash):
         return self.call("truncate", [block_hash])
 

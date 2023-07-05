@@ -1,6 +1,8 @@
 import json
 import re
 
+import yaml
+
 from framework.test_node import CkbNodeConfigPath
 from framework.util import get_project_root
 from framework.util import run_command
@@ -403,14 +405,14 @@ def tx_add_cell_dep(tx_hash, index_hex, tx_file):
     with open(tx_file, "w") as f:
         tx = json.loads(tx_info_str)
         tx["transaction"]["cell_deps"].insert(0,
-            {
-                "out_point": {
-                    "tx_hash": tx_hash,
-                    "index": index_hex
-                },
-                "dep_type": "code"
-            }
-        )
+                                              {
+                                                  "out_point": {
+                                                      "tx_hash": tx_hash,
+                                                      "index": index_hex
+                                                  },
+                                                  "dep_type": "code"
+                                              }
+                                              )
         tx_info_str = json.dumps(tx, indent=4)
         f.write(tx_info_str)
 
@@ -468,3 +470,258 @@ def estimate_cycles(json_path: str, raw_data=False, no_color=False, debug=False,
     parts = run_command(cmd).split(":")
     parts = [part.strip() for part in parts]
     return int(parts[1])
+
+
+def get_transaction_and_witness_proof(raw_data=False, no_color=False, debug=False, local_only=False,
+                                      tx_hashes=None, block_hash=None, output_format='yaml',
+                                      api_url="http://127.0.0.1:8114"):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_transaction_and_witness_proof --tx-hash 0x3c82a3a6d55849102debac84299e0dc53162f5108ec629f8a338df9efd45d6dc --output-format yaml
+    result:block_hash: 0x4c8bc2d0fd4367db1d000417bf64ba06b60daa2ad5f4c7879af0a0804bdc1233
+    transactions_proof:
+      indices:
+        - 0
+      lemmas: []
+    witnesses_proof:
+      indices:
+        - 0
+      lemmas: []:param raw_data:
+    :param no_color:
+    :param debug:
+    :param local_only:
+    :param tx_hashes:
+    :param block_hash:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli get_transaction_and_witness_proof command
+    cmd = 'rpc get_transaction_and_witness_proof'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    if tx_hashes:
+        cmd += ' --tx-hash ' + ''.join(tx_hashes)
+    if block_hash:
+        cmd += f' --block-hash {block_hash}'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    result = {k.strip(): v.strip() for k, v in [line.split(':')
+                                                for line in run_command(cmd).split('\n') if ':' in line] if k.strip() != ''}
+
+    return result
+
+
+def verify_transaction_and_witness_proof(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
+                    output_format='yaml', api_url="http://127.0.0.1:8114"):
+    """
+    export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc verify_transaction_and_witness_proof --raw-data --json-path /tmp/tmp.json --output-format yaml
+    result:tx_hashes:0x3c82a3a6d55849102debac84299e0dc53162f5108ec629f8a338df9efd45d6dc
+    :param json_path:
+    :param raw_data:
+    :param no_color:
+    :param debug:
+    :param local_only:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli estimate_cycles command
+    cmd = 'rpc verify_transaction_and_witness_proof'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --json-path {json_path}'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    result = run_command(cmd)
+    return result.split(" ")[1].rstrip('\n')
+
+
+def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False, local_only=False, output_format='yaml',
+              api_url="http://127.0.0.1:8114"):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_block --with-cycles --hash 0x4c8bc2d0fd4367db1d000417bf64ba06b60daa2ad5f4c7879af0a0804bdc1233 --output-format yaml
+    cycles: []
+    :param hash_value:
+    :param raw_data:
+    :param with_cycles:
+    :param no_color:
+    :param packed:
+    :param debug:
+    :param local_only:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli get_block command
+    cmd = 'rpc get_block'
+    if raw_data:
+        cmd += ' --raw-data'
+    if with_cycles:
+        cmd += ' --with-cycles'
+    if no_color:
+        cmd += ' --no-color'
+    if packed:
+        cmd += ' --packed'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --hash {hash_value}'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    parts = run_command(cmd).split(":")
+    parts = [part.strip() for part in parts]
+    return parts[-1]
+
+
+def get_block_by_number(block_number, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False, local_only=False, output_format='yaml',
+              api_url="http://127.0.0.1:8114"):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_block_by_number --with-cycles --number 20 --output-format yaml
+    cycles: []
+    :param block_number:
+    :param raw_data:
+    :param with_cycles:
+    :param no_color:
+    :param packed:
+    :param debug:
+    :param local_only:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli get_block_by_number command
+    cmd = 'rpc get_block_by_number'
+    if raw_data:
+        cmd += ' --raw-data'
+    if with_cycles:
+        cmd += ' --with-cycles'
+    if no_color:
+        cmd += ' --no-color'
+    if packed:
+        cmd += ' --packed'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --number {block_number}'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    parts = run_command(cmd).split(":")
+    parts = [part.strip() for part in parts]
+    return parts[-1]
+
+
+def get_consensus(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
+                  api_url="http://127.0.0.1:8114"):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_consensus --output-format yaml
+    hardfork_features:
+      - epoch_number: 3113
+        rfc: "0028"
+      - epoch_number: 0
+        rfc: "0029"
+      - epoch_number: 0
+        rfc: "0030"
+      - epoch_number: 0
+        rfc: "0031"
+      - epoch_number: 0
+        rfc: "0032"
+      - epoch_number: 0
+        rfc: "0036"
+      - epoch_number: 0
+        rfc: "0038"
+      - epoch_number: 1
+        rfc: "0048"
+      - epoch_number: 1
+        rfc: "0049"
+    :param raw_data:
+    :param no_color:
+    :param debug:
+    :param local_only:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli get_consensus command
+    cmd = 'rpc get_consensus'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    # 预处理修复格式问题
+    fixed_data = run_command(cmd).replace('epoch_number:', '- epoch_number:').replace('rfc:', '  rfc:')
+
+    # 解析修复后的 YAML 数据
+    parsed_data = yaml.safe_load(fixed_data)
+    return parsed_data['hardfork_features']
+
+
+def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
+                  api_url="http://127.0.0.1:8114"):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_deployments_info --output-format yaml
+    light_client:
+        bit: 1
+        min_activation_epoch: 0
+        period: 10
+        since: 0
+        start: 0
+        state: active
+        threshold:
+          denom: 4
+          numer: 3
+        timeout: 0
+    :param raw_data:
+    :param no_color:
+    :param debug:
+    :param local_only:
+    :param output_format:
+    :param api_url:
+    :return:
+    """
+    # Build the ckb-cli get_deployments_info command
+    cmd = 'rpc get_deployments_info'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --output-format {output_format}'
+
+    # Run the ckb-cli command
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    yaml_data = yaml.safe_dump(yaml.safe_load(run_command(cmd)))
+    parsed_data = yaml.safe_load(yaml_data)
+    return parsed_data["deployments"]
