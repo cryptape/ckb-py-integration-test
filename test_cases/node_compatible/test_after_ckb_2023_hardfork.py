@@ -5,7 +5,8 @@ from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transf
 from framework.helper.contract import invoke_ckb_contract
 from framework.helper.contract_util import deploy_contracts
 from framework.helper.miner import make_tip_height_number, miner_with_version, miner_until_tx_committed
-from framework.helper.node import wait_cluster_height, wait_get_transaction, wait_node_height
+from framework.helper.node import wait_cluster_height, wait_get_transaction, wait_node_height, \
+    wait_cluster_sync_with_miner
 from framework.test_cluster import Cluster
 from framework.test_node import CkbNode, CkbNodeConfigPath
 
@@ -13,7 +14,9 @@ from framework.test_node import CkbNode, CkbNodeConfigPath
 class TestAfterCkb2023:
     node_current = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "node_compatible/current/node1", 8115,
                                             8225)
-    node_111 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V111, "node_compatible/current/node2", 8116,
+    node_111 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V111,
+                                        "node_compatible/current/node2",
+                                        8116,
                                         8226)
     node_110 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "node_compatible/current/node3", 8117,
                                         8227)
@@ -31,7 +34,9 @@ class TestAfterCkb2023:
         contracts = deploy_contracts(ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
         cls.spawn_contract = contracts["SpawnContract"]
         make_tip_height_number(cls.node_current, 1050)
-        wait_cluster_height(cls.cluster, 1050, 300)
+        wait_cluster_sync_with_miner(cls.cluster, 300, 1050)
+        heights = cls.cluster.get_all_nodes_height()
+        print(f"heights:{heights}")
 
     def setup_method(self, method):
         """
@@ -46,19 +51,26 @@ class TestAfterCkb2023:
         gt_111_tip_number = self.ge_111_nodes[0].getClient().get_tip_block_number()
         if lt_111_tip_number == gt_111_tip_number:
             return
-        min_tip_number = min(lt_111_tip_number, gt_111_tip_number)
-        for node in self.cluster.ckb_nodes:
-            make_tip_height_number(node, min_tip_number)
-        self.cluster.restart_all_node()
-        for i in range(10):
-            miner_with_version(self.node_current, "0x0")
-        tip_number = self.node_current.getClient().get_tip_block_number()
-        self.cluster.connected_all_nodes()
-        wait_cluster_height(self.cluster, tip_number, 300)
+        try:
+            wait_cluster_height(self.cluster, max(lt_111_tip_number, gt_111_tip_number), 30)
+            return
+        except:
+            heights = self.cluster.get_all_nodes_height()
+            min_tip_number = min(heights)
+            for node in self.cluster.ckb_nodes:
+                make_tip_height_number(node, min_tip_number)
+            self.cluster.restart_all_node()
+            for _ in range(10):
+                miner_with_version(self.node_current, "0x0")
+            tip_number = self.node_current.getClient().get_tip_block_number()
+            self.cluster.connected_all_nodes()
+            wait_cluster_sync_with_miner(self.cluster, 300, tip_number)
 
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
+        heights = cls.cluster.get_all_nodes_height()
+        print(heights)
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
@@ -69,8 +81,7 @@ class TestAfterCkb2023:
         - 111: sync successful
         :return:
         """
-        tip_number = self.node_current.getClient().get_tip_block_number()
-        wait_cluster_height(self.cluster, tip_number, 300)
+        wait_cluster_sync_with_miner(self.cluster, 300)
 
     @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in ge_111_nodes])
     def test_node_miner_0x0_in_ge_111_node(self, version, node):
@@ -84,10 +95,11 @@ class TestAfterCkb2023:
         :param node:
         :return:
         """
-        for _ in range(10):
-            miner_with_version(node, "0x0")
-        tip_number = node.getClient().get_tip_block_number()
-        wait_cluster_height(self.cluster, tip_number, 30)
+        heights = self.cluster.get_all_nodes_height()
+        max_tip_number = max(heights) + 10
+        node.start_miner()
+        wait_cluster_height(self.cluster, max_tip_number, 180)
+        node.stop_miner()
 
     @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in ge_111_nodes])
     def test_node_miner_0x1_in_ge_111_node(self, version, node):
@@ -119,7 +131,7 @@ class TestAfterCkb2023:
     def test_node_miner_0x0_in_lt_111_node(self, version, node):
         """
         node version < 111 ,miner block 0x0
-        - v111: sync successful
+        - v111: sync failed
         - v110: sync successful
         :param version:
         :param node:
@@ -183,6 +195,10 @@ class TestAfterCkb2023:
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
         miner_until_tx_committed(node, tx_hash)
+        tip_number = node.getClient().get_tip_block_number()
+        wait_cluster_sync_with_miner(self.cluster,100,tip_number)
+        heights = self.cluster.get_all_nodes_height()
+        print(f"heights:{heights}")
         for query_node in self.cluster.ckb_nodes:
             wait_get_transaction(query_node, tx_hash, "committed")
 
@@ -258,7 +274,7 @@ class TestAfterCkb2023:
         for i in range(10):
             miner_with_version(node, "0x0")
         tip_number = node.getClient().get_tip_block_number()
-        wait_cluster_height(self.cluster, tip_number, 300)
+        wait_cluster_sync_with_miner(self.cluster, 300, tip_number)
         # @ckb-lumos/helpers.encodeToAddress(
         #     {
         #         hashType:"data2",

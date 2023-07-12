@@ -143,8 +143,11 @@ class CkbNode:
     def stop_miner(self):
         if self.ckb_miner_pid == -1:
             return
-        run_command("kill {pid}".format(pid=self.ckb_miner_pid))
-        self.ckb_miner_pid = -1
+        try:
+            run_command("kill {pid}".format(pid=self.ckb_miner_pid))
+            self.ckb_miner_pid = -1
+        except:
+            self.ckb_miner_pid = -1
 
     def version(self):
         pass
