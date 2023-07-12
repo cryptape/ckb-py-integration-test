@@ -21,3 +21,4 @@ clean-tmp:
 	-pkill ckb
 	rm -rf tmp
 	rm -rf report
+	rm -rf ckb-cli
