@@ -163,8 +163,15 @@ class TestAfterCkb2023:
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
     @pytest.mark.parametrize("version,node", [(node.__str__(), node) for node in ge_111_nodes])
+    @pytest.mark.skip
     def test_transfer_in_ge_111_node(self, version, node):
         """
+        not stable
+        skip reason:
+            110 完全连不上，协议完全不兼容
+            如果节点没有重启过：
+            可以连上，但会定时清理
+            不会主动发送消息，但会被动响应，因为需要照顾还没有经过 hardfork 的节点（这里会导致没有不兼容交易的情况下 110 会偶尔同步一点）
         node version >= 111  ,transfer pending tx
         - v111 : can found tx in pending
         - v110 : can't found tx in pending ,tx status: unknown
