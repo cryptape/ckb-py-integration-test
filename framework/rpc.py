@@ -67,7 +67,7 @@ class RPCClient:
 
     def get_transaction(self, tx_hash, verbosity=None, only_committed=None):
         if verbosity is None and only_committed is None:
-            return self.call("get_transaction", [tx_hash, None, None])
+            return self.call("get_transaction", [tx_hash])
         return self.call("get_transaction", [tx_hash, verbosity, only_committed])
 
     def send_transaction(self, tx, outputs_validator="passthrough"):
