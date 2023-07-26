@@ -22,3 +22,7 @@ clean-tmp:
 	rm -rf tmp
 	rm -rf report
 	rm -rf ckb-cli
+
+docs:
+	python -m pytest --docs=docs/tx_pool_refactor.md --doc-type=md test_cases/tx_pool_refactor
+	python -m pytest --docs=docs/ckb2023.md --doc-type=md test_cases/ckb2023
