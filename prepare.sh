@@ -1,7 +1,7 @@
 set -e
 git clone https://github.com/gpBlockchain/ckb-cli.git
 cd ckb-cli
-git checkout fix/get_live_cell
+git checkout exec/data2
 make prod
 cp target/release/ckb-cli ../source/ckb-cli
 cd ../
