@@ -8,7 +8,6 @@ from framework.test_node import CkbNode
 from framework.rpc import RPCClient
 
 
-
 class CkbContract(ABC):
 
     @abstractmethod
@@ -61,6 +60,7 @@ def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_i
           f" && rm /tmp/tmp.data"
     return run_command(cmd).replace('\n', '')
 
+
 @exception_use_old_ckb()
 def get_ckb_contract_codehash(tx_hash, tx_index, enable_type_id=True, api_url="http://127.0.0.1:8114"):
     if enable_type_id:
@@ -80,6 +80,7 @@ def get_ckb_contract_codehash(tx_hash, tx_index, enable_type_id=True, api_url="h
     hash_object.update(data)
     hex_digest = hash_object.hexdigest()
     return f"0x{hex_digest}"
+
 
 @exception_use_old_ckb()
 def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_out_point_tx_index, type_script_arg,

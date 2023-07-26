@@ -50,6 +50,9 @@ class RPCClient:
     def get_consensus(self):
         return self.call("get_consensus", [])
 
+    def get_fee_rate_statics(self, target=None):
+        return self.call("get_fee_rate_statics", [target])
+
     def get_deployments_info(self):
         return self.call("get_deployments_info", [])
 
@@ -64,12 +67,26 @@ class RPCClient:
 
     def get_transaction(self, tx_hash, verbosity=None, only_committed=None):
         if verbosity is None and only_committed is None:
-            return self.call("get_transaction", [tx_hash])
+            return self.call("get_transaction", [tx_hash, None, None])
         return self.call("get_transaction", [tx_hash, verbosity, only_committed])
+
+    def send_transaction(self, tx, outputs_validator="passthrough"):
+        return self.call("send_transaction", [tx, outputs_validator])
+
+    def get_raw_tx_pool(self, verbose=None):
+        return self.call("get_raw_tx_pool", [verbose])
+
+    def clear_tx_pool(self):
+        return self.call("clear_tx_pool", [])
 
     def get_peers(self):
         return self.call("get_peers", [])
 
+    def remove_transaction(self, tx_hash):
+        return self.call("remove_transaction", [tx_hash])
+
+    def get_live_cell(self, index, tx_hash, with_data=True):
+        return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data])
 
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
@@ -77,14 +94,14 @@ class RPCClient:
     def call(self, method, params):
         headers = {'content-type': 'application/json'}
         data = {
-            "id": 1,
+            "id": 42,
             "jsonrpc": "2.0",
             "method": method,
             "params": params
         }
-        print("request:url:{url},data:{data}".format(url=self.url, data=json.dumps(data)))
+        print("request:url:{url},data:\n{data}".format(url=self.url, data=json.dumps(data)))
         response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
-        print("response:{response}".format(response=response))
+        print("response:\n{response}".format(response=json.dumps(response)))
         if 'error' in response.keys():
             error_message = response['error'].get('message', 'Unknown error')
             raise Exception(f"Error: {error_message}")

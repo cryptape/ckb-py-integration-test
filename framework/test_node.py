@@ -7,10 +7,20 @@ import shutil
 
 
 class CkbNodeConfigPath(Enum):
-    CURRENT_TEST = ("source/template/ckb/v111/ckb.toml.j2",
-                    "source/template/ckb/v111/ckb-miner.toml.j2",
-                    "source/template/ckb/v111/specs/dev.toml",
-                    "download/0.111.0")
+    CURRENT_TEST = (
+        "source/template/ckb/v112/ckb.toml.j2",
+        "source/template/ckb/v112/ckb-miner.toml.j2",
+        "source/template/ckb/v112/specs/dev.toml",
+        "download/0.112.0"
+    )
+
+    V112 = (
+        "source/template/ckb/v112/ckb.toml.j2",
+        "source/template/ckb/v112/ckb-miner.toml.j2",
+        "source/template/ckb/v112/specs/dev.toml",
+        "download/0.112.0"
+    )
+
     V111 = (
         "source/template/ckb/v111/ckb.toml.j2",
         "source/template/ckb/v111/ckb-miner.toml.j2",
@@ -113,7 +123,10 @@ class CkbNode:
         self.ckb_pid = -1
         time.sleep(3)
 
-    def prepare(self, check_file=False):
+    def prepare(self, other_ckb_config={}, other_ckb_miner_config={}, other_ckb_spec_config={}, check_file=False):
+        self.ckb_config.update(other_ckb_config)
+        self.ckb_miner_config.update(other_ckb_miner_config)
+        self.ckb_specs_config.update(other_ckb_spec_config)
         # check file exist
         create_config_file(self.ckb_config, self.ckb_config_path.ckb_config_path,
                            self.ckb_toml_path)

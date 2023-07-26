@@ -12,6 +12,7 @@ from framework.util import run_command
 #                                                            cli_path=CkbNodeConfigPath.CURRENT_TEST.ckb_bin_path)
 cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
 
+
 def exception_use_old_ckb():
     def decorator(func):
         @wraps(func)
@@ -32,7 +33,9 @@ def exception_use_old_ckb():
                         raise e
                 else:
                     raise e
+
         return wrapper
+
     return decorator
 
 
@@ -123,6 +126,7 @@ def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
     """
     cmd = f"export API_URL={api_url} && {cli_path} wallet get-live-cells --address {ckb_address} --output-format json"
     return json.loads(run_command(cmd))
+
 
 @exception_use_old_ckb()
 def wallet_transfer_by_private_key(private_key, to_ckb_address, capacity, api_url="http://127.0.0.1:8114",
@@ -349,7 +353,7 @@ def tx_add_input(tx_hash, index, tx_file, api_url="http://127.0.0.1:8114"):
     Returns:
 
     """
-    cmd = f"export API_URL={api_url} && {cli_path} tx add-input --tx-hash {tx_hash} --index {index} --tx-file {tx_file}"
+    cmd = f"export API_URL={api_url} && {cli_path} tx add-input --tx-hash {tx_hash} --index {index} --tx-file {tx_file} --skip-check"
     return run_command(cmd)
 
 
@@ -397,25 +401,35 @@ def tx_info(tx_file_path, api_url="http://127.0.0.1:8114"):
     return run_command(cmd)
 
 
-def tx_add_type_out_put(code_hash, hash_type, arg, capacity_hex, out_put_data, tx_file):
+def tx_add_type_out_put(code_hash, hash_type, arg, capacity_hex, out_put_data, tx_file, with_type=True):
     with open(tx_file, "r") as file:
         tx_info_str = file.read()
 
     with open(tx_file, "w") as f:
         tx = json.loads(tx_info_str)
-        tx["transaction"]["outputs"].append({
-            "capacity": capacity_hex,
-            "lock": {
-                "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                "hash_type": "type",
-                "args": "0xc8328aabcd9b9e8e64fbc566c4385c3bdeb219d5"
-            },
-            "type": {
-                "code_hash": code_hash,
-                "hash_type": hash_type,
-                "args": arg
-            }
-        })
+        if with_type:
+            tx["transaction"]["outputs"].append({
+                "capacity": capacity_hex,
+                "lock": {
+                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                    "hash_type": "type",
+                    "args": "0xc8328aabcd9b9e8e64fbc566c4385c3bdeb219d5"
+                },
+                "type": {
+                    "code_hash": code_hash,
+                    "hash_type": hash_type,
+                    "args": arg
+                }
+            })
+        if not with_type:
+            tx["transaction"]["outputs"].append({
+                "capacity": capacity_hex,
+                "lock": {
+                    "code_hash": code_hash,
+                    "hash_type": hash_type,
+                    "args": arg
+                }
+            })
         tx["transaction"]["outputs_data"].append(out_put_data)
 
         tx_info_str = json.dumps(tx, indent=4)
@@ -437,6 +451,21 @@ def tx_add_cell_dep(tx_hash, index_hex, tx_file):
                                                   "dep_type": "code"
                                               }
                                               )
+        tx_info_str = json.dumps(tx, indent=4)
+        f.write(tx_info_str)
+
+
+def tx_add_input_cell_without_check(tx_hash, index, tx_file):
+    with open(tx_file, "r") as file:
+        tx_info_str = file.read()
+
+    with open(tx_file, "w") as f:
+        tx = json.loads(tx_info_str)
+        tx["transaction"]["inputs"].insert(0, {"previous_output":
+                                                   {"index": hex(index),
+                                                    "tx_hash": tx_hash},
+                                               "since": "0x0"}
+                                           )
         tx_info_str = json.dumps(tx, indent=4)
         f.write(tx_info_str)
 
@@ -538,13 +567,14 @@ def get_transaction_and_witness_proof(raw_data=False, no_color=False, debug=Fals
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     result = {k.strip(): v.strip() for k, v in [line.split(':')
-                                                for line in run_command(cmd).split('\n') if ':' in line] if k.strip() != ''}
+                                                for line in run_command(cmd).split('\n') if ':' in line] if
+              k.strip() != ''}
 
     return result
 
 
 def verify_transaction_and_witness_proof(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
-                    output_format='yaml', api_url="http://127.0.0.1:8114"):
+                                         output_format='yaml', api_url="http://127.0.0.1:8114"):
     """
     export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc verify_transaction_and_witness_proof --raw-data --json-path /tmp/tmp.json --output-format yaml
     result:tx_hashes:0x3c82a3a6d55849102debac84299e0dc53162f5108ec629f8a338df9efd45d6dc
@@ -576,7 +606,8 @@ def verify_transaction_and_witness_proof(json_path: str, raw_data=False, no_colo
     return result.split(" ")[1].rstrip('\n')
 
 
-def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False, local_only=False, output_format='yaml',
+def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False,
+              local_only=False, output_format='yaml',
               api_url="http://127.0.0.1:8114"):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_block --with-cycles --hash 0x4c8bc2d0fd4367db1d000417bf64ba06b60daa2ad5f4c7879af0a0804bdc1233 --output-format yaml
@@ -616,8 +647,9 @@ def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, pac
     return parts[-1]
 
 
-def get_block_by_number(block_number, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False, local_only=False, output_format='yaml',
-              api_url="http://127.0.0.1:8114"):
+def get_block_by_number(block_number, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False,
+                        local_only=False, output_format='yaml',
+                        api_url="http://127.0.0.1:8114"):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_block_by_number --with-cycles --number 20 --output-format yaml
     cycles: []
@@ -710,7 +742,7 @@ def get_consensus(raw_data=False, no_color=False, debug=False, local_only=False,
 
 
 def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
-                  api_url="http://127.0.0.1:8114"):
+                         api_url="http://127.0.0.1:8114"):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_deployments_info --output-format yaml
     light_client:

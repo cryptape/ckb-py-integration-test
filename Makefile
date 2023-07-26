@@ -3,7 +3,7 @@ prepare:
 	pip install -r requirements.txt
 	echo "install ckb"
 	python -m download
-	echo "install ckb cli"
+	echo "install ckb cli and new ckb"
 	sh prepare.sh
 
 test:
