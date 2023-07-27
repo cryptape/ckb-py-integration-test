@@ -1,8 +1,11 @@
 import json
+import time
 
 from framework.config import MINER_PRIVATE_1
 from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key, estimate_cycles
-from framework.helper.miner import make_tip_height_number
+from framework.helper.miner import make_tip_height_number, miner_until_tx_committed, miner_with_version
+from framework.helper.node import wait_get_transaction
+from framework.helper.tx import send_transfer_self_tx_with_input
 from framework.test_node import CkbNode, CkbNodeConfigPath
 
 
@@ -72,3 +75,48 @@ class TestTxQuery:
         assert result['status'] == 'live'
         remove_result = self.node.getClient().remove_transaction(tx_hash)
         assert remove_result == True
+
+    def test_get_transaction_contains_fee_and_min_replace_fee_in_pending_and_proposal(self):
+        """
+        In the pending and proposal stages,
+        the transaction contains the 'fee' and 'min_replace_fee' fields.
+        In the commit stage, both 'fee' and 'min_replace_fee' will be cleared.
+
+
+        1. send tx
+            successful
+        2. get_transaction in pending
+            contains fee and min_replace_fee
+        3. miner until  get_transaction in proposed
+            contains fee and min_replace_fee
+        4. miner until get_transaction in committed
+                fee == null ,min_replace_fee == null
+        :return:
+        """
+        account = util_key_info_by_private_key(MINER_PRIVATE_1)
+        tx_hash = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+                                                 self.node.getClient().url, "1500")
+
+        tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], MINER_PRIVATE_1, output_count=1,
+                                                   fee=1000,
+                                                   api_url=self.node.getClient().url)
+
+        print(f"txHash:{tx_hash}")
+        transaction = self.node.getClient().get_transaction(tx_hash)
+        tx_pool = self.node.getClient().get_raw_tx_pool(True)
+        assert tx_pool['pending'][tx_hash]['fee'] == transaction['fee']
+        assert int(transaction['fee'], 16) == 1000
+        assert int(transaction['min_replace_fee'], 16) > 1000
+        time.sleep(1)
+        miner_with_version(self.node, "0x0")
+        time.sleep(1)
+        miner_with_version(self.node, "0x0")
+        wait_get_transaction(self.node, tx_hash, 'proposed')
+        transaction = self.node.getClient().get_transaction(tx_hash)
+        assert transaction['tx_status']['status'] == 'proposed'
+
+        miner_until_tx_committed(self.node, tx_hash)
+        transaction = self.node.getClient().get_transaction(tx_hash)
+
+        assert transaction['fee'] is None
+        assert transaction['min_replace_fee'] is None

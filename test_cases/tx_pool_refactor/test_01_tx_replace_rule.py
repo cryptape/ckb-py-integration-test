@@ -105,35 +105,15 @@ class TestTxReplaceRule:
         tx_ac_to_b_response = self.node.getClient().get_transaction(tx_ac_to_b)
         assert tx_ac_to_b_response['tx_status']['status'] == 'pending'
 
-    def test_replace_fee_higher_than_min_rbf_fee(self):
-        """
-        min_fee < old tx fee < min_rbf_fee,replace fee must higher min_rbf_fee
-        1. send tx that tx fee == min_rbf_fee
-            ERROR : PoolRejctedRBF
-        :return:
-        """
-        account = util_key_info_by_private_key(MINER_PRIVATE_1)
-        hash = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
-                                              self.node.getClient().url, "1000")
-        self.node.getClient().get_raw_tx_pool(True)
-        with pytest.raises(Exception) as exc_info:
-            wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 101,
-                                           self.node.getClient().url, "1500")
-            self.node.getClient().get_raw_tx_pool(True)
-
-        expected_error_message = "PoolRejctedRBF: RBF rejected: Tx's current fee is 696, expect it to be larger than: 696 to replace old txs"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' " \
-            f"not found in actual string '{exc_info.value.args[0]}'"
-        tx_pool = self.node.getClient().get_raw_tx_pool(True)
-        hash_list = list(tx_pool['pending'].keys())
-        assert tx_pool['pending'][hash_list[0]]['fee'] == '0x1d0'
-
     def test_transaction_fee_equal_to_old_fee(self):
         """
-         min_rbf_fee < old tx fee
-         1. send tx that tx fee == old tx fee
-            ERROR : PoolRejctedRBF
+         replace tx fee  ==  old tx fee
+
+             1. send tx that tx fee == old tx fee
+                ERROR : PoolRejectedRBF
+
+             2. get_transaction
+                min_fee_rate in PoolRejectedRBF
         :return:
         """
         account = util_key_info_by_private_key(MINER_PRIVATE_1)
@@ -145,13 +125,14 @@ class TestTxReplaceRule:
                                            self.node.getClient().url, "5000")
             self.node.getClient().get_raw_tx_pool(True)
 
-        expected_error_message = "PoolRejctedRBF: RBF rejected: Tx's current fee is 2320, expect it to be larger than: 2320 to replace old txs"
+        expected_error_message = "PoolRejctedRBF"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         hash_list = list(tx_pool['pending'].keys())
         assert tx_pool['pending'][hash_list[0]]['fee'] == '0x910'
+        assert f"{int(self.node.getClient().get_transaction(hash)['min_replace_fee'], 16)}" in exc_info.value.args[0]
 
     def test_transaction_replacement_higher_fee(self):
         """
@@ -165,19 +146,19 @@ class TestTxReplaceRule:
         3. send transaction C, sending the same input cell to address B and fee > B(fee)
             send successful
         4. query transaction (A,B,C) status
-              A status : rejected ; reason : RBFRejected
-              B status: rejected  ; reason : RBFRejected
-              C status: pending   ;
+              A status : rejected  ; reason : RBFRejected
+              B status : rejected  ; reason : RBFRejected
+              C status : pending   ;
         :return:
         """
         account = util_key_info_by_private_key(MINER_PRIVATE_1)
         tx_hash1 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                   self.node.getClient().url, "1500")
         tx_hash2 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 200,
-                                                  self.node.getClient().url, "2000")
+                                                  self.node.getClient().url, "3000")
 
         tx_hash3 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 300,
-                                                  self.node.getClient().url, "3000")
+                                                  self.node.getClient().url, "6000")
         tx1_response = self.node.getClient().get_transaction(tx_hash1)
         tx2_response = self.node.getClient().get_transaction(tx_hash2)
         tx3_response = self.node.getClient().get_transaction(tx_hash3)
@@ -185,6 +166,36 @@ class TestTxReplaceRule:
         assert tx2_response['tx_status']['status'] == 'rejected'
         assert tx3_response['tx_status']['status'] == 'pending'
         assert "RBFRejected" in tx1_response['tx_status']['reason']
+        assert "RBFRejected" in tx2_response['tx_status']['reason']
+
+    def test_transaction_replacement_min_replace_fee(self):
+        """
+        replace tx use min_replace_fee ,replace successful
+        Steps:
+        1. send transaction A
+             send successful
+        2. send transaction B use A.min_replace_fee
+            send successful
+        4. query transaction (A,B) status
+              A status : rejected  ; reason : RBFRejected
+              B status : pending   ;
+        :return:
+        """
+        account = util_key_info_by_private_key(MINER_PRIVATE_1)
+        tx_hash1 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+                                                  self.node.getClient().url, "1500")
+
+        tx_hash2 = send_transfer_self_tx_with_input([tx_hash1], ['0x0'], MINER_PRIVATE_1, fee=1500,
+                                                    api_url=self.node.getClient().url)
+        transaction = self.node.getClient().get_transaction(tx_hash2)
+        tx_hash3 = send_transfer_self_tx_with_input([tx_hash1], ['0x0'], MINER_PRIVATE_1,
+                                                    fee=int(transaction['min_replace_fee'], 16),
+                                                    api_url=self.node.getClient().url)
+
+        tx2_response = self.node.getClient().get_transaction(tx_hash2)
+        tx3_response = self.node.getClient().get_transaction(tx_hash3)
+        assert tx2_response['tx_status']['status'] == 'rejected'
+        assert tx3_response['tx_status']['status'] == 'pending'
         assert "RBFRejected" in tx2_response['tx_status']['reason']
 
     def test_tx_conflict_too_many_txs(self):

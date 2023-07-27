@@ -9,6 +9,15 @@
             ERROR:  TransactionFailedToResolve: Resolve failed Dead
         :return:
         
+### test_disable_rbf_and_check_min_replace_fee
+
+        Disabling RBF (Replace-By-Fee) feature, transaction min_replace_fee is null
+         1. starting the node, modify ckb.toml with min_rbf_rate = 800 < min_fee_rate.
+            node starts successfully.
+        2. send tx and get_transaction
+            min_rbf_rate == null
+        :return:
+        
 # test_01_tx_replace_rule
 ## TestTxReplaceRule
 ### test_transaction_replacement_with_unconfirmed_inputs_failure
@@ -25,18 +34,15 @@
             ERROR :RBF rejected: new Tx contains unconfirmed inputs
         :return:
         
-### test_replace_fee_higher_than_min_rbf_fee
-
-        min_fee < old tx fee < min_rbf_fee,replace fee must higher min_rbf_fee
-        1. send tx that tx fee == min_rbf_fee
-            ERROR : PoolRejctedRBF
-        :return:
-        
 ### test_transaction_fee_equal_to_old_fee
 
-         min_rbf_fee < old tx fee
-         1. send tx that tx fee == old tx fee
-            ERROR : PoolRejctedRBF
+         replace tx fee  ==  old tx fee
+
+             1. send tx that tx fee == old tx fee
+                ERROR : PoolRejectedRBF
+
+             2. get_transaction
+                min_fee_rate in PoolRejectedRBF
         :return:
         
 ### test_transaction_replacement_higher_fee
@@ -51,9 +57,22 @@
         3. send transaction C, sending the same input cell to address B and fee > B(fee)
             send successful
         4. query transaction (A,B,C) status
-              A status : rejected ; reason : RBFRejected
-              B status: rejected  ; reason : RBFRejected
-              C status: pending   ;
+              A status : rejected  ; reason : RBFRejected
+              B status : rejected  ; reason : RBFRejected
+              C status : pending   ;
+        :return:
+        
+### test_transaction_replacement_min_replace_fee
+
+        replace tx use min_replace_fee ,replace successful
+        Steps:
+        1. send transaction A
+             send successful
+        2. send transaction B use A.min_replace_fee
+            send successful
+        4. query transaction (A,B) status
+              A status : rejected  ; reason : RBFRejected
+              B status : pending   ;
         :return:
         
 ### test_tx_conflict_too_many_txs
@@ -197,6 +216,23 @@
         Result:
         1. send successful
         2. estimate_cycles successful
+        :return:
+        
+### test_get_transaction_contains_fee_and_min_replace_fee_in_pending_and_proposal
+
+        In the pending and proposal stages,
+        the transaction contains the 'fee' and 'min_replace_fee' fields.
+        In the commit stage, both 'fee' and 'min_replace_fee' will be cleared.
+
+
+        1. send tx
+            successful
+        2. get_transaction in pending
+            contains fee and min_replace_fee
+        3. miner until  get_transaction in proposed
+            contains fee and min_replace_fee
+        4. miner until get_transaction in committed
+                fee == null ,min_replace_fee == null
         :return:
         
 # test_05_node_broadcast

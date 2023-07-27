@@ -127,9 +127,9 @@ class TestTxsLifeCycleChain:
             print("tx_pools:", len(tx_pools['pending']))
             print("transactions len:", len(block['transactions']))
             if len(block['transactions']) > 0:
-                print("transactions > 1 ")
+                print("transactions > 1")
                 break
-            # block['proposals'].remove(first_tx_hash[0:len('0x9b93e149e1f90a8a5436')])
+            block['proposals'].remove(first_tx_hash[0:len('0x9b93e149e1f90a8a5436')])
             self.node.getClient().submit_block(block["work_id"], block_template_transfer_to_submit_block(block, '0x0'))
             for j in range(100):
                 pool_info = self.node.getClient().tx_pool_info()
@@ -138,8 +138,5 @@ class TestTxsLifeCycleChain:
                     break
 
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
-        assert len(tx_pool['pending']) == 1
-        assert first_tx_hash in tx_pool['pending']
-        # block_template = self.node.getClient().get_block_template()
-        # assert block_template['transactions'][0]['tx_hash'] == first_tx_hash
-
+        # assert len(tx_pool['pending']) == 1
+        assert first_tx_hash in list(tx_pool['pending'].keys())

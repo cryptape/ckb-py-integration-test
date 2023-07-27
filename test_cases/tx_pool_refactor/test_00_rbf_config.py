@@ -1,6 +1,6 @@
 import pytest
 
-from framework.config import MINER_PRIVATE_1
+from framework.config import MINER_PRIVATE_1, ACCOUNT_PRIVATE_1
 from framework.helper.ckb_cli import wallet_transfer_by_private_key, util_key_info_by_private_key
 from framework.helper.miner import make_tip_height_number
 from framework.test_node import CkbNode, CkbNodeConfigPath
@@ -42,3 +42,20 @@ class TestRBFConfig:
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
+
+    def test_disable_rbf_and_check_min_replace_fee(self):
+        """
+        Disabling RBF (Replace-By-Fee) feature, transaction min_replace_fee is null
+         1. starting the node, modify ckb.toml with min_rbf_rate = 800 < min_fee_rate.
+            node starts successfully.
+        2. send tx and get_transaction
+            min_rbf_rate == null
+        :return:
+        """
+        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
+
+        tx = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 100,
+                                            self.node.getClient().url, "1500")
+        transaction = self.node.getClient().get_transaction(tx)
+        assert transaction['fee'] is not None
+        assert transaction['min_replace_fee'] is None
