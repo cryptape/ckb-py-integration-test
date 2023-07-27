@@ -363,3 +363,59 @@ class TestTxReplaceRule:
             tx_response = self.node.getClient().get_transaction(tx)
             assert tx_response['tx_status']['status'] == "rejected"
             assert "RBFRejected" in tx_response['tx_status']['reason']
+
+    def test_min_replace_fee_unchanged_with_child_tx(self):
+        """
+        based on transaction A,
+        send a child transaction. The 'min_replace_fee' of transaction A will not change,
+        and it can be successfully replaced.
+
+        1. Send transaction A.
+            successful
+        2. Query the 'min_replace_fee' of transaction A.
+
+        3. Send a child transaction of transaction A.
+            successful
+        4. Query the updated 'min_replace_fee' of transaction A.
+            min_replace_fee unchanged
+        5.Send B to replace A.
+            replace successful
+        :return:
+        """
+        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
+        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+                                                 self.node.getClient().url, "2800")
+        first_hash = tx_hash
+        wait_get_transaction(self.node, tx_hash, "pending")
+        tx_list = []
+        tx_hash1 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
+                                                    api_url=self.node.getClient().url)
+        transaction1 = self.node.getClient().get_transaction(tx_hash1)
+        send_transfer_self_tx_with_input([tx_hash1], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
+                                         api_url=self.node.getClient().url)
+        after_transaction1 = self.node.getClient().get_transaction(tx_hash1)
+        assert after_transaction1['min_replace_fee'] == transaction1['min_replace_fee']
+        replace_tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1,
+                                                           fee=int(transaction1['min_replace_fee'], 16),
+                                                           api_url=self.node.getClient().url)
+        transaction = self.node.getClient().get_transaction(replace_tx_hash)
+        assert transaction['tx_status']['status'] == 'pending'
+
+    def test_min_replace_fee_exceeds_1_ckb(self):
+        """
+            min_replace_fee exceeds 1 CKB.
+            1. send tx(fee=0.9999ckb)
+            2. query transaction
+                tx.min_replace_fee > 1CKB
+        :return:
+        """
+        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
+        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+                                                 self.node.getClient().url, "2800")
+        first_hash = tx_hash
+        wait_get_transaction(self.node, tx_hash, "pending")
+        tx_list = []
+        tx_hash1 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=99999999,
+                                                    api_url=self.node.getClient().url)
+        transaction = self.node.getClient().get_transaction(tx_hash1)
+        assert int(transaction['min_replace_fee'], 16) > 99999999

@@ -128,6 +128,32 @@
             status : rejected ,reason:RBFRejected
         :return:
         
+### test_
+
+        based on transaction A,
+        send a child transaction. The 'min_replace_fee' of transaction A will not change,
+        and it can be successfully replaced.
+
+        1. Send transaction A.
+            successful
+        2. Query the 'min_replace_fee' of transaction A.
+
+        3. Send a child transaction of transaction A.
+            successful
+        4. Query the updated 'min_replace_fee' of transaction A.
+            min_replace_fee unchanged
+        5.Send B to replace A.
+            replace successful
+        :return:
+        
+### test_min_replace_fee_exceeds_1_ckb
+
+            min_replace_fee exceeds 1 CKB.
+            1. send tx(fee=0.9999ckb)
+            2. query transaction
+                tx.min_replace_fee > 1CKB
+        :return:
+        
 # test_02_txs_lifecycle_chain
 ## TestTxsLifeCycleChain
 ### test_high_fee_transaction_priority
