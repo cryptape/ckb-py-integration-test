@@ -76,10 +76,12 @@ class TestTxQuery:
         remove_result = self.node.getClient().remove_transaction(tx_hash)
         assert remove_result == True
 
-    def test_get_transaction_contains_fee_and_min_replace_fee_in_pending_and_proposal(self):
+    def test_get_transaction_contains_fee_and_min_replace_fee_in_pending(self):
         """
-        In the pending and proposal stages,
-        the transaction contains the 'fee' and 'min_replace_fee' fields.
+        In the pending stages,
+            the transaction contains the 'fee' and 'min_replace_fee' fields.
+        In the proposal stages,
+                the transaction contains the 'fee' ,but not contains 'min_replace_fee' fields.
         In the commit stage, both 'fee' and 'min_replace_fee' will be cleared.
 
 
@@ -88,7 +90,7 @@ class TestTxQuery:
         2. get_transaction in pending
             contains fee and min_replace_fee
         3. miner until  get_transaction in proposed
-            contains fee and min_replace_fee
+               fee != null,  min_replace_fee == null
         4. miner until get_transaction in committed
                 fee == null ,min_replace_fee == null
         :return:
@@ -114,7 +116,8 @@ class TestTxQuery:
         wait_get_transaction(self.node, tx_hash, 'proposed')
         transaction = self.node.getClient().get_transaction(tx_hash)
         assert transaction['tx_status']['status'] == 'proposed'
-
+        assert transaction['fee'] is not None
+        assert transaction['min_replace_fee'] is None
         miner_until_tx_committed(self.node, tx_hash)
         transaction = self.node.getClient().get_transaction(tx_hash)
 

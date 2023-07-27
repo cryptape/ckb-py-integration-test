@@ -244,10 +244,12 @@
         2. estimate_cycles successful
         :return:
         
-### test_get_transaction_contains_fee_and_min_replace_fee_in_pending_and_proposal
+### test_get_transaction_contains_fee_and_min_replace_fee_in_pending
 
-        In the pending and proposal stages,
-        the transaction contains the 'fee' and 'min_replace_fee' fields.
+        In the pending stages,
+            the transaction contains the 'fee' and 'min_replace_fee' fields.
+        In the proposal stages,
+                the transaction contains the 'fee' ,but not contains 'min_replace_fee' fields.
         In the commit stage, both 'fee' and 'min_replace_fee' will be cleared.
 
 
@@ -256,10 +258,9 @@
         2. get_transaction in pending
             contains fee and min_replace_fee
         3. miner until  get_transaction in proposed
-            contains fee and min_replace_fee
+               fee != null,  min_replace_fee == null
         4. miner until get_transaction in committed
                 fee == null ,min_replace_fee == null
-        :return:
         
 # test_05_node_broadcast
 ## TestNodeBroadcast
