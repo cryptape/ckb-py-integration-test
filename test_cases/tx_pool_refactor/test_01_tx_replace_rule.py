@@ -125,7 +125,7 @@ class TestTxReplaceRule:
                                            self.node.getClient().url, "5000")
             self.node.getClient().get_raw_tx_pool(True)
 
-        expected_error_message = "PoolRejctedRBF"
+        expected_error_message = "PoolRejectedRBF"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -207,7 +207,7 @@ class TestTxReplaceRule:
             2. send A linked tx 100
                 send tx successful
             3. replace A tx
-                Error : PoolRejctedRBF
+                Error : PoolRejectedRBF
             4. replace first linked tx
                 replace successful
 
@@ -229,7 +229,7 @@ class TestTxReplaceRule:
         with pytest.raises(Exception) as exc_info:
             wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                            self.node.getClient().url, "8800")
-        expected_error_message = "Server error: PoolRejctedRBF: RBF rejected: Tx conflict too many txs, conflict txs count: 101"
+        expected_error_message = "Server error: PoolRejectedRBF: RBF rejected: Tx conflict too many txs, conflict txs count: 101"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
