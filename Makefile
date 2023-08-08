@@ -22,3 +22,6 @@ clean-tmp:
 	rm -rf tmp
 	rm -rf report
 	rm -rf ckb-cli
+
+docs:
+	python -m pytest --docs=docs/soft.md --doc-type=md test_cases/soft_fork

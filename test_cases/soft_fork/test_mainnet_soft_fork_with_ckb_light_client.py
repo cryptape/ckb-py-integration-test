@@ -1,5 +1,5 @@
 from framework.config import MINER_PRIVATE_1
-from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_get_capacity
+from framework.helper.ckb_cli import util_key_info_by_private_key
 from framework.helper.miner import make_tip_height_number
 from framework.helper.node import wait_cluster_height, wait_light_sync_height
 from framework.test_light_client import CkbLightClientNode, CkbLightClientConfigPath
