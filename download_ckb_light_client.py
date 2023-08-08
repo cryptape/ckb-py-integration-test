@@ -11,36 +11,31 @@ import zipfile
 import requests
 from tqdm import tqdm
 
-versions = ['0.109.0', '0.110.1-rc2', '0.111.0-rc8']  # Replace with your versions
+versions = ['0.2.4']  # Replace with your versions
 DOWNLOAD_DIR = "download"
 SYSTEMS = {
     'Windows': {
-        'url': 'https://github.com/nervosnetwork/ckb/releases/download/v{version}/ckb_v{'
-               'version}_x86_64-pc-windows-gnu.zip',
-        'ext': '.zip',
+        'url': 'https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{'
+               'version}-x86_64-windows.tar.gz',
+        'ext': '.tar.gz',
     },
     'Linux': {
         'x86_64': {
-            'url': 'https://github.com/nervosnetwork/ckb/releases/download/v{version}/ckb_v{'
-                   'version}_x86_64-unknown-linux-gnu.tar.gz',
-            'ext': '.tar.gz',
-        },
-        'aarch64': {
-            'url': 'https://github.com/nervosnetwork/ckb/releases/download/v{version}/ckb_v{'
-                   'version}_aarch64-unknown-linux-gnu.tar.gz',
+            'url': 'https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{'
+                   'version}_x86_64-linux-portable.tar.gz',
             'ext': '.tar.gz',
         },
     },
     'Darwin': {
         'x86_64': {
-            'url': 'https://github.com/nervosnetwork/ckb/releases/download/v{version}/ckb_v{'
-                   'version}_aarch64-apple-darwin-portable.zip',
-            'ext': '.zip',
+            'url': 'https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{'
+                   'version}-x86_64-darwin-portable.tar.gz',
+            'ext': '.tar.gz',
         },
         'arm64': {
-            'url': 'https://github.com/nervosnetwork/ckb/releases/download/v{version}/ckb_v{'
-                   'version}_aarch64-apple-darwin-portable.zip',
-            'ext': '.zip',
+            'url': 'https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{'
+                   'version}-x86_64-darwin.tar.gz',
+            'ext': '.tar.gz',
         },
     },
 }
@@ -84,7 +79,7 @@ def extract_file(filename, path):
             filename (str): The name of the compressed file.
             path (str): The path to extract the files to.
     """
-    temp_path = os.path.join(path, 'temp')
+    temp_path = path
     os.makedirs(temp_path, exist_ok=True)
 
     if filename.endswith('.zip'):
@@ -93,19 +88,8 @@ def extract_file(filename, path):
     elif filename.endswith('.tar.gz'):
         with tarfile.open(filename, 'r:gz') as tar_ref:
             tar_ref.extractall(temp_path)
-
-    # Move the extracted files from the subdirectory to the target directory
-    extracted_subdir = os.path.join(temp_path, os.listdir(temp_path)[0])
-    for file in os.listdir(extracted_subdir):
-        os.rename(os.path.join(extracted_subdir, file), os.path.join(path, file))
-
-    # Remove the downloaded zip or tar.gz file and the temporary directory
-    os.remove(filename)
-    os.rmdir(extracted_subdir)
-    os.rmdir(temp_path)
-
-    # Change permission of ckb and ckb-cli files
-    for file in ['ckb', 'ckb-cli']:
+    # Change permission of ckb-light-client
+    for file in ['ckb-light-client']:
         filepath = os.path.join(path, file)
         if os.path.isfile(filepath):
             os.chmod(filepath, 0o755)
@@ -124,7 +108,7 @@ def download_ckb(ckb_version):
     url = SYSTEMS[system][architecture]['url'].format(version=ckb_version)
     ext = SYSTEMS[system][architecture]['ext']
 
-    filename = f'ckb_v{ckb_version}_binary{ext}'
+    filename = f'ckb_light_client_v{ckb_version}_binary{ext}'
     download_path = os.path.join(DOWNLOAD_DIR, ckb_version).split("-")[0]
     os.makedirs(download_path, exist_ok=True)
 

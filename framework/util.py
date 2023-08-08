@@ -21,7 +21,7 @@ def get_ckb_configs(p2p_port, rpc_port, spec='{ file = "dev.toml" }'):
         'ckb_network_listen_addresses': ["/ip4/0.0.0.0/tcp/{p2p_port}".format(p2p_port=p2p_port)],
         'ckb_rpc_listen_address': '127.0.0.1:{rpc_port}'.format(rpc_port=rpc_port),
         'ckb_rpc_modules': ["Net", "Pool", "Miner", "Chain", "Stats", "Subscription", "Experiment", "Debug",
-                            "IntegrationTest"],
+                            "IntegrationTest","Indexer"],
         'ckb_block_assembler_code_hash': '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
         'ckb_block_assembler_args': '0x8883a512ee2383c01574a328f60eeccbb4d78240',
         'ckb_block_assembler_hash_type': 'type',
