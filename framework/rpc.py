@@ -115,11 +115,16 @@ class RPCClient:
                     raise Exception(f"Error: {error_message}")
 
                 return response.get('result', None)
-            except Exception as e:
+            except requests.exceptions.ConnectionError as e:
                 print(e)
                 print("request too quickly, wait 2s")
                 time.sleep(2)
+                continue
+            except Exception as e:
+                print("Exception:",e)
+                raise e
         raise Exception("request time out")
+
 
 
 if __name__ == '__main__':

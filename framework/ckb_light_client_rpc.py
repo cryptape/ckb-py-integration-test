@@ -38,8 +38,9 @@ class CKBLightRPCClient:
                     raise Exception(f"Error: {error_message}")
 
                 return response.get('result', None)
-            except Exception as e:
+            except requests.exceptions.ConnectionError as e:
                 print(e)
                 print("request too quickly, wait 2s")
                 time.sleep(2)
+                continue
         raise Exception("request time out")
