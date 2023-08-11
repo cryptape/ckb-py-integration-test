@@ -3,6 +3,7 @@ prepare:
 	pip install -r requirements.txt
 	echo "install ckb"
 	python -m download
+	python -m download_ckb_light_client
 	echo "install ckb cli"
 	sh prepare.sh
 
