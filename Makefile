@@ -7,7 +7,7 @@ prepare:
 	sh prepare.sh
 
 test:
-	python -m pytest
+	python -m pytest test_cases/tx_pool_refactor
 
 clean:
 	-pkill ckb
