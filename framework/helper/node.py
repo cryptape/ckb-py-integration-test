@@ -48,7 +48,8 @@ def wait_light_sync_height(ckb_light_node, height, wait_times):
         if min_height >= height:
             return
         time.sleep(1)
-    raise Exception("time out ,node tip number:{number}".format(number=node.getClient().get_tip_block_number()))
+    raise Exception(f"time out "
+                    f",node tip number:{ckb_light_node.getClient().get_tip_block_number()}")
 
 
 def wait_cluster_sync_with_miner(cluster: Cluster, wait_times, sync_number=None):
