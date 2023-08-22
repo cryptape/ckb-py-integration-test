@@ -8,7 +8,7 @@ prepare:
 	sh prepare.sh
 
 test:
-	python -m pytest test_case/soft_fork
+	python -m pytest test_cases/soft_fork
 
 clean:
 	-pkill ckb
