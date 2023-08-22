@@ -289,9 +289,8 @@ class TestAfterCkb2023:
         #         codeHash:"0x69c80d6a8104994bddc132bb568c953d60fae0ac928ad887c96de8434ca2a790"
         #     }
         # )
-        # ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqqcnk99q8
         tx_hash = wallet_transfer_by_private_key(MINER_PRIVATE_1,
-                                                 "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqqcnk99q8",
+                                                 "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
                                                  140,
                                                  node.client.url)
         print(tx_hash)

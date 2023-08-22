@@ -7,14 +7,14 @@ import shutil
 
 
 class CkbNodeConfigPath(Enum):
-    CURRENT_TEST = ("source/template/ckb/v110/ckb.toml.j2",
-                    "source/template/ckb/v110/ckb-miner.toml.j2",
-                    "source/template/ckb/v110/specs/dev.toml",
-                    "download/0.110.1")
-    CURRENT_MAIN =  ("source/template/ckb/v110/ckb.toml.j2",
-                    "source/template/ckb/v110/ckb-miner.toml.j2",
+    CURRENT_TEST = ("source/template/ckb/v111/ckb.toml.j2",
+                    "source/template/ckb/v111/ckb-miner.toml.j2",
+                    "source/template/ckb/v111/specs/dev.toml",
+                    "download/0.111.0")
+    CURRENT_MAIN =  ("source/template/ckb/v111/ckb.toml.j2",
+                    "source/template/ckb/v111/ckb-miner.toml.j2",
                      "source/template/specs/mainnet.toml.j2",
-                     "download/0.110.1")
+                     "download/0.111.0")
     V111 = (
         "source/template/ckb/v111/ckb.toml.j2",
         "source/template/ckb/v111/ckb-miner.toml.j2",
