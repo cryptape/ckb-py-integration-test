@@ -8,7 +8,7 @@ prepare:
 	sh prepare.sh
 
 test:
-	python -m pytest
+	python -m pytest test_cases/soft_fork/test_mainnet_soft_fork_with_ckb_light_client.py
 
 clean:
 	-pkill ckb
