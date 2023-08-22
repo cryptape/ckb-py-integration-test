@@ -61,7 +61,7 @@ class TestMainnetSoftForkWithCkbLightClient:
         wait_cluster_height(self.cluster, 10000, 300)
         height = self.cluster.get_all_nodes_height()
         assert height[0] == height[1]
-        wait_light_sync_height(self.ckb_light_node, height[0], 3000)
+        wait_light_sync_height(self.ckb_light_node, height[0], 600)
         node_res = self.cluster.ckb_nodes[0].getClient().get_cells_capacity({"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": self.account['lock_arg']}, "script_type": "lock"})
