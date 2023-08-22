@@ -105,11 +105,11 @@ class RPCClient:
             "method": method,
             "params": params
         }
-        print("request:url:{url},data:\n{data}".format(url=self.url, data=json.dumps(data)))
-        for i in range(100):
+        print(f"request:url:{self.url},data:\n{json.dumps(data)}")
+        for i in range(15):
             try:
                 response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
-                print("response:\n{response}".format(response=json.dumps(response)))
+                print(f"response:\n{json.dumps(response)}")
                 if 'error' in response.keys():
                     error_message = response['error'].get('message', 'Unknown error')
                     raise Exception(f"Error: {error_message}")

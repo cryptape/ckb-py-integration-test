@@ -14,9 +14,9 @@ class TestMainnetSoftForkWithCkbLightClient:
 
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node1", 8115,
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8115,
                                          8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node2", 8116,
+        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node2", 8116,
                                          8228)
         cls.node = node1
         cls.cluster = Cluster([node1, node2])

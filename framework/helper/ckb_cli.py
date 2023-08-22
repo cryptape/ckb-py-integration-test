@@ -64,6 +64,7 @@ def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
         Exception(f"Number not found :{capacity_response}")
 
 
+@exception_use_old_ckb()
 def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
     """
     ./ckb-cli wallet get-live-cells --address

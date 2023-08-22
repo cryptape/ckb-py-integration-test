@@ -7,7 +7,7 @@ from framework.test_node import CkbNode, CkbNodeConfigPath
 class TestMainNetSoftForkFailed:
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node1", 8119,
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
                                          8227)
         node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
         cls.cluster = Cluster([node1, node2])
