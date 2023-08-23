@@ -29,7 +29,7 @@ def wait_node_height(node: CkbNode, num, wait_times):
         if node.getClient().get_tip_block_number() >= num:
             return
         time.sleep(1)
-    raise Exception("time out ,node tip number:{number}".format(number=node.getClient().get_tip_block_number()))
+    raise Exception(f"time out ,node tip number:{node.getClient().get_tip_block_number()}")
 
 
 def wait_cluster_height(cluster: Cluster, num, wait_times):
