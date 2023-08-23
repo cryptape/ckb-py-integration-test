@@ -29,10 +29,10 @@ class TestSyncDaoLockSizeMismatch:
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
-        # cls.node1.stop()
-        # cls.node1.clean()
-        # cls.node2.stop()
-        # cls.node2.clean()
+        cls.node1.stop()
+        cls.node1.clean()
+        cls.node2.stop()
+        cls.node2.clean()
 
     def test_01_sync(self):
         """
