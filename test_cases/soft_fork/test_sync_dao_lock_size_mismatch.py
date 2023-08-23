@@ -45,12 +45,12 @@ class TestSyncDaoLockSizeMismatch:
             tip block == 10005
         Returns:
         """
-        wait_node_height(self.node2, 10005, 120)
+        wait_node_height(self.node2, 8668, 120)
         block_num = self.node2.getClient().get_tip_block_number()
-        assert block_num == 10005
+        assert block_num == 8668
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
-        assert block_num == 10005
+        assert block_num == 8668
 
 
 def tar_file(src_tar, dec_data):

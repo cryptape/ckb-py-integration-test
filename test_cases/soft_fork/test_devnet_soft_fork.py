@@ -1,3 +1,4 @@
+from framework.helper.miner import make_tip_height_number
 from framework.test_node import CkbNode, CkbNodeConfigPath
 
 
@@ -6,18 +7,23 @@ class TestDevNetSoftFork:
 
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "tx_pool_test/node1", 8114,
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114,
                                          8227)
         cls.node = node1
-        node1.prepare()
-        node1.start()
+        # node1.prepare()
+        # node1.start()
 
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
-        cls.node.stop()
-        cls.node.clean()
+        # cls.node.stop()
+        # cls.node.clean()
 
+    def test_02_miner(self):
+        # make_tip_height_number(self.node,8686)
+        self.node.getClient().get_transaction("0x8a305e941e4a4b8c5a7351230f50a9ec0d7d1bda2a4d5c3085fc9d239136f65b")
+
+    # def test——s
     def test_01_get_consensus(self):
         """
         rfc0043 min_activation_epoch  is 0x0
