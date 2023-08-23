@@ -40,6 +40,7 @@ class TestMainnetSoftForkWithCkbLightClient:
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
+        cls.node.stop_miner()
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
         cls.ckb_light_node.stop()
@@ -61,11 +62,12 @@ class TestMainnetSoftForkWithCkbLightClient:
         wait_cluster_height(self.cluster, 10000, 300)
         height = self.cluster.get_all_nodes_height()
         assert height[0] == height[1]
-        wait_light_sync_height(self.ckb_light_node, height[0], 3000)
         node_res = self.cluster.ckb_nodes[0].getClient().get_cells_capacity({"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": self.account['lock_arg']}, "script_type": "lock"})
+        self.node.start_miner()
+        wait_light_sync_height(self.ckb_light_node, height[0], 600)
         light_res = self.ckb_light_node.getClient().get_cells_capacity({"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": self.account['lock_arg']}, "script_type": "lock"})
-        assert int(node_res['capacity'], 16) == int(light_res['capacity'], 16)
+        assert int(node_res['capacity'], 16) <= int(light_res['capacity'], 16)
