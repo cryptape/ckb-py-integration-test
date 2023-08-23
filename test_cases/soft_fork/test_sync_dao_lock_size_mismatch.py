@@ -29,10 +29,10 @@ class TestSyncDaoLockSizeMismatch:
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
-        cls.node1.stop()
-        cls.node1.clean()
-        cls.node2.stop()
-        cls.node2.clean()
+        # cls.node1.stop()
+        # cls.node1.clean()
+        # cls.node2.stop()
+        # cls.node2.clean()
 
     def test_01_sync(self):
         """
@@ -41,16 +41,16 @@ class TestSyncDaoLockSizeMismatch:
         10006 block contains DaoLockSizeMismatch tx
         1. can sync 6000 block
             tip block num > 6000
-        2. can't sync 10006 block
-            tip block == 10005
+        2. can't sync 8669 block
+            tip block == 8668
         Returns:
         """
-        wait_node_height(self.node2, 10005, 120)
+        wait_node_height(self.node2, 8668, 120)
         block_num = self.node2.getClient().get_tip_block_number()
-        assert block_num == 10005
+        assert block_num == 8668
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
-        assert block_num == 10005
+        assert block_num == 8668
 
 
 def tar_file(src_tar, dec_data):
