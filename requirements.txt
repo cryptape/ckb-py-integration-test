@@ -4,3 +4,4 @@ requests==2.31.0
 tqdm==4.65.0
 pytest-html==3.2.0
 PyYAML==6.0
+pytest-docs==0.1.0

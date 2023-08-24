@@ -1,10 +1,10 @@
 from framework.config import SPAWN_CONTRACT_PATH
-from framework.helper.contract import deploy_ckb_contract, CKbContract
+from framework.helper.contract import deploy_ckb_contract, CkbContract
 from framework.helper.miner import miner_until_tx_committed
 from framework.test_node import CkbNode
 
 
-class SpawnContract(CKbContract):
+class SpawnContract(CkbContract):
 
     def __init__(self, contract_hash=None, contract_tx_index=None):
         self.contract_hash = contract_hash

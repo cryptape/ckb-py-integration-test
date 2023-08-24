@@ -1,13 +1,15 @@
-from framework.helper.ckb_cli import *
-from framework.test_node import CkbNode
-from framework.rpc import RPCClient
 import hashlib
 import time
 
 from abc import ABC, abstractmethod
 
+from framework.helper.ckb_cli import *
+from framework.test_node import CkbNode
+from framework.rpc import RPCClient
 
-class CKbContract(ABC):
+
+
+class CkbContract(ABC):
 
     @abstractmethod
     def deploy(self, account_private, node: CkbNode):
@@ -22,6 +24,7 @@ class CKbContract(ABC):
         pass
 
 
+@exception_use_old_ckb()
 def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_id=True,
                         api_url="http://127.0.0.1:8114"):
     """
@@ -58,7 +61,7 @@ def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_i
           f" && rm /tmp/tmp.data"
     return run_command(cmd).replace('\n', '')
 
-
+@exception_use_old_ckb()
 def get_ckb_contract_codehash(tx_hash, tx_index, enable_type_id=True, api_url="http://127.0.0.1:8114"):
     if enable_type_id:
         type_arg = RPCClient(api_url).get_transaction(tx_hash)["transaction"]["outputs"][tx_index]['type'][
@@ -78,7 +81,7 @@ def get_ckb_contract_codehash(tx_hash, tx_index, enable_type_id=True, api_url="h
     hex_digest = hash_object.hexdigest()
     return f"0x{hex_digest}"
 
-
+@exception_use_old_ckb()
 def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_out_point_tx_index, type_script_arg,
                         hash_type="type",
                         data="0x", fee=1000,

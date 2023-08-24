@@ -11,6 +11,10 @@ class CkbNodeConfigPath(Enum):
                     "source/template/ckb/v111/ckb-miner.toml.j2",
                     "source/template/ckb/v111/specs/dev.toml",
                     "download/0.111.0")
+    CURRENT_MAIN =  ("source/template/ckb/v111/ckb.toml.j2",
+                    "source/template/ckb/v111/ckb-miner.toml.j2",
+                     "source/template/specs/mainnet.toml.j2",
+                     "download/0.111.0")
     V111 = (
         "source/template/ckb/v111/ckb.toml.j2",
         "source/template/ckb/v111/ckb-miner.toml.j2",
@@ -21,9 +25,23 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v110/ckb.toml.j2",
         "source/template/ckb/v110/ckb-miner.toml.j2",
         "source/template/ckb/v110/specs/dev.toml",
-        "download/0.110.0"
+        "download/0.110.1"
     )
-    V109 = ("", "", "", "")
+
+    V110_MAIN = (
+        "source/template/ckb/v110/ckb.toml.j2",
+        "source/template/ckb/v110/ckb-miner.toml.j2",
+        "source/template/specs/mainnet.toml.j2",
+        "download/0.110.1"
+    )
+
+
+    V109 = ("source/template/ckb/v109/ckb.toml.j2", "source/template/ckb/v109/ckb-miner.toml.j2",
+            "source/template/ckb/v109/specs/dev.toml", "download/0.109.0")
+
+    V109_MAIN = ("source/template/ckb/v109/ckb.toml.j2", "source/template/ckb/v109/ckb-miner.toml.j2",
+                 "source/template/specs/mainnet.toml.j2", "download/0.109.0")
+
     v108 = ("", "", "", "")
 
     def __init__(self, ckb_config_path, ckb_miner_config_path, ckb_spec_path, ckb_bin_path):
@@ -31,6 +49,9 @@ class CkbNodeConfigPath(Enum):
         self.ckb_miner_config_path = ckb_miner_config_path
         self.ckb_spec_path = ckb_spec_path
         self.ckb_bin_path = ckb_bin_path
+
+    def __str__(self):
+        return self.ckb_bin_path.split("/")[-1]
 
 
 class CkbNode:
@@ -52,13 +73,17 @@ class CkbNode:
         self.ckb_miner_config = ckb_miner_config
         self.ckb_specs_config = ckb_specs_config
         self.ckb_dir = "{tmp}/{ckb_dir}".format(tmp=get_tmp_path(), ckb_dir=dec_dir)
-        self.ckb_bin_path = "{ckb_dir}/ckb".format(ckb_dir=self.ckb_dir)
-        self.ckb_toml_path = "{ckb_dir}/ckb.toml".format(ckb_dir=self.ckb_dir)
-        self.ckb_miner_toml_path = "{ckb_dir}/ckb-miner.toml".format(ckb_dir=self.ckb_dir)
+        self.ckb_bin_path = f"{self.ckb_dir}/ckb"
+        self.ckb_toml_path = f"{self.ckb_dir}/ckb.toml"
+        self.ckb_miner_toml_path = f"{self.ckb_dir}/ckb-miner.toml"
+        self.ckb_specs_config_path = f"{self.ckb_dir}/dev.toml"
         self.ckb_pid = -1
         self.ckb_miner_pid = -1
         self.rpcUrl = "http://{url}".format(url=self.ckb_config.get("ckb_rpc_listen_address", "127.0.0.1:8114"))
         self.client = RPCClient(self.rpcUrl)
+
+    def __str__(self):
+        return self.ckb_config_path
 
     def get_peer_id(self):
         return self.client.local_node_info()["node_id"]
@@ -75,11 +100,24 @@ class CkbNode:
         peer_address = node.get_peer_address()
         print("add node response:", self.getClient().add_node(peer_id, peer_address))
 
-    def getClient(self)->RPCClient:
+    def getClient(self) -> RPCClient:
         return self.client
 
-    def restart(self, config):
-        pass
+    def restart(self, config={}, clean_data=False):
+        self.stop()
+        self.stop_miner()
+
+        if clean_data:
+            # rm -rf indexer
+            run_command(f"cd {self.ckb_dir} && rm -rf data/indexer")
+            # rm -rf network
+            run_command(f"cd {self.ckb_dir} && rm -rf data/network")
+            # rm -rf tx_pool
+            run_command(f"cd {self.ckb_dir} && rm -rf data/tx_pool")
+            # rm -rf tmp
+            run_command(f"cd {self.ckb_dir} && rm -rf data/tmp")
+
+        self.start()
 
     def start(self):
         self.ckb_pid = run_command("cd {ckb_dir} && ./ckb run --indexer > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
@@ -94,12 +132,21 @@ class CkbNode:
         self.ckb_pid = -1
         time.sleep(3)
 
-
-    def prepare(self, check_file=False):
+    def prepare(self, other_ckb_config={}, other_ckb_miner_config={}, other_ckb_spec_config={}, check_file=False):
+        self.ckb_config.update(other_ckb_config)
+        self.ckb_miner_config.update(other_ckb_miner_config)
+        self.ckb_specs_config.update(other_ckb_spec_config)
         # check file exist
         create_config_file(self.ckb_config, self.ckb_config_path.ckb_config_path,
                            self.ckb_toml_path)
+
         create_config_file(self.ckb_miner_config, self.ckb_config_path.ckb_miner_config_path, self.ckb_miner_toml_path)
+        if ".j2" in self.ckb_config_path.ckb_spec_path:
+            create_config_file(self.ckb_specs_config, self.ckb_config_path.ckb_spec_path, self.ckb_specs_config_path)
+        else:
+            shutil.copy("{root_path}/{spec_path}".format(root_path=get_project_root(),
+                                                         spec_path=self.ckb_config_path.ckb_spec_path), self.ckb_dir)
+
         shutil.copy("{root_path}/{ckb_bin_path}/ckb".format(root_path=get_project_root(),
                                                             ckb_bin_path=self.ckb_config_path.ckb_bin_path),
                     self.ckb_dir)
@@ -108,9 +155,8 @@ class CkbNode:
                                                                 ckb_bin_path=self.ckb_config_path.ckb_bin_path),
                     self.ckb_dir)
 
-        shutil.copy("{root_path}/source/template/ckb/default.db-options".format(root_path=get_project_root()), self.ckb_dir)
-        shutil.copy("{root_path}/{spec_path}".format(root_path=get_project_root(),
-                                                     spec_path=self.ckb_config_path.ckb_spec_path), self.ckb_dir)
+        shutil.copy("{root_path}/source/template/ckb/default.db-options".format(root_path=get_project_root()),
+                    self.ckb_dir)
 
     def clean(self):
         run_command("rm -rf {ckb_dir}".format(ckb_dir=self.ckb_dir))
@@ -122,8 +168,13 @@ class CkbNode:
         time.sleep(3)
 
     def stop_miner(self):
-        run_command("kill {pid}".format(pid=self.ckb_miner_pid))
-        self.ckb_miner_pid = -1
+        if self.ckb_miner_pid == -1:
+            return
+        try:
+            run_command("kill {pid}".format(pid=self.ckb_miner_pid))
+            self.ckb_miner_pid = -1
+        except:
+            self.ckb_miner_pid = -1
 
     def version(self):
         pass
