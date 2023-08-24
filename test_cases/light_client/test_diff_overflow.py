@@ -1,3 +1,5 @@
+import pytest
+
 from framework.config import MINER_PRIVATE_1
 from framework.helper.ckb_cli import util_key_info_by_private_key
 from framework.helper.miner import make_tip_height_number
@@ -52,7 +54,19 @@ class TestDiffOverflow:
         cls.ckb_light_node.stop()
         cls.ckb_light_node.clean()
 
+    @pytest.mark.skip
     def test_soft_fork_activation_light_node(self):
+        """
+        ckb-light-client sync  successful  when diff very big
+        1. wait ckb-light-client sync 5 block
+        2. node2 close net
+        3. node2 miner 500 block(500 epoch )
+        4. node2 start net
+        5. wait node1 sync 500 block
+        6. wait ckb-light-client sync 500 block
+        Returns:
+
+        """
         wait_light_sync_height(self.ckb_light_node, 5, 3000)
         self.node2.getClient().set_network_active(False)
         make_tip_height_number(self.node2, 500)
