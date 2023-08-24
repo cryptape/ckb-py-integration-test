@@ -84,6 +84,8 @@ class RPCClient:
     def get_peers(self):
         return self.call("get_peers", [])
 
+    def set_network_active(self,state):
+        return self.call("set_network_active", [state])
     def remove_transaction(self, tx_hash):
         return self.call("remove_transaction", [tx_hash])
 
