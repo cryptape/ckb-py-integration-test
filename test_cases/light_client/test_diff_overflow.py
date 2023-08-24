@@ -55,7 +55,7 @@ class TestDiffOverflow:
         cls.ckb_light_node.clean()
 
     @pytest.mark.skip
-    def test_soft_fork_activation_light_node(self):
+    def test_light_node_when_diff_very_big(self):
         """
         ckb-light-client sync  successful  when diff very big
         1. wait ckb-light-client sync 5 block
