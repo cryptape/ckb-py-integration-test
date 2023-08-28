@@ -148,7 +148,8 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
     tx_add_multisig_config(account_address, tmp_tx_file, api_url)
     # add input
     tx_add_input(input_cell_out_point['tx_hash'], input_cell_out_point['index'], tmp_tx_file, api_url)
-
+    transaction = RPCClient(api_url).get_transaction(contract_out_point_tx_hash)
+    tx_add_header_dep(transaction['tx_status']['block_hash'],tmp_tx_file)
     # add output
     tx_add_type_out_put(output_cell["type"]["code_hash"], output_cell["type"]["hash_type"], output_cell["type"]["args"],
                         output_cell["capacity"], data, tmp_tx_file)

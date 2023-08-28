@@ -38,6 +38,7 @@ def exception_use_old_ckb():
 
     return decorator
 
+
 @exception_use_old_ckb()
 def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
     """
@@ -471,6 +472,17 @@ def tx_add_input_cell_without_check(tx_hash, index, tx_file):
         f.write(tx_info_str)
 
 
+def tx_add_header_dep(block_hash, tx_file):
+    with open(tx_file, "r") as file:
+        tx_info_str = file.read()
+
+    with open(tx_file, "w") as f:
+        tx = json.loads(tx_info_str)
+        tx["transaction"]["header_deps"].insert(0, block_hash)
+        tx_info_str = json.dumps(tx, indent=4)
+        f.write(tx_info_str)
+
+
 def get_deploy_toml_config(account_private, contract_bin_path, enable_type_id):
     # get account script
     account = util_key_info_by_private_key(account_private)
@@ -741,8 +753,10 @@ def get_consensus(raw_data=False, no_color=False, debug=False, local_only=False,
     parsed_data = yaml.safe_load(fixed_data)
     return parsed_data['hardfork_features']
 
+
 def deposit():
     pass
+
 
 def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
                          api_url="http://127.0.0.1:8114"):
