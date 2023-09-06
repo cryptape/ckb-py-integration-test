@@ -61,6 +61,7 @@ def deploy_ckb_contract(private_key, contract_path, fee_rate=2000, enable_type_i
           f" && rm /tmp/tmp.data"
     return run_command(cmd).replace('\n', '')
 
+
 @exception_use_old_ckb()
 def get_ckb_contract_codehash(tx_hash, tx_index, enable_type_id=True, api_url="http://127.0.0.1:8114"):
     if enable_type_id:
@@ -80,6 +81,7 @@ def get_ckb_contract_codehash(tx_hash, tx_index, enable_type_id=True, api_url="h
     hash_object.update(data)
     hex_digest = hash_object.hexdigest()
     return f"0x{hex_digest}"
+
 
 @exception_use_old_ckb()
 def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_out_point_tx_index, type_script_arg,
@@ -114,14 +116,22 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
     account_address = account["address"]["testnet"]
     account_live_cells = wallet_get_live_cells(account_address, api_url=api_url)
     assert len(account_live_cells['live_cells']) > 0
-    input_cell_out_point = {
-        'tx_hash': account_live_cells['live_cells'][0]['tx_hash'],
-        'index': account_live_cells['live_cells'][0]['output_index']
-    }
+    input_cell_out_points = []
+    input_cell_cap = 0
+    for i in range(len(account_live_cells['live_cells'])):
+        input_cell_out_point = {
+            'tx_hash': account_live_cells['live_cells'][i]['tx_hash'],
+            'index': account_live_cells['live_cells'][i]['output_index']
+        }
+        input_cell_cap += float(account_live_cells['live_cells'][i]['capacity'].replace('(CKB)', "").strip()) * 100000000
+        input_cell_out_points.append(input_cell_out_point)
+        if  input_cell_cap> 10000000000:
+            break
+
+
     # get output_cells.cap = input_cell.cap - fee
     #  "capacity": "21685.0 (CKB)",
-    output_cell_capacity = float(
-        account_live_cells['live_cells'][0]['capacity'].replace('(CKB)', "").strip()) * 100000000 - fee
+    output_cell_capacity = input_cell_cap - fee
 
     output_cell = {
         "capacity": hex(int(output_cell_capacity)),
@@ -147,9 +157,11 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
     tx_init(tmp_tx_file, api_url)
     tx_add_multisig_config(account_address, tmp_tx_file, api_url)
     # add input
-    tx_add_input(input_cell_out_point['tx_hash'], input_cell_out_point['index'], tmp_tx_file, api_url)
+    for i in range(len(input_cell_out_points)):
+        input_cell_out_point = input_cell_out_points[i]
+        tx_add_input(input_cell_out_point['tx_hash'], input_cell_out_point['index'], tmp_tx_file, api_url)
     transaction = RPCClient(api_url).get_transaction(contract_out_point_tx_hash)
-    tx_add_header_dep(transaction['tx_status']['block_hash'],tmp_tx_file)
+    tx_add_header_dep(transaction['tx_status']['block_hash'], tmp_tx_file)
     # add output
     tx_add_type_out_put(output_cell["type"]["code_hash"], output_cell["type"]["hash_type"], output_cell["type"]["args"],
                         output_cell["capacity"], data, tmp_tx_file)

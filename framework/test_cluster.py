@@ -14,9 +14,9 @@ class Cluster:
         for num in range(len(self.ckb_nodes) - 1):
             self.connected_node(num, len(self.ckb_nodes) - 1)
 
-    def prepare_all_nodes(self):
+    def prepare_all_nodes(self, other_ckb_config={}, other_ckb_miner_config={}, other_ckb_spec_config={}):
         for node in self.ckb_nodes:
-            node.prepare()
+            node.prepare(other_ckb_config, other_ckb_miner_config, other_ckb_spec_config)
 
     def connected_node(self, num1, num2):
         self.ckb_nodes[num1].connected(self.ckb_nodes[num2])

@@ -2,7 +2,7 @@ destination=`pwd`/test_cases
 mkdir -p test_cases
 git clone https://github.com/gpBlockchain/ckb-test-contracts.git
 cd ckb-test-contracts
-git checkout fa728703aa5c20376213fb84e381c73e69e20955
+git checkout 5e549b499c9be4ab8aec6fb6e1adfeb0796fab4d
 cargo install cross --git https://github.com/cross-rs/cross
 cargo install ckb-capsule --git https://github.com/quake/capsule.git --branch quake/ckb-0.111
 cd rust/acceptance-contracts

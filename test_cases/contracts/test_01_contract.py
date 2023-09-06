@@ -27,7 +27,8 @@ def get_successful_files():
                   "loop_contract",
                   "spawn_exec_memory_limit_le_7",
                   "spawn_argc_not_eq",
-                  "spawn_argc_is_u64_max"
+                  "spawn_argc_is_u64_max",
+                  "spawn_out_of_memory"
                   ]
     return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
 
@@ -40,7 +41,8 @@ def get_failed_files():
                   "loop_contract",
                   "spawn_exec_memory_limit_le_7",
                   "spawn_argc_not_eq",
-                  "spawn_argc_is_u64_max"
+                  "spawn_argc_is_u64_max",
+                  "spawn_out_of_memory"
                   ]
     # return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
     return [f"{project_root}/source/contract/test_cases/{x}" for x in files_list]
@@ -56,8 +58,6 @@ class TestHelperContract:
         cls.node.prepare()
         cls.node.start()
         make_tip_height_number(cls.node, 2000)
-        pass
-        # dep   loy `anyone_can_pay` contract
 
     @classmethod
     def teardown_class(cls):
@@ -76,7 +76,6 @@ class TestHelperContract:
         except Exception as e:
             print(e)
 
-    @pytest.mark.skip
     def test_stack_overflow(self):
         """
         contract link:
@@ -87,7 +86,7 @@ class TestHelperContract:
                           f"{get_project_root()}/source/contract/test_cases/spawn_recursive",
                           self.node)
 
-    @pytest.mark.skip
+    # @pytest.mark.skip
     def test_estimate_cycles_bug(self):
         """
         https://github.com/gpBlockchain/ckb-test-contracts/blob/main/rust/acceptance-contracts/contracts/spawn_demo/src/spawn_times.rs
@@ -133,17 +132,27 @@ class TestHelperContract:
                         pass
 
 
-def deploy_and_invoke(account, path, node):
-    deploy_hash = deploy_ckb_contract(account,
-                                      path,
-                                      enable_type_id=True,
-                                      api_url=node.getClient().url)
-    miner_until_tx_committed(node, deploy_hash)
-    invoke_hash = invoke_ckb_contract(account_private=account,
-                                      contract_out_point_tx_hash=deploy_hash,
-                                      contract_out_point_tx_index=0,
-                                      type_script_arg="0x02", data="0x1234",
-                                      hash_type="type",
-                                      api_url=node.getClient().url)
-
-    return invoke_hash
+def deploy_and_invoke(account, path, node, try_count=5):
+    if try_count < 0:
+        raise Exception("try out of times")
+    try:
+        deploy_hash = deploy_ckb_contract(account,
+                                          path,
+                                          enable_type_id=True,
+                                          api_url=node.getClient().url)
+        miner_until_tx_committed(node, deploy_hash)
+        time.sleep(1)
+        invoke_hash = invoke_ckb_contract(account_private=account,
+                                          contract_out_point_tx_hash=deploy_hash,
+                                          contract_out_point_tx_index=0,
+                                          type_script_arg="0x02", data="0x1234",
+                                          hash_type="type",
+                                          api_url=node.getClient().url)
+        return invoke_hash
+    except Exception as e:
+        print(e)
+        if "Resolve failed Dead" in e:
+            try_count -= 1
+            time.sleep(3)
+            return deploy_and_invoke(account, path, node, try_count)
+        raise e

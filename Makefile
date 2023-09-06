@@ -8,7 +8,16 @@ prepare:
 	sh prepare.sh
 
 test:
-	python -m pytest 
+	bash test.sh test_cases/ckb2023
+	bash test.sh test_cases/ckb_cli
+	bash test.sh test_cases/contracts
+	bash test.sh test_cases/example
+	bash test.sh test_cases/framework
+	bash test.sh test_cases/light_client
+	bash test.sh test_cases/mocking
+	bash test.sh test_cases/node_compatible
+	bash test.sh test_cases/rpc
+	bash test.sh test_cases/soft_fork
 
 clean:
 	-pkill ckb

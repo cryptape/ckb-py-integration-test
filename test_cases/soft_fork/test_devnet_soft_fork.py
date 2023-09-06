@@ -6,7 +6,7 @@ class TestDevNetSoftFork:
 
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "tx_pool_test/node1", 8114,
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "tx_pool_test/node1", 8114,
                                          8227)
         cls.node = node1
         node1.prepare()

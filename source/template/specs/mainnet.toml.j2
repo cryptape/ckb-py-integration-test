@@ -91,6 +91,11 @@ lock.hash_type = "type"
 [params]
 genesis_epoch_length = {{ ckb_params_genesis_epoch_length | default(1) }}
 permanent_difficulty_in_dummy = true
+epoch_duration_target = {{ ckb_params_epoch_duration_target | default(8) }}
+{% if starting_block_limiting_dao_withdrawing_lock is defined %}
+starting_block_limiting_dao_withdrawing_lock = {{ starting_block_limiting_dao_withdrawing_lock }}
+{% endif %}
+
 
 [pow]
 func = "{{ ckb_pow_func | default("Dummy") }}"

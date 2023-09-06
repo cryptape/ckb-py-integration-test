@@ -10,48 +10,116 @@ DATA_ERROR_TAT = f"{get_project_root()}/source/data/data.err.tar.gz"
 
 class TestSyncDaoLockSizeMismatch:
 
-    @classmethod
-    def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114,
-                                         8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112,
-                                         8228)
-        cls.node1 = node1
-        cls.node2 = node2
-        node1.prepare()
-        node2.prepare()
-        tar_file(DATA_ERROR_TAT, node1.ckb_dir)
-        node1.start()
-        node2.start()
-        node1.start_miner()
-        node1.connected(node2)
 
-    @classmethod
-    def teardown_class(cls):
-        print("\nTeardown TestClass1")
-        cls.node1.stop()
-        cls.node1.clean()
-        cls.node2.stop()
-        cls.node2.clean()
 
-    def test_01_sync(self):
+    def test_01_sync_dao_out_of_starting_block_limiting_dao_withdrawing_lock(self):
         """
-        can't sync DaoLockSizeMismatch tx after softFork active
+        can sync DaoLockSizeMismatch tx
+         - after softFork active
+         - starting_block_limiting_dao_withdrawing_lock > dao deposit tx block number
+
         6000 block contains DaoLockSizeMismatch tx
-        10006 block contains DaoLockSizeMismatch tx
+        5495 block contains dao deposit tx
+        8669 block contains DaoLockSizeMismatch tx use 5495 dao deposit tx
         1. can sync 6000 block
             tip block num > 6000
         2. can't sync 8669 block
             tip block == 8668
         Returns:
         """
+
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
+        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        self.node1 = node1
+        self.node2 = node2
+        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
+        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
+        tar_file(DATA_ERROR_TAT, node1.ckb_dir)
+        node1.start()
+        node2.start()
+        node1.start_miner()
+        node1.connected(node2)
+
+        wait_node_height(self.node2, 8669, 120)
+
+        self.node1.stop_miner()
+        self.node1.stop()
+        self.node1.clean()
+        self.node2.stop()
+        self.node2.clean()
+
+    def test_02_sync_dao_in_starting_block_limiting_dao_withdrawing_lock(self):
+        """
+        can't sync DaoLockSizeMismatch tx
+        - after softFork active
+        - starting_block_limiting_dao_withdrawing_lock <= dao deposit tx block number
+
+        6000 block contains DaoLockSizeMismatch tx
+        8669 block contains DaoLockSizeMismatch tx
+        1. can sync 6000 block
+            tip block num > 6000
+        2. can't sync 8669 block
+            tip block == 8668
+        Returns:
+        """
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
+        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        self.node1 = node1
+        self.node2 = node2
+        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
+        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
+        tar_file(DATA_ERROR_TAT, node1.ckb_dir)
+        node1.start()
+        node2.start()
+        node1.start_miner()
+        node1.connected(node2)
+
         wait_node_height(self.node2, 8668, 120)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
+        self.node1.stop_miner()
+        self.node1.stop()
+        self.node1.clean()
+        self.node2.stop()
+        self.node2.clean()
 
+    def test_03_sync_dao_lock_size_mismatch_before_soft_fork(self):
+        """
+        can sync DaoLockSizeMismatch tx
+        - before softFork active
+        6000 block contains DaoLockSizeMismatch tx
+        1. can sync 6000 block
+            tip block num > 6000
+        2. can't sync 8669 block(DaoLockSizeMismatch tx)
+            tip block == 8668
+        Returns:
+        """
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
+        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        self.node1 = node1
+        self.node2 = node2
+        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
+        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
+        tar_file(DATA_ERROR_TAT, node1.ckb_dir)
+        node1.start()
+        node2.start()
+        node1.start_miner()
+        node1.connected(node2)
+
+        wait_node_height(self.node2, 8668, 120)
+        block_num = self.node2.getClient().get_tip_block_number()
+        assert block_num == 8668
+        time.sleep(10)
+        block_num = self.node2.getClient().get_tip_block_number()
+        assert block_num == 8668
+        self.node1.stop_miner()
+        self.node1.stop()
+        self.node1.clean()
+        self.node2.stop()
+        self.node2.clean()
 
 def tar_file(src_tar, dec_data):
     run_command(f"tar -xvf {src_tar} -C {dec_data}")

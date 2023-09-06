@@ -29,6 +29,7 @@ block_on_submit = {{ ckb_miner_block_on_submit | default("true") }}
 
 # block template polling interval in milliseconds
 poll_interval = {{ ckb_miner_poll_interval | default("1000") }}
+# listen = "{{ ckb_miner_listen }}"
 
 #{% if ckb_miner_workers is defined %}
 #    {% for worker in ckb_miner_workers %}
@@ -41,5 +42,5 @@ poll_interval = {{ ckb_miner_poll_interval | default("1000") }}
 [[miner.workers]]
 worker_type = "Dummy"
 delay_type = "Constant"
-value = 1000
+value = {{ ckb_worker_value | default("1000")      }}
 #{% endif %}

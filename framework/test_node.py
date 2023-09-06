@@ -25,14 +25,14 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v110/ckb.toml.j2",
         "source/template/ckb/v110/ckb-miner.toml.j2",
         "source/template/ckb/v110/specs/dev.toml",
-        "download/0.110.1"
+        "download/0.110.2"
     )
 
     V110_MAIN = (
         "source/template/ckb/v110/ckb.toml.j2",
         "source/template/ckb/v110/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.110.1"
+        "download/0.110.2"
     )
 
 
@@ -60,6 +60,7 @@ class CkbNode:
     def init_dev_by_port(cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port):
         ckb_config, ckb_miner_config, ckb_specs_config = get_ckb_configs(p2p_port, rpc_port)
         return CkbNode(ckb_node_path_enum, dec_dir, ckb_config, ckb_miner_config, ckb_specs_config)
+
 
     def __init__(self, ckb_node_path_enum: CkbNodeConfigPath,
                  dec_dir,
@@ -120,7 +121,7 @@ class CkbNode:
         self.start()
 
     def start(self):
-        self.ckb_pid = run_command("cd {ckb_dir} && ./ckb run --indexer > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
+        self.ckb_pid = run_command("cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
         # //todo replace by rpc
         time.sleep(3)
 

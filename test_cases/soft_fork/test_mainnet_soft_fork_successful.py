@@ -9,17 +9,15 @@ class TestMainNetSoftForkSuccessful:
     def setup_class(cls):
         node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
                                          8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node2", 8120, 8228)
+        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
         cls.cluster = Cluster([node1, node2])
 
         cls.cluster = Cluster([node1, node2])
         cls.node = node1
         cls.node109 = node2
 
-        node1.prepare(other_ckb_config={'ckb_logger_filter': 'debug'},
-                      other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
-        node2.prepare(other_ckb_config={'ckb_logger_filter': 'debug'},
-                      other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
+        node1.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
+        node2.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
 
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()

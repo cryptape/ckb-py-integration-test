@@ -28,15 +28,20 @@ class TestAfterCkb2023:
     @classmethod
     def setup_class(cls):
 
-        cls.cluster.prepare_all_nodes()
+        cls.cluster.prepare_all_nodes(
+            other_ckb_config={'ckb_logger_filter': 'debug'}
+        )
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
         contracts = deploy_contracts(ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
         cls.spawn_contract = contracts["SpawnContract"]
-        make_tip_height_number(cls.node_current, 1050)
+        make_tip_height_number(cls.node_current, 1002)
         wait_cluster_sync_with_miner(cls.cluster, 300, 1050)
         heights = cls.cluster.get_all_nodes_height()
         print(f"heights:{heights}")
+
+    def test_1234(self):
+        pass
 
     def setup_method(self, method):
         """
@@ -45,34 +50,35 @@ class TestAfterCkb2023:
         :param method:
         :return:
         """
-        print("\nSetting up method", method.__name__)
-
-        lt_111_tip_number = self.lt_111_nodes[0].getClient().get_tip_block_number()
-        gt_111_tip_number = self.ge_111_nodes[0].getClient().get_tip_block_number()
-        if lt_111_tip_number == gt_111_tip_number:
-            return
-        try:
-            wait_cluster_height(self.cluster, max(lt_111_tip_number, gt_111_tip_number), 30)
-            return
-        except:
-            heights = self.cluster.get_all_nodes_height()
-            min_tip_number = min(heights)
-            for node in self.cluster.ckb_nodes:
-                make_tip_height_number(node, min_tip_number)
-            self.cluster.restart_all_node()
-            for _ in range(10):
-                miner_with_version(self.node_current, "0x0")
-            tip_number = self.node_current.getClient().get_tip_block_number()
-            self.cluster.connected_all_nodes()
-            wait_cluster_sync_with_miner(self.cluster, 300, tip_number)
+        pass
+        # print("\nSetting up method", method.__name__)
+        #
+        # lt_111_tip_number = self.lt_111_nodes[0].getClient().get_tip_block_number()
+        # gt_111_tip_number = self.ge_111_nodes[0].getClient().get_tip_block_number()
+        # if lt_111_tip_number == gt_111_tip_number:
+        #     return
+        # try:
+        #     wait_cluster_height(self.cluster, max(lt_111_tip_number, gt_111_tip_number), 30)
+        #     return
+        # except:
+        #     heights = self.cluster.get_all_nodes_height()
+        #     min_tip_number = min(heights)
+        #     for node in self.cluster.ckb_nodes:
+        #         make_tip_height_number(node, min_tip_number)
+        #     self.cluster.restart_all_node()
+        #     for _ in range(10):
+        #         miner_with_version(self.node_current, "0x0")
+        #     tip_number = self.node_current.getClient().get_tip_block_number()
+        #     self.cluster.connected_all_nodes()
+        #     wait_cluster_sync_with_miner(self.cluster, 300, tip_number)
 
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
-        heights = cls.cluster.get_all_nodes_height()
-        print(heights)
-        cls.cluster.stop_all_nodes()
-        cls.cluster.clean_all_nodes()
+        # heights = cls.cluster.get_all_nodes_height()
+        # print(heights)
+        # cls.cluster.stop_all_nodes()
+        # cls.cluster.clean_all_nodes()
 
     def test_node_sync(self):
         """
@@ -203,7 +209,7 @@ class TestAfterCkb2023:
 
         miner_until_tx_committed(node, tx_hash)
         tip_number = node.getClient().get_tip_block_number()
-        wait_cluster_sync_with_miner(self.cluster,100,tip_number)
+        wait_cluster_sync_with_miner(self.cluster, 100, tip_number)
         heights = self.cluster.get_all_nodes_height()
         print(f"heights:{heights}")
         for query_node in self.cluster.ckb_nodes:
