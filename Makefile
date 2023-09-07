@@ -20,7 +20,7 @@ test:
 	bash test.sh test_cases/framework
 	bash test.sh test_cases/light_client
 	bash test.sh test_cases/mocking
-	#bash test.sh test_cases/node_compatible
+	bash test.sh test_cases/node_compatible
 	bash test.sh test_cases/rpc
 	bash test.sh test_cases/soft_fork
 	check_failed_html

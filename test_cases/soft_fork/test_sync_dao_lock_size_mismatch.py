@@ -10,7 +10,13 @@ DATA_ERROR_TAT = f"{get_project_root()}/source/data/data.err.tar.gz"
 
 class TestSyncDaoLockSizeMismatch:
 
-
+    def teardown_method(self, method):
+        print("\nTearing down method", method.__name__)
+        self.node1.stop_miner()
+        self.node1.stop()
+        self.node1.clean()
+        self.node2.stop()
+        self.node2.clean()
 
     def test_01_sync_dao_out_of_starting_block_limiting_dao_withdrawing_lock(self):
         """
@@ -41,12 +47,6 @@ class TestSyncDaoLockSizeMismatch:
         node1.connected(node2)
 
         wait_node_height(self.node2, 8669, 120)
-
-        self.node1.stop_miner()
-        self.node1.stop()
-        self.node1.clean()
-        self.node2.stop()
-        self.node2.clean()
 
     def test_02_sync_dao_in_starting_block_limiting_dao_withdrawing_lock(self):
         """
@@ -80,11 +80,7 @@ class TestSyncDaoLockSizeMismatch:
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
-        self.node1.stop_miner()
-        self.node1.stop()
-        self.node1.clean()
-        self.node2.stop()
-        self.node2.clean()
+
 
     def test_03_sync_dao_lock_size_mismatch_before_soft_fork(self):
         """
@@ -115,11 +111,7 @@ class TestSyncDaoLockSizeMismatch:
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
-        self.node1.stop_miner()
-        self.node1.stop()
-        self.node1.clean()
-        self.node2.stop()
-        self.node2.clean()
+
 
 def tar_file(src_tar, dec_data):
     run_command(f"tar -xvf {src_tar} -C {dec_data}")
