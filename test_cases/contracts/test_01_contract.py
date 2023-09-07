@@ -101,7 +101,7 @@ class TestHelperContract:
         :return:
         """
         deploy_hash = deploy_ckb_contract(MINER_PRIVATE_1,
-                                          "/Users/guopenglin/WebstormProjects/gp1/ckb-test-contracts/rust/acceptance-contracts/build/release/spawn_times",
+                                          f"{get_project_root()}/source/contract/test_cases/spawn_times",
                                           enable_type_id=True,
                                           api_url=self.node.getClient().url)
         miner_until_tx_committed(self.node, deploy_hash)

@@ -7,6 +7,11 @@ prepare:
 	echo "install ckb cli"
 	sh prepare.sh
 
+check_failed_html:
+	@if test -n "$$(ls report/*failed.html 2>/dev/null)"; then \
+        echo "Error: Failed HTML files found in the 'report' directory"; \
+        exit 1; \
+    fi
 test:
 	bash test.sh test_cases/ckb2023
 	bash test.sh test_cases/ckb_cli
@@ -18,7 +23,7 @@ test:
 	#bash test.sh test_cases/node_compatible
 	bash test.sh test_cases/rpc
 	bash test.sh test_cases/soft_fork
-
+	check_failed_html
 clean:
 	-pkill ckb
 	rm -rf tmp
