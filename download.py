@@ -10,8 +10,8 @@ import tarfile
 import zipfile
 import requests
 from tqdm import tqdm
-# '0.109.0', '0.110.2-rc2'
-versions = [ '0.111.0-rc12']  # Replace with your versions
+
+versions = ['0.109.0', '0.110.2-rc2', '0.111.0-rc12']  # Replace with your versions
 DOWNLOAD_DIR = "download"
 SYSTEMS = {
     'Windows': {
