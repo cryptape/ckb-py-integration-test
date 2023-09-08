@@ -36,12 +36,10 @@ jobs:
       run: make test
       
     - uses: actions/checkout@v2
+      if: failure()
     - name: Setup upterm session
       uses: lhotari/action-upterm@v1
-    
-    - uses: actions/checkout@v2
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
+
 
     - name: Publish reports
       if: failure()
