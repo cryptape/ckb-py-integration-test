@@ -38,6 +38,10 @@ jobs:
 
     - name: Run tests
       run: make test
+      
+    - uses: actions/checkout@v2
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
 
     - name: Publish reports
       if: failure()
