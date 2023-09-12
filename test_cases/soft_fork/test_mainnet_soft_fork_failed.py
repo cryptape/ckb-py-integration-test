@@ -1,16 +1,19 @@
-from framework.helper.miner import make_tip_height_number
-from framework.helper.node import wait_cluster_height, wait_node_height
-from framework.test_cluster import Cluster
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestMainNetSoftForkFailed:
+class TestMainNetSoftForkFailed(CkbTest):
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
+
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
+        node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
                                          8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
-        cls.cluster = Cluster([node1, node2])
+        node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
+        cls.cluster = cls.Cluster([node1, node2])
         cls.node = node1
         cls.node109 = node2
 
@@ -18,8 +21,8 @@ class TestMainNetSoftForkFailed:
         node2.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
-        make_tip_height_number(node2, 200)
-        wait_cluster_height(cls.cluster, 100, 300)
+        cls.Miner.make_tip_height_number(node2, 200)
+        cls.Node.wait_cluster_height(cls.cluster, 100, 300)
 
     @classmethod
     def teardown_class(cls):
@@ -74,19 +77,19 @@ class TestMainNetSoftForkFailed:
             query 110 node statue == failed
         :return:
         """
-        make_tip_height_number(self.node109, 8314)
-        wait_node_height(self.node, 8314, 100)
+        self.Miner.make_tip_height_number(self.node109, 8314)
+        self.Node.wait_node_height(self.node, 8314, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "defined"
-        make_tip_height_number(self.node109, 8315)
-        wait_node_height(self.node, 8315, 100)
+        self.Miner.make_tip_height_number(self.node109, 8315)
+        self.Node.wait_node_height(self.node, 8315, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "started"
-        make_tip_height_number(self.node109, 8566)
-        wait_node_height(self.node, 8566, 100)
+        self.Miner.make_tip_height_number(self.node109, 8566)
+        self.Node.wait_node_height(self.node, 8566, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "started"
-        make_tip_height_number(self.node109, 8567)
-        wait_node_height(self.node, 8567, 100)
+        self.Miner.make_tip_height_number(self.node109, 8567)
+        self.Node.wait_node_height(self.node, 8567, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "failed"

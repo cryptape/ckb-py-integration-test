@@ -1,11 +1,13 @@
 import json
 
-from framework.helper.miner import make_tip_height_number
-from framework.helper.node import wait_node_height
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class Test4133:
+
+class Test4133(CkbTest):
+
+    def setup_method(self, method):
+        pass
 
     def test_4133(self):
         """
@@ -22,21 +24,21 @@ class Test4133:
                 There will only be 2 peers in addr_manager, and last_connected_at_ms will be updated.
         Returns:
         """
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "issue/node1", 8914,
-                                         8927)
+        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_TEST, "issue/node1", 8914,
+                                              8927)
         self.node1 = node1
         node1.prepare(
             other_ckb_config={'ckb_logger_filter': 'debug'}
         )
         node1.start()
-        make_tip_height_number(node1, 100)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "issue/node2", 8915,
-                                         8928)
+        self.Miner.make_tip_height_number(node1, 100)
+        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_TEST, "issue/node2", 8915,
+                                              8928)
         self.node2 = node2
         node2.prepare()
         node2.start()
         node1.connected(node2)
-        wait_node_height(node2, 100, 150)
+        self.Node.wait_node_height(node2, 100, 150)
 
         node1.stop()
         with open(f"{node1.ckb_dir}/data/network/peer_store/addr_manager.db", 'r') as f:
@@ -44,8 +46,8 @@ class Test4133:
         addr_manager1 = json.loads(addr_managers)
         node1.start()
         node1.connected(node2)
-        make_tip_height_number(node1, 200)
-        wait_node_height(node2, 200, 150)
+        self.Miner.make_tip_height_number(node1, 200)
+        self.Node.wait_node_height(node2, 200, 150)
         node1.stop()
         with open(f"{node1.ckb_dir}/data/network/peer_store/addr_manager.db", 'r') as f:
             addr_managers = f.read()

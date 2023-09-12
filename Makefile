@@ -23,6 +23,7 @@ test:
 	bash test.sh test_cases/node_compatible
 	bash test.sh test_cases/rpc
 	bash test.sh test_cases/soft_fork
+	bash test.sh test_cases/issue
 	check_failed_html
 clean:
 	-pkill ckb

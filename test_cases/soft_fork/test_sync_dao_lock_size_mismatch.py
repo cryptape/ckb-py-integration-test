@@ -1,14 +1,16 @@
 import time
 
-from framework.helper.node import wait_node_height
-from framework.test_node import CkbNodeConfigPath, CkbNode
+from framework.basic import CkbTest
 from framework.util import run_command, get_project_root
 
 # use ckb0.110.1-rc1: generate DaoLockSizeMismatch tx in softfork before and after
 DATA_ERROR_TAT = f"{get_project_root()}/source/data/data.err.tar.gz"
 
 
-class TestSyncDaoLockSizeMismatch:
+class TestSyncDaoLockSizeMismatch(CkbTest):
+
+    def setup_method(self, method):
+        pass
 
     def teardown_method(self, method):
         print("\nTearing down method", method.__name__)
@@ -34,8 +36,8 @@ class TestSyncDaoLockSizeMismatch:
         Returns:
         """
 
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
+        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
         self.node1 = node1
         self.node2 = node2
         node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
@@ -46,7 +48,7 @@ class TestSyncDaoLockSizeMismatch:
         node1.start_miner()
         node1.connected(node2)
 
-        wait_node_height(self.node2, 8669, 120)
+        self.Node.wait_node_height(self.node2, 8669, 120)
 
     def test_02_sync_dao_in_starting_block_limiting_dao_withdrawing_lock(self):
         """
@@ -62,8 +64,8 @@ class TestSyncDaoLockSizeMismatch:
             tip block == 8668
         Returns:
         """
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
+        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
         self.node1 = node1
         self.node2 = node2
         node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
@@ -74,13 +76,12 @@ class TestSyncDaoLockSizeMismatch:
         node1.start_miner()
         node1.connected(node2)
 
-        wait_node_height(self.node2, 8668, 120)
+        self.Node.wait_node_height(self.node2, 8668, 120)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
-
 
     def test_03_sync_dao_lock_size_mismatch_before_soft_fork(self):
         """
@@ -93,8 +94,8 @@ class TestSyncDaoLockSizeMismatch:
             tip block == 8668
         Returns:
         """
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
+        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
         self.node1 = node1
         self.node2 = node2
         node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
@@ -105,7 +106,7 @@ class TestSyncDaoLockSizeMismatch:
         node1.start_miner()
         node1.connected(node2)
 
-        wait_node_height(self.node2, 8668, 120)
+        self.Node.wait_node_height(self.node2, 8668, 120)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
         time.sleep(10)

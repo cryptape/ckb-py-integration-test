@@ -1,18 +1,21 @@
-from framework.helper.miner import make_tip_height_number, miner_with_version
-from framework.helper.node import wait_cluster_height, wait_node_height
-from framework.test_cluster import Cluster
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestMainNetSoftForkSuccessful:
+class TestMainNetSoftForkSuccessful(CkbTest):
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
+
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
-                                         8227)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
-        cls.cluster = Cluster([node1, node2])
+        node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
+                                             8227)
+        node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
+        cls.cluster = cls.Cluster([node1, node2])
 
-        cls.cluster = Cluster([node1, node2])
+        cls.cluster = cls.Cluster([node1, node2])
         cls.node = node1
         cls.node109 = node2
 
@@ -21,8 +24,8 @@ class TestMainNetSoftForkSuccessful:
 
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
-        make_tip_height_number(node2, 200)
-        wait_cluster_height(cls.cluster, 100, 300)
+        cls.Miner.make_tip_height_number(node2, 200)
+        cls.Node.wait_cluster_height(cls.cluster, 100, 300)
 
     @classmethod
     def teardown_class(cls):
@@ -47,29 +50,29 @@ class TestMainNetSoftForkSuccessful:
             node.state == active
         :return:
         """
-        make_tip_height_number(self.node, 8314)
-        wait_node_height(self.node, 8314, 100)
+        self.Miner.make_tip_height_number(self.node, 8314)
+        self.Node.wait_node_height(self.node, 8314, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "defined"
-        make_tip_height_number(self.node, 8315)
-        wait_node_height(self.node, 8315, 100)
+        self.Miner.make_tip_height_number(self.node, 8315)
+        self.Node.wait_node_height(self.node, 8315, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "started"
-        make_tip_height_number(self.node, 8356)
-        wait_node_height(self.node, 8356, 100)
+        self.Miner.make_tip_height_number(self.node, 8356)
+        self.Node.wait_node_height(self.node, 8356, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "started"
-        make_tip_height_number(self.node, 8567)
-        wait_node_height(self.node, 8567, 100)
+        self.Miner.make_tip_height_number(self.node, 8567)
+        self.Node.wait_node_height(self.node, 8567, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "locked_in"
-        make_tip_height_number(self.node, 8650)
-        wait_node_height(self.node, 8650, 100)
+        self.Miner.make_tip_height_number(self.node, 8650)
+        self.Node.wait_node_height(self.node, 8650, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "locked_in"
-        make_tip_height_number(self.node, 8651)
-        wait_node_height(self.node, 8651, 100)
+        self.Miner.make_tip_height_number(self.node, 8651)
+        self.Node.wait_node_height(self.node, 8651, 100)
         deployments_info = self.node.getClient().get_deployments_info()
         assert deployments_info['deployments']['light_client']['state'] == "active"
-        make_tip_height_number(self.node, 8655)
-        wait_cluster_height(self.cluster, 8654, 100)
+        self.Miner.make_tip_height_number(self.node, 8655)
+        self.Node.wait_cluster_height(self.cluster, 8654, 100)

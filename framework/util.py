@@ -56,7 +56,7 @@ def create_config_file(config_values, template_path, output_file):
         f.write(output)
 
 
-def run_command(cmd):
+def run_command(cmd,check_exit_code=True):
     if cmd[-1] == "&":
         cmd1 = "{cmd} echo $! > pid.txt".format(cmd=cmd)
         print("cmd:{cmd}".format(cmd=cmd1))
@@ -81,6 +81,8 @@ def run_command(cmd):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     stdout, stderr = process.communicate()
     exit_code = process.returncode
+    if not check_exit_code:
+        return exit_code
     if exit_code != 0:
         print("Command failed with exit code:", exit_code)
         if stderr:
@@ -92,6 +94,7 @@ def run_command(cmd):
         return stdout.decode('utf-8')
     print("result:{result}".format(result=stdout.decode('utf-8')))
     return stdout.decode('utf-8')
+
 
 
 def get_project_root():

@@ -129,7 +129,8 @@ class CkbNode:
         # run_command("kill {pid}".format(pid=self.ckb_pid))
         # self.ckb_pid = -1
         port = self.rpcUrl.split(":")[-1]
-        run_command(f"kill $(lsof -t -i:{port})")
+
+        run_command(f"kill $(lsof -t -i:{port})",check_exit_code=False)
         self.ckb_pid = -1
         time.sleep(3)
 

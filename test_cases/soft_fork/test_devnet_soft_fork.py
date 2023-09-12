@@ -1,13 +1,19 @@
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestDevNetSoftFork:
-    node: CkbNode
+class TestDevNetSoftFork(CkbTest):
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
+
+    node: CkbTest.CkbNode
 
     @classmethod
     def setup_class(cls):
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "tx_pool_test/node1", 8114,
-                                         8227)
+        node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool_test/node1", 8114,
+                                             8227)
         cls.node = node1
         node1.prepare()
         node1.start()

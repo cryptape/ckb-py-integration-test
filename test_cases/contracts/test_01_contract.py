@@ -4,11 +4,7 @@ import time
 
 import pytest
 
-from framework.config import MINER_PRIVATE_1
-from framework.helper.ckb_cli import estimate_cycles
-from framework.helper.contract import deploy_ckb_contract, invoke_ckb_contract
-from framework.helper.miner import miner_until_tx_committed, make_tip_height_number, miner_with_version
-from framework.test_node import CkbNodeConfigPath, CkbNode
+from framework.basic import CkbTest
 from framework.util import get_project_root
 
 
@@ -48,16 +44,22 @@ def get_failed_files():
     return [f"{project_root}/source/contract/test_cases/{x}" for x in files_list]
 
 
-class TestHelperContract:
+class TestHelperContract(CkbTest):
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
+
     success_files = get_successful_files()
     failed_files = get_failed_files()
 
     @classmethod
     def setup_class(cls):
-        cls.node = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "contract/node", 8114, 8115)
+        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "contract/node", 8114, 8115)
         cls.node.prepare()
         cls.node.start()
-        make_tip_height_number(cls.node, 2000)
+        cls.Miner.make_tip_height_number(cls.node, 2000)
 
     @classmethod
     def teardown_class(cls):
@@ -67,12 +69,12 @@ class TestHelperContract:
     @pytest.mark.parametrize("path", success_files)
     # @pytest.mark.skip
     def test_deploy_and_invoke_demo(self, path):
-        return deploy_and_invoke(MINER_PRIVATE_1, path, self.node)
+        return self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
 
     @pytest.mark.parametrize("path", failed_files)
     def test_deploy_and_invoke_demo_failed(self, path):
         try:
-            deploy_and_invoke(MINER_PRIVATE_1, path, self.node)
+            self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
         except Exception as e:
             print(e)
 
@@ -82,9 +84,9 @@ class TestHelperContract:
         https://github.com/gpBlockchain/ckb-test-contracts/blob/main/rust/acceptance-contracts/contracts/spawn_demo/src/spawn_recursive.rs
         :return:
         """
-        deploy_and_invoke(MINER_PRIVATE_1,
-                          f"{get_project_root()}/source/contract/test_cases/spawn_recursive",
-                          self.node)
+        self.deploy_and_invoke(self.Config.MINER_PRIVATE_1,
+                               f"{get_project_root()}/source/contract/test_cases/spawn_recursive",
+                               self.node)
 
     # @pytest.mark.skip
     def test_estimate_cycles_bug(self):
@@ -100,18 +102,18 @@ class TestHelperContract:
             if return cycles > 1045122714,is bug
         :return:
         """
-        deploy_hash = deploy_ckb_contract(MINER_PRIVATE_1,
-                                          f"{get_project_root()}/source/contract/test_cases/spawn_times",
-                                          enable_type_id=True,
-                                          api_url=self.node.getClient().url)
-        miner_until_tx_committed(self.node, deploy_hash)
+        deploy_hash = self.Contract.deploy_ckb_contract(self.Config.MINER_PRIVATE_1,
+                                                        f"{get_project_root()}/source/contract/test_cases/spawn_times",
+                                                        enable_type_id=True,
+                                                        api_url=self.node.getClient().url)
+        self.Miner.miner_until_tx_committed(self.node, deploy_hash)
         for i in range(1, 10):
-            invoke_hash = invoke_ckb_contract(account_private=MINER_PRIVATE_1,
-                                              contract_out_point_tx_hash=deploy_hash,
-                                              contract_out_point_tx_index=0,
-                                              type_script_arg="0x02", data=f"0x{i:02x}",
-                                              hash_type="type",
-                                              api_url=self.node.getClient().url)
+            invoke_hash = self.Contract.invoke_ckb_contract(account_private=self.Config.MINER_PRIVATE_1,
+                                                            contract_out_point_tx_hash=deploy_hash,
+                                                            contract_out_point_tx_index=0,
+                                                            type_script_arg="0x02", data=f"0x{i:02x}",
+                                                            hash_type="type",
+                                                            api_url=self.node.getClient().url)
             time.sleep(5)
             transaction = self.node.getClient().get_transaction(invoke_hash)
             # if transaction["tx_status"]['status'] == ""
@@ -121,38 +123,37 @@ class TestHelperContract:
                 # bug
                 # es cycle
                 del transaction['transaction']['hash']
-                with open("/tmp/tmp.json", 'w') as tmp_file:
+                with open("./tmp.json", 'w') as tmp_file:
                     tmp_file.write(json.dumps(transaction['transaction']))
                 for i in range(5):
                     try:
-                        result = estimate_cycles("/tmp/tmp.json",
-                                                 api_url=self.node.getClient().url)
+                        result = self.Ckb_cli.estimate_cycles("./tmp.json",
+                                                              api_url=self.node.getClient().url)
                         print(f"estimate_cycles:{result}")
                     except Exception:
                         pass
 
-
-def deploy_and_invoke(account, path, node, try_count=5):
-    if try_count < 0:
-        raise Exception("try out of times")
-    try:
-        deploy_hash = deploy_ckb_contract(account,
-                                          path,
-                                          enable_type_id=True,
-                                          api_url=node.getClient().url)
-        miner_until_tx_committed(node, deploy_hash)
-        time.sleep(1)
-        invoke_hash = invoke_ckb_contract(account_private=account,
-                                          contract_out_point_tx_hash=deploy_hash,
-                                          contract_out_point_tx_index=0,
-                                          type_script_arg="0x02", data="0x1234",
-                                          hash_type="type",
-                                          api_url=node.getClient().url)
-        return invoke_hash
-    except Exception as e:
-        print(e)
-        if "Resolve failed Dead" in e:
-            try_count -= 1
-            time.sleep(3)
-            return deploy_and_invoke(account, path, node, try_count)
-        raise e
+    def deploy_and_invoke(self, account, path, node, try_count=5):
+        if try_count < 0:
+            raise Exception("try out of times")
+        try:
+            deploy_hash = self.Contract.deploy_ckb_contract(account,
+                                                            path,
+                                                            enable_type_id=True,
+                                                            api_url=node.getClient().url)
+            self.Miner.miner_until_tx_committed(node, deploy_hash)
+            time.sleep(1)
+            invoke_hash = self.Contract.invoke_ckb_contract(account_private=account,
+                                                            contract_out_point_tx_hash=deploy_hash,
+                                                            contract_out_point_tx_index=0,
+                                                            type_script_arg="0x02", data="0x1234",
+                                                            hash_type="type",
+                                                            api_url=node.getClient().url)
+            return invoke_hash
+        except Exception as e:
+            print(e)
+            if "Resolve failed Dead" in e:
+                try_count -= 1
+                time.sleep(3)
+                return self.Contract.deploy_and_invoke(account, path, node, try_count)
+            raise e

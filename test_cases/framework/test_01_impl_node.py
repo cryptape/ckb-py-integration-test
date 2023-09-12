@@ -3,7 +3,7 @@ import time
 from framework.basic import CkbTest
 
 
-class TestNode(CkbTest):
+class TestImplCkbTest(CkbTest):
 
     def setup_method(self, method):
         pass

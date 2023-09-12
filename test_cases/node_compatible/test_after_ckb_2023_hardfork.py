@@ -2,30 +2,28 @@ import time
 
 import pytest
 
-from framework.config import ACCOUNT_PRIVATE_1, ACCOUNT_PRIVATE_2, MINER_PRIVATE_1
-from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
-from framework.helper.contract import invoke_ckb_contract
-from framework.helper.contract_util import deploy_contracts
-from framework.helper.miner import make_tip_height_number, miner_with_version, miner_until_tx_committed
-from framework.helper.node import wait_cluster_height, wait_get_transaction, wait_node_height, \
-    wait_cluster_sync_with_miner
-from framework.test_cluster import Cluster
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
+class TestAfterCkb2023(CkbTest):
+    def setup_method(self, method):
+        pass
 
-class TestAfterCkb2023:
-    node_current = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "node_compatible/current/node1", 8115,
-                                            8225)
-    node_111 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V111,
-                                        "node_compatible/current/node2",
-                                        8116,
-                                        8226)
-    node_110 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "node_compatible/current/node3", 8117,
-                                        8227)
+    def teardown_method(self, method):
+        pass
+
+    node_current = CkbTest.CkbNode.init_dev_by_port(CkbTest.CkbNodeConfigPath.CURRENT_TEST,
+                                                    "node_compatible/current/node1", 8115,
+                                                    8225)
+    node_111 = CkbTest.CkbNode.init_dev_by_port(CkbTest.CkbNodeConfigPath.V111,
+                                                "node_compatible/current/node2",
+                                                8116,
+                                                8226)
+    node_110 = CkbTest.CkbNode.init_dev_by_port(CkbTest.CkbNodeConfigPath.V110, "node_compatible/current/node3", 8117,
+                                                8227)
     nodes = [node_current, node_111, node_110]
     lt_111_nodes = [node_110]
     ge_111_nodes = [node_current, node_111]
-    cluster: Cluster = Cluster(nodes)
+    cluster: CkbTest.Cluster = CkbTest.Cluster(nodes)
 
     @classmethod
     def setup_class(cls):
@@ -35,13 +33,13 @@ class TestAfterCkb2023:
         cls.cluster.start_all_nodes()
         cls.node_current.connected(cls.node_111)
         cls.node_current.connected(cls.node_110)
-        contracts = deploy_contracts(ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
+        contracts = cls.Contract_util.deploy_contracts(cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
         cls.spawn_contract = contracts["SpawnContract"]
-        make_tip_height_number(cls.node_current, 900)
-        wait_cluster_sync_with_miner(cls.cluster, 300, 900)
+        cls.Miner.make_tip_height_number(cls.node_current, 900)
+        cls.Node.wait_cluster_sync_with_miner(cls.cluster, 300, 900)
         heights = cls.cluster.get_all_nodes_height()
         print(f"heights:{heights}")
-        make_tip_height_number(cls.node_current, 1100)
+        cls.Miner.make_tip_height_number(cls.node_current, 1100)
 
     @classmethod
     def teardown_class(cls):
@@ -52,29 +50,29 @@ class TestAfterCkb2023:
         cls.cluster.clean_all_nodes()
 
     def test_lt_111_sync_hard_fork(self):
-        wait_node_height(self.node_110, 999, 100)
+        self.Node.wait_node_height(self.node_110, 999, 100)
         time.sleep(10)
         tip_number = self.node_110.getClient().get_tip_block_number()
         assert tip_number == 999
 
     def test_lt_111_sync_failed(self):
-        node = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "node_compatible/current/node5", 8229,
-                                        8339)
+        node = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110, "node_compatible/current/node5", 8229,
+                                             8339)
         node.prepare()
         node.start()
         node.connected(self.node_current)
         self.cluster.ckb_nodes.append(node)
         with pytest.raises(Exception) as exc_info:
-            wait_node_height(node, 1, 30)
+            self.Node.wait_node_height(node, 1, 30)
         expected_error_message = "time out"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
     def test_sync_successful_ge_111(self):
-        node = CkbNode.init_dev_by_port(CkbNodeConfigPath.V111, "node_compatible/current/node6", 8129,
-                                        8239)
+        node = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V111, "node_compatible/current/node6", 8129,
+                                             8239)
         node.prepare()
         node.start()
         node.connected(self.node_current)
-        wait_node_height(node, 1001, 1000)
+        self.Node.wait_node_height(node, 1001, 1000)
         self.cluster.ckb_nodes.append(node)

@@ -340,7 +340,7 @@ def tx_add_signature(lock_arg, signature, tx_file, api_url="http://127.0.0.1:811
 
 
 def tx_send(tx_file, api_url="http://127.0.0.1:8114"):
-    cmd = f"export API_URL={api_url} && {cli_path} tx send --tx-file {tx_file}"
+    cmd = f"export API_URL={api_url} && {cli_path} tx send --tx-file {tx_file} --skip-check"
     return run_command(cmd)
 
 

@@ -1,21 +1,17 @@
 import pytest
 
-from framework.config import ACCOUNT_PRIVATE_1, ACCOUNT_PRIVATE_2, MINER_PRIVATE_1
-from framework.helper.ckb_cli import util_key_info_by_private_key, \
-    wallet_get_capacity, wallet_transfer_by_private_key
-from framework.helper.contract import invoke_ckb_contract
-from framework.helper.contract_util import deploy_contracts
-from framework.helper.miner import miner_with_version, make_tip_height_number
-from framework.helper.node import wait_cluster_height
-from framework.test_cluster import Cluster
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestBeforeHardFork:
+class TestBeforeHardFork(CkbTest):
     """
     test cases before ckb2023
     """
-    cluster: Cluster
+
+    def teardown_method(self, method):
+        pass
+
+    cluster: CkbTest.Cluster
 
     @classmethod
     def setup_class(cls):
@@ -27,21 +23,21 @@ class TestBeforeHardFork:
         :return:
         """
         nodes = [
-            CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST,
-                                     f"cluster/hardfork/node{i}",
-                                     8114 + i,
-                                     8225 + i)
+            cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST,
+                                         f"cluster/hardfork/node{i}",
+                                         8114 + i,
+                                         8225 + i)
             for
             i in range(1, 5)
         ]
-        cls.cluster = Cluster(nodes)
+        cls.cluster = cls.Cluster(nodes)
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
-        contracts = deploy_contracts(ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
+        contracts = cls.Contract_util.deploy_contracts(cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
         cls.spawn_contract = contracts["SpawnContract"]
-        make_tip_height_number(cls.cluster.ckb_nodes[0], 850)
-        wait_cluster_height(cls.cluster, 850, 100)
+        cls.Miner.make_tip_height_number(cls.cluster.ckb_nodes[0], 850)
+        cls.Node.wait_cluster_height(cls.cluster, 850, 100)
 
     @classmethod
     def teardown_class(cls):
@@ -94,7 +90,7 @@ class TestBeforeHardFork:
         :return:
         """
         before_miner_num = self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
-        miner_with_version(self.cluster.ckb_nodes[0], "0x0")
+        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
         after_miner_num = self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
         assert after_miner_num > before_miner_num
 
@@ -105,7 +101,7 @@ class TestBeforeHardFork:
         :return:
         """
         with pytest.raises(Exception) as exc_info:
-            miner_with_version(self.cluster.ckb_nodes[0], "0x1")
+            self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x1")
         expected_error_message = "BlockVersionError"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}" \
@@ -118,9 +114,9 @@ class TestBeforeHardFork:
                             but not enabled in current chain"
         :return:
         """
-        account1 = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        account1_capacity = wallet_get_capacity(account1['address']['testnet'],
-                                                self.cluster.ckb_nodes[0].client.url)
+        account1 = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        account1_capacity = self.Ckb_cli.wallet_get_capacity(account1['address']['testnet'],
+                                                             self.cluster.ckb_nodes[0].client.url)
         assert account1_capacity > 0
         # send account 1 transfer data2
         # @ckb-lumos/helpers.encodeToAddress(
@@ -132,8 +128,8 @@ class TestBeforeHardFork:
         # )
         # ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0
         with pytest.raises(Exception) as exc_info:
-            wallet_transfer_by_private_key(
-                ACCOUNT_PRIVATE_1,
+            self.Ckb_cli.wallet_transfer_by_private_key(
+                self.Config.ACCOUNT_PRIVATE_1,
                 "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
                 140,
                 self.cluster.ckb_nodes[0].client.url)
@@ -153,13 +149,13 @@ class TestBeforeHardFork:
         code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
         with pytest.raises(Exception) as exc_info:
-            invoke_ckb_contract(MINER_PRIVATE_1,
-                                code_tx_hash,
-                                code_tx_index,
-                                invoke_arg,
-                                "type",
-                                invoke_data,
-                                api_url=self.cluster.ckb_nodes[0].getClient().url)
+            self.Contract.invoke_ckb_contract(self.Config.MINER_PRIVATE_1,
+                                              code_tx_hash,
+                                              code_tx_index,
+                                              invoke_arg,
+                                              "type",
+                                              invoke_data,
+                                              api_url=self.cluster.ckb_nodes[0].getClient().url)
         expected_error_message = "InvalidEcall(2101)"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
@@ -175,8 +171,8 @@ class TestBeforeHardFork:
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
         epoch_number = get_epoch_number_by_consensus_response(consensus_response, '0049') * 1000
 
-        make_tip_height_number(self.cluster.ckb_nodes[0], epoch_number - 10)
-        wait_cluster_height(self.cluster, epoch_number - 10, 100)
+        self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], epoch_number - 10)
+        self.Node.wait_cluster_height(self.cluster, epoch_number - 10, 100)
         # send account 1 transfer data2
         # @ckb-lumos/helpers.encodeToAddress(
         #     {
@@ -186,13 +182,13 @@ class TestBeforeHardFork:
         #     }
         # )
         # ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0
-        tx_hash = wallet_transfer_by_private_key(
-            MINER_PRIVATE_1,
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.MINER_PRIVATE_1,
             "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
             140,
             self.cluster.ckb_nodes[0].client.url)
         print(f"txHash:{tx_hash}")
-        miner_with_version(self.cluster.ckb_nodes[0], "0x0")
+        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
         print(f"tx response:{tx_response['tx_status']['status']}")
         assert tx_response['tx_status']['status'] == "rejected" \
@@ -211,8 +207,8 @@ class TestBeforeHardFork:
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
         epoch_number = get_epoch_number_by_consensus_response(consensus_response, '0049') * 1000
 
-        make_tip_height_number(self.cluster.ckb_nodes[0], epoch_number - 10)
-        wait_cluster_height(self.cluster, epoch_number - 10, 100)
+        self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], epoch_number - 10)
+        self.Node.wait_cluster_height(self.cluster, epoch_number - 10, 100)
         # send account 1 transfer data2
         # @ckb-lumos/helpers.encodeToAddress(
         #     {
@@ -222,24 +218,24 @@ class TestBeforeHardFork:
         #     }
         # )
         # ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0
-        account = util_key_info_by_private_key(account_private=ACCOUNT_PRIVATE_2)
-        tx_hash1 = wallet_transfer_by_private_key(
-            ACCOUNT_PRIVATE_1,
+        account = self.Ckb_cli.util_key_info_by_private_key(account_private=self.Config.ACCOUNT_PRIVATE_2)
+        tx_hash1 = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1,
             account["address"]["testnet"],
             140,
             self.cluster.ckb_nodes[0].client.url)
-        tx_hash2 = wallet_transfer_by_private_key(
-            ACCOUNT_PRIVATE_2,
+        tx_hash2 = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_2,
             "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
             140,
             self.cluster.ckb_nodes[0].client.url)
         print(f"txHash:{tx_hash1}")
-        miner_with_version(self.cluster.ckb_nodes[0], '0x0')
+        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], '0x0')
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash1)
         print(f"tx response:{tx_response['tx_status']['status']}")
         assert tx_response['tx_status']['status'] == 'unknown'
         for _ in range(30):
-            miner_with_version(self.cluster.ckb_nodes[0], '0x0')
+            self.Miner.miner_with_version(self.cluster.ckb_nodes[0], '0x0')
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash1)
         print(f"tx response:{tx_response['tx_status']['status']}")
         block = self.cluster.ckb_nodes[0]. \
