@@ -22,7 +22,7 @@ class Test4133:
                 There will only be 2 peers in addr_manager, and last_connected_at_ms will be updated.
         Returns:
         """
-        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "issue/node1", 8914,
+        node1 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "issue/node1", 8914,
                                          8927)
         self.node1 = node1
         node1.prepare(
@@ -30,7 +30,7 @@ class Test4133:
         )
         node1.start()
         make_tip_height_number(node1, 100)
-        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V110, "issue/node2", 8915,
+        node2 = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "issue/node2", 8915,
                                          8928)
         self.node2 = node2
         node2.prepare()
