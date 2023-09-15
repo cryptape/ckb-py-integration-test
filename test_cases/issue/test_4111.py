@@ -4,6 +4,7 @@ import time
 import pytest
 
 from framework.basic import CkbTest
+from framework.util import get_project_root
 
 
 class Test4111(CkbTest):
@@ -40,7 +41,7 @@ class Test4111(CkbTest):
         """
         with pytest.raises(Exception) as exc_info:
             self.deploy_and_invoke(self.Config.MINER_PRIVATE_1,
-                                   "/Users/guopenglin/WebstormProjects/gp12/ckb-py-integration-test/source/contract/always_success",
+                                   f"{get_project_root()}/source/contract/always_success",
                                    self.node, 1)
         expected_error_message = "Malformed Overflow transaction"
         print("exc_info.value.args[0]:", exc_info.value.args[0])
