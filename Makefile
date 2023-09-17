@@ -24,7 +24,10 @@ test:
 	bash test.sh test_cases/rpc
 	bash test.sh test_cases/soft_fork
 	bash test.sh test_cases/issue
-	check_failed_html
+	@if test -n "$$(ls report/*failed.html 2>/dev/null)"; then \
+        echo "Error: Failed HTML files found in the 'report' directory"; \
+        exit 1; \
+    fi
 clean:
 	-pkill ckb
 	rm -rf tmp
