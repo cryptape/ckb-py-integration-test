@@ -17,6 +17,9 @@ jobs:
       with:
         repository: nervosnetwork/ckb
         ref: develop
+        
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
     - name: Update ckb
       id: UpdateCkb
       run: |
