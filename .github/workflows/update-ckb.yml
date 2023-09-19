@@ -18,8 +18,6 @@ jobs:
         repository: nervosnetwork/ckb
         ref: develop
         
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
     - name: Update ckb
       id: UpdateCkb
       run: |
@@ -41,17 +39,8 @@ jobs:
           tar -zcvf ckb-latest-x86_64-unknown-linux-gnu-portable.tar.gz ckb-latest-x86_64-unknown-linux-gnu-portable
           echo "设置上传到七牛云"
           echo "备份新版本"
-          export PWD_DIR=$(pwd)
-          curl -LO https://www.openssl.org/source/openssl-1.1.1s.tar.gz
-          tar -xzf openssl-1.1.1s.tar.gz
-          cd openssl-1.1.1s
-          ./Configure linux-x86_64 shared
-          make
-          cd ..
-          export OPENSSL_LIB_DIR=${PWD_DIR}/openssl-1.1.1s
-          export OPENSSL_INCLUDE_DIR=${PWD_DIR}/openssl-1.1.1s/include
-          export OPENSSL_STATIC=1
-          make prod_portable
+          export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+          docker run --rm -i -w /ckb -v $(pwd):/ckb -e OPENSSL_STATIC=1 -e OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu -e OPENSSL_INCLUDE_DIR=/usr/include nervos/ckb-docker-builder:bionic-rust-1.67.1  make prod_portable
           cp target/prod/ckb ckb-latest-x86_64-unknown-linux-gnu-portable/ckb
           mv ckb-latest-x86_64-unknown-linux-gnu-portable ckb-develop-x86_64-unknown-linux-gnu-portable
           tar -zcvf ckb-develop-x86_64-unknown-linux-gnu-portable.tar.gz ckb-develop-x86_64-unknown-linux-gnu-portable
@@ -77,12 +66,4 @@ jobs:
         bucket_name: acceptance-test 
         key: ckb/bin/ckb-develop-x86_64-unknown-linux-gnu-portable.tar.gz
         local_file: ckb-develop-x86_64-unknown-linux-gnu-portable.tar.gz
-    - name: Upload develop to Qiniu 2
-      if: ${{ steps.UpdateCkb.outputs.compare_result == 'true' }}
-      uses: gpBlockchain/upload-to-qiniu-action@main
-      with:
-        access_key: ${{ secrets.ACCESS_KEY }}
-        secret_key: ${{ secrets.SECRET_KEY }}
-        bucket_name: acceptance-test 
-        key: ckb/bin/ckb-develop-x86_64-unknown-linux-gnu-portable-1.tar.gz
-        local_file: ckb-develop-x86_64-unknown-linux-gnu-portable.tar.gz
+    
