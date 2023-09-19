@@ -39,7 +39,7 @@ jobs:
           echo "设置上传到七牛云"
           echo "备份新版本"
           export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
-          docker run --rm -i -w /ckb -v $(pwd):/ckb -e OPENSSL_STATIC=1 -e OPENSSL_LIB_DIR=/usr/local/lib64 -e OPENSSL_INCLUDE_DIR=/usr/local/include nervos/ckb-docker-builder:bionic-rust-1.67.1  make prod_portable
+          docker run --rm -i -w /ckb -v $(pwd):/ckb -e OPENSSL_STATIC=1 -e OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu -e OPENSSL_INCLUDE_DIR=/usr/include nervos/ckb-docker-builder:bionic-rust-1.67.1 make prod_portable          
           cp target/prod/ckb ckb-latest-x86_64-unknown-linux-gnu-portable/ckb
           mv ckb-latest-x86_64-unknown-linux-gnu-portable ckb-develop-x86_64-unknown-linux-gnu-portable
           tar -zcvf ckb-develop-x86_64-unknown-linux-gnu-portable.tar.gz ckb-develop-x86_64-unknown-linux-gnu-portable
