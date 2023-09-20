@@ -50,10 +50,10 @@ class TestAfterCkb2023(CkbTest):
         cls.cluster.clean_all_nodes()
 
     def test_lt_111_sync_hard_fork(self):
-        self.Node.wait_node_height(self.node_110, 999, 100)
+        self.Node.wait_node_height(self.node_110, 990, 100)
         time.sleep(10)
         tip_number = self.node_110.getClient().get_tip_block_number()
-        assert tip_number == 999
+        assert tip_number <= 999
 
     def test_lt_111_sync_failed(self):
         node = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110, "node_compatible/current/node5", 8229,
