@@ -46,6 +46,12 @@ class TestGetTransaction(CkbTest):
             response = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash, None, False)
             if response['tx_status']['status'] == "proposed":
                 break
+            if response['tx_status']['status'] == "committed":
+                response_enable_commit = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash, None, True)
+                response = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash, None, True)
+                assert response_enable_commit['tx_status']['status'] == "committed"
+                assert response['tx_status']['status'] == "committed"
+                return
             self.Miner.miner_with_version(cluster.ckb_nodes[0], "0x0")
             time.sleep(1)
         response_enable_commit = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash, None, True)

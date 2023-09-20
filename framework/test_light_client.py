@@ -57,6 +57,8 @@ class CkbLightClientNode:
     def start(self):
         run_command(
             f"cd {self.tmp_path} && RUST_LOG=info,ckb_light_client=trace ./ckb-light-client run --config-file testnet.toml > node.log 2>&1 &")
+        # wait rpc start
+        time.sleep(2)
         print("start clb_light client ")
 
     def getClient(self) -> CKBLightRPCClient:
