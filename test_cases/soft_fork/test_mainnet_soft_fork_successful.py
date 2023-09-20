@@ -13,7 +13,6 @@ class TestMainNetSoftForkSuccessful(CkbTest):
         node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
                                              8227)
         node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
-        cls.cluster = cls.Cluster([node1, node2])
 
         cls.cluster = cls.Cluster([node1, node2])
         cls.node = node1

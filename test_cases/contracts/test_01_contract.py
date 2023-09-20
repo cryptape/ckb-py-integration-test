@@ -152,7 +152,7 @@ class TestHelperContract(CkbTest):
             return invoke_hash
         except Exception as e:
             print(e)
-            if "Resolve failed Dead" in e:
+            if "Resolve failed Dead" in str(e):
                 try_count -= 1
                 time.sleep(3)
                 return self.Contract.deploy_and_invoke(account, path, node, try_count)
