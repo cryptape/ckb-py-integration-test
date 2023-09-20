@@ -154,6 +154,8 @@ class TestHelperContract(CkbTest):
             print(e)
             if "Resolve failed Dead" in str(e):
                 try_count -= 1
+                for i in range(2):
+                    self.Miner.miner_with_version(node,"0x0")
                 time.sleep(3)
                 return self.Contract.deploy_and_invoke(account, path, node, try_count)
             raise e
