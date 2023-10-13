@@ -7,6 +7,9 @@ from enum import Enum
 
 class CkbLightClientConfigPath(Enum):
     V0_2_4 = ("source/template/ckb_light_client/0.2.4/testnet.toml.j2", "download/0.2.4/ckb-light-client")
+    V0_2_5 = ("source/template/ckb_light_client/0.2.4/testnet.toml.j2", "download/0.2.5/ckb-light-client")
+    CURRENT = ("source/template/ckb_light_client/0.2.4/testnet.toml.j2", "download/0.2.5/ckb-light-client")
+
 
     def __init__(self, ckb_light_client_config_path, ckb_light_bin_path):
         self.ckb_light_client_config_path = ckb_light_client_config_path
@@ -65,7 +68,7 @@ class CkbLightClientNode:
         return self.client
 
     def stop(self):
-        run_command(f"kill $(lsof -t -i:{self.rpc_port})")
+        run_command(f"kill $(lsof -t -i:{self.rpc_port})",False)
         time.sleep(3)
 
     def clean(self):

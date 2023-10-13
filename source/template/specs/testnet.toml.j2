@@ -88,9 +88,9 @@ lock.hash_type = "type"
 
 
 [params]
-genesis_epoch_length = {{ ckb_params_genesis_epoch_length }}
+genesis_epoch_length = {{ ckb_params_genesis_epoch_length | default(1) }}
 permanent_difficulty_in_dummy = true
 
 
 [pow]
-func = "{{ ckb_pow_func }}"
+func = "{{ ckb_pow_func | default("Dummy") }}"

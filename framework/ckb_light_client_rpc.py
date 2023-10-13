@@ -19,6 +19,12 @@ class CKBLightRPCClient:
     def get_cells_capacity(self,script):
         return self.call("get_cells_capacity",[script])
 
+    def send_transaction(self,tx):
+        return self.call("send_transaction",[tx])
+
+    def fetch_transaction(self,tx_hash):
+        return self.call("fetch_transaction",[tx_hash])
+
     def call(self, method, params):
 
         headers = {'content-type': 'application/json'}
