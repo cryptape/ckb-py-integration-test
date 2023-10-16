@@ -8,7 +8,7 @@ cd ../
 cp download/0.110.0/ckb-cli ./source/ckb-cli-old
 
 cp -r download/0.111.0 download/0.112.0
-git clone https://github.com/chenyukang/ckb.git
+git clone https://github.com/nervosnetwork/ckb.git
 cd ckb
 git checkout tx_pool_rbf
 make prod

@@ -1,26 +1,19 @@
-from framework.config import ACCOUNT_PRIVATE_1
-from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
-from framework.helper.miner import make_tip_height_number, miner_until_tx_committed
-from framework.helper.node import wait_get_transaction, wait_cluster_height
-from framework.helper.tx import send_transfer_self_tx_with_input
-from framework.test_cluster import Cluster
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
-
-class TestNodeBroadcast:
+class TestNodeBroadcast(CkbTest):
 
     @classmethod
     def setup_class(cls):
-        cls.current_node = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
+        cls.current_node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
                                                     8225)
-        cls.node_111 = CkbNode.init_dev_by_port(CkbNodeConfigPath.V111, "tx_pool/node2", 8121,
+        cls.node_111 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V111, "tx_pool/node2", 8121,
                                                 8226)
-        cls.cluster = Cluster([cls.current_node, cls.node_111])
+        cls.cluster = cls.Cluster([cls.current_node, cls.node_111])
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
-        make_tip_height_number(cls.current_node, 200)
-        wait_cluster_height(cls.cluster, 150, 50)
+        cls.Miner.make_tip_height_number(cls.current_node, 200)
+        cls.Node.wait_cluster_height(cls.cluster, 150, 50)
 
     @classmethod
     def teardown_class(cls):
@@ -42,23 +35,23 @@ class TestNodeBroadcast:
                 tx-A:reject
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                  self.node_111.getClient().url, "2800")
 
-        tx_hash1 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=3000,
+        tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=3000,
                                                     api_url=self.node_111.getClient().url)
 
-        tx_hash2 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=1100,
+        tx_hash2 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1100,
                                                     api_url=self.node_111.getClient().url)
-        wait_get_transaction(self.node_111, tx_hash1, "pending")
-        wait_get_transaction(self.node_111, tx_hash2, "pending")
-        wait_get_transaction(self.current_node, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.node_111, tx_hash1, "pending")
+        self.Node.wait_get_transaction(self.node_111, tx_hash2, "pending")
+        self.Node.wait_get_transaction(self.current_node, tx_hash, "pending")
 
-        wait_get_transaction(self.current_node, tx_hash1, "pending")
-        wait_get_transaction(self.current_node, tx_hash2, "rejected")
-        miner_until_tx_committed(self.node_111, tx_hash1)
-        wait_get_transaction(self.current_node, tx_hash1, "committed")
+        self.Node.wait_get_transaction(self.current_node, tx_hash1, "pending")
+        self.Node.wait_get_transaction(self.current_node, tx_hash2, "rejected")
+        self.Miner.miner_until_tx_committed(self.node_111, tx_hash1)
+        self.Node.wait_get_transaction(self.current_node, tx_hash1, "committed")
 
     def test_current_p2p_broadcast(self):
         """
@@ -75,24 +68,24 @@ class TestNodeBroadcast:
                 tx-B: pending
             :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                  self.current_node.getClient().url, "2800")
 
-        tx_hash1 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
+        tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                                     api_url=self.current_node.getClient().url)
 
-        wait_get_transaction(self.node_111, tx_hash1, "pending")
+        self.Node.wait_get_transaction(self.node_111, tx_hash1, "pending")
 
-        tx_hash2 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=3100,
+        tx_hash2 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=3100,
                                                     api_url=self.current_node.getClient().url)
 
-        wait_get_transaction(self.current_node, tx_hash1, "rejected")
-        wait_get_transaction(self.current_node, tx_hash2, "pending")
-        wait_get_transaction(self.current_node, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.current_node, tx_hash1, "rejected")
+        self.Node.wait_get_transaction(self.current_node, tx_hash2, "pending")
+        self.Node.wait_get_transaction(self.current_node, tx_hash, "pending")
 
-        wait_get_transaction(self.node_111, tx_hash, "pending")
-        wait_get_transaction(self.node_111, tx_hash1, "pending")
-        wait_get_transaction(self.node_111, tx_hash2, "pending")
-        miner_until_tx_committed(self.current_node, tx_hash2)
-        wait_get_transaction(self.node_111, tx_hash2, "committed")
+        self.Node.wait_get_transaction(self.node_111, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.node_111, tx_hash1, "pending")
+        self.Node.wait_get_transaction(self.node_111, tx_hash2, "pending")
+        self.Miner.miner_until_tx_committed(self.current_node, tx_hash2)
+        self.Node.wait_get_transaction(self.node_111, tx_hash2, "committed")

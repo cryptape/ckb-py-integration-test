@@ -1,21 +1,15 @@
 import pytest
-
-from framework.config import ACCOUNT_PRIVATE_1, ACCOUNT_PRIVATE_2
-from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
-from framework.helper.miner import make_tip_height_number, miner_with_version, miner_until_tx_committed
-from framework.helper.node import wait_get_transaction
-from framework.helper.tx import send_transfer_self_tx_with_input
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestTxPoolLimit:
+class TestTxPoolLimit(CkbTest):
     @classmethod
     def setup_class(cls):
-        cls.node = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
-                                            8225)
+        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
+                                                8225)
         cls.node.prepare(other_ckb_config={"ckb_tx_pool_max_tx_pool_size": "4640"})
         cls.node.start()
-        make_tip_height_number(cls.node, 30)
+        cls.Miner.make_tip_height_number(cls.node, 30)
 
     def setup_method(self, method):
         """
@@ -41,27 +35,31 @@ class TestTxPoolLimit:
         :return:
         """
         tip_number = self.node.getClient().get_tip_block_number()
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 1000000,
-                                                 self.node.getClient().url, "1500000")
-        tx_hash = send_transfer_self_tx_with_input([tx_hash], ['0x0'], ACCOUNT_PRIVATE_1, output_count=10,
-                                                   fee=1500000,
-                                                   api_url=self.node.getClient().url)
-        miner_until_tx_committed(self.node, tx_hash)
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
+                                                              account["address"]["testnet"], 1000000,
+                                                              self.node.getClient().url, "1500000")
+        tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_1,
+                                                           output_count=10,
+                                                           fee=1500000,
+                                                           api_url=self.node.getClient().url)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
         for i in range(0, 10):
-            tx_hash1 = send_transfer_self_tx_with_input([tx_hash], [hex(i)], ACCOUNT_PRIVATE_1, output_count=1,
-                                                        fee=1090,
-                                                        api_url=self.node.getClient().url)
+            tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], [hex(i)], self.Config.ACCOUNT_PRIVATE_1,
+                                                                output_count=1,
+                                                                fee=1090,
+                                                                api_url=self.node.getClient().url)
             for i in range(10):
-                tx_hash1 = send_transfer_self_tx_with_input([tx_hash1], ['0x0'], ACCOUNT_PRIVATE_1, output_count=1,
-                                                            fee=1090,
-                                                            api_url=self.node.getClient().url)
+                tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash1], ['0x0'], self.Config.ACCOUNT_PRIVATE_1,
+                                                                    output_count=1,
+                                                                    fee=1090,
+                                                                    api_url=self.node.getClient().url)
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         tx_poll_list = list(tx_pool['pending'].keys())
         before_miner_tx_pool = self.node.getClient().tx_pool_info()
         print(before_miner_tx_pool)
         for i in range(1):
-            miner_with_version(self.node, "0x0")
+            self.Miner.miner_with_version(self.node, "0x0")
         self.node.getClient().get_raw_tx_pool()
         after_miner_tx_pool = self.node.getClient().tx_pool_info()
         print(tx_pool)
@@ -79,17 +77,19 @@ class TestTxPoolLimit:
          max_ancestors_count == 125
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
-                                                 self.node.getClient().url, "2800")
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
+                                                              account["address"]["testnet"], 360000,
+                                                              self.node.getClient().url, "2800")
         num = 0
-        wait_get_transaction(self.node, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         with pytest.raises(Exception) as exc_info:
 
             while True:
-                tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
-                                                           api_url=self.node.getClient().url)
-                wait_get_transaction(self.node, tx_hash, "pending")
+                tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
+                                                                   fee=1000,
+                                                                   api_url=self.node.getClient().url)
+                self.Node.wait_get_transaction(self.node, tx_hash, "pending")
                 num += 1
         print(exc_info)
         expected_error_message = "PoolRejectedTransactionByMaxAncestorsCountLimit"
@@ -110,15 +110,18 @@ class TestTxPoolLimit:
             pass
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_2)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_2, account["address"]["testnet"], 360000,
-                                                 api_url=self.node.getClient().url, fee_rate="8000000")
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_2,
+                                                              account["address"]["testnet"], 360000,
+                                                              api_url=self.node.getClient().url, fee_rate="8000000")
 
-        tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_2, output_count=1000,
-                                                   fee=10009246,
-                                                   api_url=self.node.getClient().url)
-        wait_get_transaction(self.node, tx_hash, 'pending')
+        tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_2,
+                                                           output_count=1000,
+                                                           fee=10009246,
+                                                           api_url=self.node.getClient().url)
+        self.Node.wait_get_transaction(self.node, tx_hash, 'pending')
         for i in range(130):
-            send_transfer_self_tx_with_input([tx_hash], [hex(i)], ACCOUNT_PRIVATE_2, output_count=1, fee=(1000),
-                                             api_url=self.node.getClient().url)
+            self.Tx.send_transfer_self_tx_with_input([tx_hash], [hex(i)], self.Config.ACCOUNT_PRIVATE_2, output_count=1,
+                                                     fee=(1000),
+                                                     api_url=self.node.getClient().url)
         self.node.getClient().clear_tx_pool()

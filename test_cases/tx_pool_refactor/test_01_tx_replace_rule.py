@@ -1,24 +1,19 @@
 import time
 
 import pytest
-
-from framework.config import MINER_PRIVATE_1, ACCOUNT_PRIVATE_1, ACCOUNT_PRIVATE_2
-from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
-from framework.helper.miner import make_tip_height_number, miner_with_version, miner_until_tx_committed
-from framework.helper.node import wait_get_transaction
-from framework.helper.tx import send_transfer_self_tx_with_input
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestTxReplaceRule:
+
+class TestTxReplaceRule(CkbTest):
 
     @classmethod
     def setup_class(cls):
-        cls.node = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
-                                            8225)
+        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
+                                                8225)
         cls.node.prepare()
         cls.node.start()
-        make_tip_height_number(cls.node, 30)
+        cls.Miner.make_tip_height_number(cls.node, 30)
 
     def setup_method(self, method):
         """
@@ -28,7 +23,7 @@ class TestTxReplaceRule:
         """
         self.node.getClient().clear_tx_pool()
         for i in range(5):
-            miner_with_version(self.node, "0x0")
+            self.Miner.miner_with_version(self.node, "0x0")
 
     @classmethod
     def teardown_class(cls):
@@ -44,21 +39,21 @@ class TestTxReplaceRule:
         """
         TEST_PRIVATE_1 = "0x98400f6a67af07025f5959af35ed653d649f745b8f54bf3f07bef9bd605ee941"
 
-        account = util_key_info_by_private_key(TEST_PRIVATE_1)
-        cell_a_hash = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+        account = self.Ckb_cli.util_key_info_by_private_key(TEST_PRIVATE_1)
+        cell_a_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                      self.node.getClient().url, "1500")
 
-        cell_c_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 100,
+        cell_c_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 100,
                                                      self.node.getClient().url, "1500")
-        tx_a_to_b = send_transfer_self_tx_with_input([cell_a_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
+        tx_a_to_b = self.Tx.send_transfer_self_tx_with_input([cell_a_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
                                                      fee=5000, output_count=1,
                                                      api_url=self.node.getClient().url)
-        tx_c_to_d = send_transfer_self_tx_with_input([cell_c_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
+        tx_c_to_d = self.Tx.send_transfer_self_tx_with_input([cell_c_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
                                                      fee=5000, output_count=1,
                                                      api_url=self.node.getClient().url)
 
         with pytest.raises(Exception) as exc_info:
-            tx_ad_to_b = send_transfer_self_tx_with_input([cell_a_hash, tx_c_to_d], ['0x0', '0x0'], TEST_PRIVATE_1,
+            tx_ad_to_b = self.Tx.send_transfer_self_tx_with_input([cell_a_hash, tx_c_to_d], ['0x0', '0x0'], TEST_PRIVATE_1,
                                                           data="0x",
                                                           fee=5000, output_count=1,
                                                           api_url=self.node.getClient().url)
@@ -76,20 +71,20 @@ class TestTxReplaceRule:
         """
         TEST_PRIVATE_1 = "0x98400f6a67af07025f5959af35ed653d649f745b8f54bf3f07bef9bd605ee941"
 
-        account = util_key_info_by_private_key(TEST_PRIVATE_1)
-        cell_a_hash = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+        account = self.Ckb_cli.util_key_info_by_private_key(TEST_PRIVATE_1)
+        cell_a_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                      self.node.getClient().url, "1500")
 
-        cell_c_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 100,
+        cell_c_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 100,
                                                      self.node.getClient().url, "1500")
-        tx_a_to_b = send_transfer_self_tx_with_input([cell_a_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
+        tx_a_to_b = self.Tx.send_transfer_self_tx_with_input([cell_a_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
                                                      fee=5000, output_count=1,
                                                      api_url=self.node.getClient().url)
-        tx_c_to_d = send_transfer_self_tx_with_input([cell_c_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
+        tx_c_to_d = self.Tx.send_transfer_self_tx_with_input([cell_c_hash], ['0x0'], TEST_PRIVATE_1, data="0x",
                                                      fee=5000, output_count=1,
                                                      api_url=self.node.getClient().url)
 
-        tx_ac_to_b = send_transfer_self_tx_with_input([cell_a_hash, cell_c_hash], ['0x0', '0x0'], TEST_PRIVATE_1,
+        tx_ac_to_b = self.Tx.send_transfer_self_tx_with_input([cell_a_hash, cell_c_hash], ['0x0', '0x0'], TEST_PRIVATE_1,
                                                       data="0x",
                                                       fee=15000, output_count=1,
                                                       api_url=self.node.getClient().url)
@@ -116,12 +111,12 @@ class TestTxReplaceRule:
                 min_fee_rate in PoolRejectedRBF
         :return:
         """
-        account = util_key_info_by_private_key(MINER_PRIVATE_1)
-        hash = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                               self.node.getClient().url, "5000")
         self.node.getClient().get_raw_tx_pool(True)
         with pytest.raises(Exception) as exc_info:
-            wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 101,
+            self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 101,
                                            self.node.getClient().url, "5000")
             self.node.getClient().get_raw_tx_pool(True)
 
@@ -151,13 +146,13 @@ class TestTxReplaceRule:
               C status : pending   ;
         :return:
         """
-        account = util_key_info_by_private_key(MINER_PRIVATE_1)
-        tx_hash1 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        tx_hash1 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                   self.node.getClient().url, "1500")
-        tx_hash2 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 200,
+        tx_hash2 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 200,
                                                   self.node.getClient().url, "3000")
 
-        tx_hash3 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 300,
+        tx_hash3 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 300,
                                                   self.node.getClient().url, "6000")
         tx1_response = self.node.getClient().get_transaction(tx_hash1)
         tx2_response = self.node.getClient().get_transaction(tx_hash2)
@@ -181,14 +176,14 @@ class TestTxReplaceRule:
               B status : pending   ;
         :return:
         """
-        account = util_key_info_by_private_key(MINER_PRIVATE_1)
-        tx_hash1 = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        tx_hash1 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                   self.node.getClient().url, "1500")
 
-        tx_hash2 = send_transfer_self_tx_with_input([tx_hash1], ['0x0'], MINER_PRIVATE_1, fee=1500,
+        tx_hash2 = self.Tx.send_transfer_self_tx_with_input([tx_hash1], ['0x0'], self.Config.MINER_PRIVATE_1, fee=1500,
                                                     api_url=self.node.getClient().url)
         transaction = self.node.getClient().get_transaction(tx_hash2)
-        tx_hash3 = send_transfer_self_tx_with_input([tx_hash1], ['0x0'], MINER_PRIVATE_1,
+        tx_hash3 = self.Tx.send_transfer_self_tx_with_input([tx_hash1], ['0x0'], self.Config.MINER_PRIVATE_1,
                                                     fee=int(transaction['min_replace_fee'], 16),
                                                     api_url=self.node.getClient().url)
 
@@ -215,26 +210,26 @@ class TestTxReplaceRule:
                 pending tx = 2
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                  self.node.getClient().url, "2800")
         first_hash = tx_hash
-        wait_get_transaction(self.node, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         tx_list = []
         for i in range(100):
-            tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
+            tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                                        api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
-            wait_get_transaction(self.node, tx_hash, "pending")
+            self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         with pytest.raises(Exception) as exc_info:
-            wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+            self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                            self.node.getClient().url, "8800")
         expected_error_message = "Server error: PoolRejectedRBF: RBF rejected: Tx conflict too many txs, conflict txs count: 101"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
 
-        send_transfer_self_tx_with_input([first_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=5000,
+        self.Tx.send_transfer_self_tx_with_input([first_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=5000,
                                          api_url=self.node.getClient().url)
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert len(tx_pool['pending'].keys()) == 2
@@ -253,13 +248,13 @@ class TestTxReplaceRule:
                 tx_hash_b status: pending
         :return:
         """
-        account = util_key_info_by_private_key(MINER_PRIVATE_1)
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
 
-        tx_a = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 100,
+        tx_a = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                               self.node.getClient().url, "1500")
         tx_a_response = self.node.getClient().get_transaction(tx_a)
         assert tx_a_response['tx_status']['status'] == 'pending'
-        tx_b = wallet_transfer_by_private_key(MINER_PRIVATE_1, account["address"]["testnet"], 200,
+        tx_b = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 200,
                                               self.node.getClient().url, "12000")
 
         tx_b_response = self.node.getClient().get_transaction(tx_b)
@@ -278,21 +273,21 @@ class TestTxReplaceRule:
             ERROR: RBF rejected: all conflict Txs should be in Pending status
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_2)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_2, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_2, account["address"]["testnet"], 360000,
                                                  api_url=self.node.getClient().url, fee_rate="1000")
 
-        tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_2, output_count=1,
+        tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_2, output_count=1,
                                                    fee=1000,
                                                    api_url=self.node.getClient().url)
-        wait_get_transaction(self.node, tx_hash, 'pending')
+        self.Node.wait_get_transaction(self.node, tx_hash, 'pending')
         tx_list = [tx_hash]
         for i in range(50):
-            tx_hash = send_transfer_self_tx_with_input([tx_hash], ['0x0'], ACCOUNT_PRIVATE_2, output_count=1, fee=1000,
+            tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_2, output_count=1, fee=1000,
                                                        api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
-        miner_with_version(self.node, "0x0")
-        miner_with_version(self.node, "0x0")
+        self.Miner.miner_with_version(self.node, "0x0")
+        self.Miner.miner_with_version(self.node, "0x0")
         time.sleep(5)
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         for tx in tx_pool['proposed'].keys():
@@ -304,8 +299,8 @@ class TestTxReplaceRule:
             assert tx_response['tx_status']['status'] == 'proposed'
         tx_response = self.node.getClient().get_transaction(proposal_txs[0])
         with pytest.raises(Exception) as exc_info:
-            send_transfer_self_tx_with_input(
-                [tx_response['transaction']['inputs'][0]['previous_output']['tx_hash']], ['0x0'], ACCOUNT_PRIVATE_2,
+            self.Tx.send_transfer_self_tx_with_input(
+                [tx_response['transaction']['inputs'][0]['previous_output']['tx_hash']], ['0x0'], self.Config.ACCOUNT_PRIVATE_2,
                 output_count=1,
                 fee=2000,
                 api_url=self.node.getClient().url)
@@ -339,21 +334,21 @@ class TestTxReplaceRule:
             status : rejected ,reason:RBFRejected
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                  api_url=self.node.getClient().url, fee_rate="1000")
         first_tx_hash = tx_hash
         tx_list = [first_tx_hash]
-        tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, output_count=1,
+        tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, output_count=1,
                                                    fee=1000,
                                                    api_url=self.node.getClient().url)
         tx_list.append(tx_hash)
-        wait_get_transaction(self.node, tx_hash, 'pending')
+        self.Node.wait_get_transaction(self.node, tx_hash, 'pending')
         for i in range(5):
-            tx_hash = send_transfer_self_tx_with_input([tx_hash], ['0x0'], ACCOUNT_PRIVATE_1, output_count=1, fee=1000,
+            tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_1, output_count=1, fee=1000,
                                                        api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
-        replace_tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        replace_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                          api_url=self.node.getClient().url, fee_rate="10000")
 
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
@@ -382,20 +377,20 @@ class TestTxReplaceRule:
             replace successful
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                  self.node.getClient().url, "2800")
         first_hash = tx_hash
-        wait_get_transaction(self.node, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         tx_list = []
-        tx_hash1 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
+        tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                                     api_url=self.node.getClient().url)
         transaction1 = self.node.getClient().get_transaction(tx_hash1)
-        send_transfer_self_tx_with_input([tx_hash1], ["0x0"], ACCOUNT_PRIVATE_1, fee=1000,
+        self.Tx.send_transfer_self_tx_with_input([tx_hash1], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                          api_url=self.node.getClient().url)
         after_transaction1 = self.node.getClient().get_transaction(tx_hash1)
         assert after_transaction1['min_replace_fee'] == transaction1['min_replace_fee']
-        replace_tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1,
+        replace_tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
                                                            fee=int(transaction1['min_replace_fee'], 16),
                                                            api_url=self.node.getClient().url)
         transaction = self.node.getClient().get_transaction(replace_tx_hash)
@@ -409,13 +404,13 @@ class TestTxReplaceRule:
                 tx.min_replace_fee > 1CKB
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_1)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
+        account = self.Tx.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"], 360000,
                                                  self.node.getClient().url, "2800")
         first_hash = tx_hash
-        wait_get_transaction(self.node, tx_hash, "pending")
+        self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         tx_list = []
-        tx_hash1 = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_1, fee=99999999,
+        tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=99999999,
                                                     api_url=self.node.getClient().url)
         transaction = self.node.getClient().get_transaction(tx_hash1)
         assert int(transaction['min_replace_fee'], 16) > 99999999

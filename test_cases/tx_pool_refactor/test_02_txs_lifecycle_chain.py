@@ -1,27 +1,28 @@
 import time
 
 import pytest
+from framework.basic import CkbTest
 
-from framework.config import ACCOUNT_PRIVATE_2
-from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
-from framework.helper.miner import make_tip_height_number, block_template_transfer_to_submit_block, miner_with_version
-from framework.helper.node import wait_get_transaction
-from framework.helper.tx import send_transfer_self_tx_with_input
-from framework.test_node import CkbNode, CkbNodeConfigPath
+# from framework.config import ACCOUNT_PRIVATE_2
+# from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
+# from framework.helper.miner import make_tip_height_number, block_template_transfer_to_submit_block, miner_with_version
+# from framework.helper.node import wait_get_transaction
+# from framework.helper.tx import send_transfer_self_tx_with_input
+# from framework.test_node import CkbNode, CkbNodeConfigPath
 
 
 # import concurrent.futures
 
 
-class TestTxsLifeCycleChain:
+class TestTxsLifeCycleChain(CkbTest):
     @classmethod
     def setup_class(cls):
-        cls.node = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
+        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
                                             8225)
         cls.node.prepare(other_ckb_config={"ckb_tx_pool_max_tx_pool_size": "180_000"})
         cls.node.prepare()
         cls.node.start()
-        make_tip_height_number(cls.node, 30)
+        cls.Miner.make_tip_height_number(cls.node, 30)
 
     def setup_method(self, method):
         """
@@ -51,28 +52,28 @@ class TestTxsLifeCycleChain:
             father tx not in proposal list
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_2)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_2, account["address"]["testnet"], 3600000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.self.Config.ACCOUNT_PRIVATE_2, account["address"]["testnet"], 3600000,
                                                  api_url=self.node.getClient().url, fee_rate="1000")
         first_tx_hash = tx_hash
         tx_list = [first_tx_hash]
-        tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_2, output_count=1500,
+        tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_2, output_count=1500,
                                                    fee=800000,
                                                    api_url=self.node.getClient().url)
         tx_list.append(tx_hash)
-        wait_get_transaction(self.node, tx_hash, 'pending')
+        self.Node.wait_get_transaction(self.node, tx_hash, 'pending')
         # num_threads = 5
         # with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
         #     futures = [executor.submit(send_transfer_self_tx_with_input,
-        #                                [tx_hash], [hex(i)], ACCOUNT_PRIVATE_2, output_count=1,
+        #                                [tx_hash], [hex(i)], self.Config.ACCOUNT_PRIVATE_2, output_count=1,
         #                                fee=9000000,
         #                                api_url=self.node.getClient().url) for i in range(0, 1500)]
         # concurrent.futures.wait(futures)
 
         for i in range(1500):
-            send_transfer_self_tx_with_input([tx_hash],
+            self.Tx.send_transfer_self_tx_with_input([tx_hash],
                                              [hex(i)],
-                                             ACCOUNT_PRIVATE_2,
+                                             self.Config.ACCOUNT_PRIVATE_2,
                                              output_count=1,
                                              fee=9000000,
                                              api_url=self.node.getClient().url)
@@ -105,18 +106,18 @@ class TestTxsLifeCycleChain:
             father tx stuck in the pending stage.
         :return:
         """
-        account = util_key_info_by_private_key(ACCOUNT_PRIVATE_2)
-        tx_hash = wallet_transfer_by_private_key(ACCOUNT_PRIVATE_2, account["address"]["testnet"], 360000,
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_2, account["address"]["testnet"], 360000,
                                                  api_url=self.node.getClient().url, fee_rate="1000")
         first_tx_hash = tx_hash
         tx_list = [first_tx_hash]
-        tx_hash = send_transfer_self_tx_with_input([tx_hash], ["0x0"], ACCOUNT_PRIVATE_2, output_count=1,
+        tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_2, output_count=1,
                                                    fee=1000,
                                                    api_url=self.node.getClient().url)
         tx_list.append(tx_hash)
-        wait_get_transaction(self.node, tx_hash, 'pending')
+        self.Node.wait_get_transaction(self.node, tx_hash, 'pending')
         for i in range(1, 5):
-            tx_hash = send_transfer_self_tx_with_input([tx_hash], ['0x0'], ACCOUNT_PRIVATE_2, output_count=1,
+            tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_2, output_count=1,
                                                        fee=10000 * i,
                                                        api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
@@ -130,7 +131,7 @@ class TestTxsLifeCycleChain:
                 print("transactions > 1")
                 break
             block['proposals'].remove(first_tx_hash[0:len('0x9b93e149e1f90a8a5436')])
-            self.node.getClient().submit_block(block["work_id"], block_template_transfer_to_submit_block(block, '0x0'))
+            self.node.getClient().submit_block(block["work_id"], self.Miner.block_template_transfer_to_submit_block(block, '0x0'))
             for j in range(100):
                 pool_info = self.node.getClient().tx_pool_info()
                 tip_number = self.node.getClient().get_tip_block_number()
