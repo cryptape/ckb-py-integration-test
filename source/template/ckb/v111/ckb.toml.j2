@@ -25,7 +25,8 @@ dsn = "{{ ckb_sentry_dsn | default("") }}"
 # please leave a way to contact you when we have troubles to reproduce the errors.
 org_contact = "{{ ckb_sentry_org_contact | default("") }}"
 
-
+# [metrics.exporter.prometheus]
+# target = { type = "prometheus", listen_address = "{{ ckb_prometheus_listen_address | default("127.0.0.1:8100") }}" }
 # # **Experimental** Monitor memory changes.
 # [memory_tracker]
 # # Seconds between checking the process, 0 is disable, default is 0.
@@ -164,7 +165,6 @@ block_uncles_cache_size    = {{ ckb_store_block_uncles_cache_size    | default("
 # use_binary_version_as_message_prefix = true
 # #
 # # Block assembler will notify new block template through http post to specified endpoints when update
-# notify = ["http://127.0.0.1:8888"]
 # # Or you may want use more flexible scripts, block template as arg.
 # notify_scripts = ["{cmd} {blocktemplate}"]
 #
@@ -177,3 +177,4 @@ code_hash = "{{ ckb_block_assembler_code_hash }}"
 args      = "{{ ckb_block_assembler_args      }}"
 hash_type = "{{ ckb_block_assembler_hash_type }}"
 message   = "{{ ckb_block_assembler_message   }}"
+# notify = ["{{ ckb_block_assembler_notify   }}"]

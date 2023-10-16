@@ -1,3 +1,5 @@
+import time
+
 import requests
 
 import json
@@ -82,7 +84,11 @@ class RPCClient:
     def get_peers(self):
         return self.call("get_peers", [])
 
-    def remove_transaction(self, tx_hash):
+
+    def set_network_active(self,state):
+        return self.call("set_network_active", [state])
+
+      def remove_transaction(self, tx_hash):
         return self.call("remove_transaction", [tx_hash])
 
     def get_live_cell(self, index, tx_hash, with_data=True):
@@ -91,7 +97,11 @@ class RPCClient:
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
 
+    def get_cells_capacity(self, script):
+        return self.call("get_cells_capacity", [script])
+
     def call(self, method, params):
+
         headers = {'content-type': 'application/json'}
         data = {
             "id": 42,
@@ -99,14 +109,26 @@ class RPCClient:
             "method": method,
             "params": params
         }
-        print("request:url:{url},data:\n{data}".format(url=self.url, data=json.dumps(data)))
-        response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
-        print("response:\n{response}".format(response=json.dumps(response)))
-        if 'error' in response.keys():
-            error_message = response['error'].get('message', 'Unknown error')
-            raise Exception(f"Error: {error_message}")
+        print(f"request:url:{self.url},data:\n{json.dumps(data)}")
+        for i in range(15):
+            try:
+                response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
+                print(f"response:\n{json.dumps(response)}")
+                if 'error' in response.keys():
+                    error_message = response['error'].get('message', 'Unknown error')
+                    raise Exception(f"Error: {error_message}")
 
-        return response.get('result', None)
+                return response.get('result', None)
+            except requests.exceptions.ConnectionError as e:
+                print(e)
+                print("request too quickly, wait 2s")
+                time.sleep(2)
+                continue
+            except Exception as e:
+                print("Exception:",e)
+                raise e
+        raise Exception("request time out")
+
 
 
 if __name__ == '__main__':

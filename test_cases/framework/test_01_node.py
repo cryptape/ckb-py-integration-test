@@ -1,13 +1,13 @@
 import time
 
-from framework.test_node import CkbNode, CkbNodeConfigPath
+from framework.basic import CkbTest
 
 
-class TestNode:
+class TestNode(CkbTest):
 
     @classmethod
     def setup_class(cls):
-        cls.node = CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "node/node", 8114, 8115)
+        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "node/node", 8114, 8115)
         cls.node.prepare()
         cls.node.start()
 
@@ -16,7 +16,7 @@ class TestNode:
         cls.node.stop()
         cls.node.clean()
 
-    def test_miner(self):
+    def test_01_miner(self):
         time.sleep(10)
         self.node.start_miner()
         time.sleep(10)

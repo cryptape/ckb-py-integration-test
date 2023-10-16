@@ -11,7 +11,7 @@ import zipfile
 import requests
 from tqdm import tqdm
 
-versions = ['0.109.0', '0.110.0', '0.111.0-rc8']  # Replace with your versions
+versions = ['0.109.0', '0.110.2', '0.111.0']  # Replace with your versions
 DOWNLOAD_DIR = "download"
 SYSTEMS = {
     'Windows': {

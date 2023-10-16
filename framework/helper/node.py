@@ -3,6 +3,7 @@ from framework.test_cluster import Cluster
 import time
 from functools import wraps
 
+
 def wait_until_timeout(wait_times):
     def decorator(func):
         @wraps(func)
@@ -28,7 +29,7 @@ def wait_node_height(node: CkbNode, num, wait_times):
         if node.getClient().get_tip_block_number() >= num:
             return
         time.sleep(1)
-    raise Exception("time out ,node tip number:{number}".format(number=node.getClient().get_tip_block_number()))
+    raise Exception(f"time out ,node tip number:{node.getClient().get_tip_block_number()}")
 
 
 def wait_cluster_height(cluster: Cluster, num, wait_times):
@@ -36,8 +37,23 @@ def wait_cluster_height(cluster: Cluster, num, wait_times):
         wait_node_height(ckb_node, num, wait_times)
 
 
+def wait_light_sync_height(ckb_light_node, height, wait_times):
+    for i in range(wait_times):
+        min_height = 99999999
+        scripts = ckb_light_node.getClient().get_scripts()
+        if len(scripts) == 0:
+            raise Exception("script is empty")
+        for script in scripts:
+            min_height = min(min_height, int(script['block_number'], 16))
+        if min_height >= height:
+            return
+        print(f"current min height:{min_height},expected:{height}")
+        time.sleep(1)
+    raise Exception(f"time out "
+                    f",node tip number:{min_height}<{height}")
 
-def wait_cluster_sync_with_miner(cluster: Cluster, wait_times,sync_number = None):
+
+def wait_cluster_sync_with_miner(cluster: Cluster, wait_times, sync_number=None):
     """
     miner can make
     :param cluster:

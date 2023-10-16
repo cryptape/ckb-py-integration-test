@@ -39,6 +39,7 @@ def exception_use_old_ckb():
     return decorator
 
 
+@exception_use_old_ckb()
 def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
     """
     MacBook-Pro-4 0.111.0 % ./ckb-cli  wallet get-capacity
@@ -64,6 +65,7 @@ def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
         Exception(f"Number not found :{capacity_response}")
 
 
+@exception_use_old_ckb()
 def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
     """
     ./ckb-cli wallet get-live-cells --address
@@ -338,7 +340,7 @@ def tx_add_signature(lock_arg, signature, tx_file, api_url="http://127.0.0.1:811
 
 
 def tx_send(tx_file, api_url="http://127.0.0.1:8114"):
-    cmd = f"export API_URL={api_url} && {cli_path} tx send --tx-file {tx_file}"
+    cmd = f"export API_URL={api_url} && {cli_path} tx send --tx-file {tx_file} --skip-check"
     return run_command(cmd)
 
 
@@ -466,6 +468,18 @@ def tx_add_input_cell_without_check(tx_hash, index, tx_file):
                                                     "tx_hash": tx_hash},
                                                "since": "0x0"}
                                            )
+        tx_info_str = json.dumps(tx, indent=4)
+        f.write(tx_info_str)
+
+
+
+def tx_add_header_dep(block_hash, tx_file):
+    with open(tx_file, "r") as file:
+        tx_info_str = file.read()
+
+    with open(tx_file, "w") as f:
+        tx = json.loads(tx_info_str)
+        tx["transaction"]["header_deps"].insert(0, block_hash)
         tx_info_str = json.dumps(tx, indent=4)
         f.write(tx_info_str)
 
@@ -739,6 +753,10 @@ def get_consensus(raw_data=False, no_color=False, debug=False, local_only=False,
     # 解析修复后的 YAML 数据
     parsed_data = yaml.safe_load(fixed_data)
     return parsed_data['hardfork_features']
+
+
+def deposit():
+    pass
 
 
 def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
