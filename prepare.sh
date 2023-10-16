@@ -10,7 +10,6 @@ cp download/0.110.2/ckb-cli ./source/ckb-cli-old
 cp -r download/0.111.0 download/0.112.0
 git clone https://github.com/nervosnetwork/ckb.git
 cd ckb
-git checkout tx_pool_rbf
 make prod
 cp target/prod/ckb ../download/0.112.0/ckb
 
