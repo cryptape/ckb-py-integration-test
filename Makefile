@@ -3,6 +3,7 @@ prepare:
 	pip install -r requirements.txt
 	echo "install ckb"
 	python -m download
+
 	python -m download_ckb_light_client
 	echo "install ckb cli"
 	sh prepare.sh
@@ -24,6 +25,8 @@ test:
 	bash test.sh test_cases/rpc
 	bash test.sh test_cases/soft_fork
 	bash test.sh test_cases/issue
+	bash test.sh test_cases/tx_pool_refactor
+	bash test.sh test_cases/feature
 	@if test -n "$$(ls report/*failed.html 2>/dev/null)"; then \
         echo "Error: Failed HTML files found in the 'report' directory"; \
         exit 1; \
@@ -36,11 +39,6 @@ clean:
 	rm -rf source/ckb-cli
 	rm -rf source/ckb-cli-old
 
-clean-tmp:
-	-pkill ckb
-	rm -rf tmp
-	rm -rf report
-	rm -rf ckb-cli
 
 docs:
 	python -m pytest --docs=docs/soft.md --doc-type=md test_cases/soft_fork

@@ -6,16 +6,17 @@ import framework.helper.ckb_cli
 import framework.helper.contract
 import framework.helper.node
 import framework.helper.contract_util
+import framework.helper.tx
 import framework.test_node
 import framework.test_light_client
 import framework.test_cluster
 import framework.helper
 import framework.config
 import shutil
-from  framework.util import get_project_root
+from framework.util import get_project_root
 
-class CkbTest(ABC,unittest.TestCase):
 
+class CkbTest(ABC, unittest.TestCase):
     Miner: framework.helper.miner = framework.helper.miner
     Ckb_cli: framework.helper.ckb_cli = framework.helper.ckb_cli
     Contract: framework.helper.contract = framework.helper.contract
@@ -24,10 +25,10 @@ class CkbTest(ABC,unittest.TestCase):
     Cluster: framework.test_cluster.Cluster = framework.test_cluster.Cluster
     CkbNode: framework.test_node.CkbNode = framework.test_node.CkbNode
     CkbNodeConfigPath: framework.test_node.CkbNodeConfigPath = framework.test_node.CkbNodeConfigPath
-    CkbLightClientConfigPath:framework.test_light_client.CkbLightClientConfigPath = framework.test_light_client.CkbLightClientConfigPath
+    CkbLightClientConfigPath: framework.test_light_client.CkbLightClientConfigPath = framework.test_light_client.CkbLightClientConfigPath
     CkbLightClientNode: framework.test_light_client = framework.test_light_client.CkbLightClientNode
     Config = framework.config
-
+    Tx: framework.helper.tx = framework.helper.tx
 
     @classmethod
     def setup_class(cls):
@@ -37,11 +38,9 @@ class CkbTest(ABC,unittest.TestCase):
     def teardown_class(cls):
         print("\nTeardown TestClass2")
 
-
     def setup_method(self, method):
         self.did_pass = None
         print("\nSetting up method", method.__name__)
-
 
     def teardown_method(self, method):
         print("\nTearing down method", method.__name__)
@@ -49,6 +48,3 @@ class CkbTest(ABC,unittest.TestCase):
         if not self.did_pass:
             print("back log data")
             shutil.copytree(f"{get_project_root()}/tmp", f"{get_project_root()}/report/{method.__name__}")
-
-
-

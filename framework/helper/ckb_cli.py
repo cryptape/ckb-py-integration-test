@@ -472,6 +472,7 @@ def tx_add_input_cell_without_check(tx_hash, index, tx_file):
         f.write(tx_info_str)
 
 
+
 def tx_add_header_dep(block_hash, tx_file):
     with open(tx_file, "r") as file:
         tx_info_str = file.read()

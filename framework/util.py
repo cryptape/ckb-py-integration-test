@@ -2,6 +2,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 import subprocess
 import time
 import json
+import toml
 import os, re
 
 
@@ -106,3 +107,14 @@ def get_project_root():
         return root_dir
     else:
         raise Exception("not found ckb-py-integration-test dir")
+
+
+def read_toml_file(file_path):
+    try:
+        with open(file_path, "r") as file:
+            toml_content = file.read()
+            config = toml.loads(toml_content)
+            return config
+    except Exception as e:
+        print(f"Error reading TOML file: {e}")
+        return None

@@ -8,7 +8,6 @@ from framework.test_node import CkbNode
 from framework.rpc import RPCClient
 
 
-
 class CkbContract(ABC):
 
     @abstractmethod

@@ -34,7 +34,7 @@ def miner_until_tx_committed(node, tx_hash):
         if tx_response['tx_status']['status'] == "rejected" or tx_response['tx_status']['status'] == "unknown":
             raise Exception(f"status:{tx_response['tx_status']['status']},reason:{tx_response['tx_status']['reason']}")
 
-    raise Exception (f"miner 100 block ,but tx_response always pending:{tx_hash}")
+    raise Exception(f"miner 100 block ,but tx_response always pending:{tx_hash}")
 
 
 # https://github.com/nervosnetwork/rfcs/pull/416
@@ -52,7 +52,7 @@ def miner_with_version(node, version):
     for i in range(100):
         pool_info = node.getClient().tx_pool_info()
         tip_number = node.getClient().get_tip_block_number()
-        if int(pool_info["tip_number"],16) == tip_number:
+        if int(pool_info["tip_number"], 16) == tip_number:
             return
         time.sleep(1)
     raise Exception("pool_info not eq tip number")

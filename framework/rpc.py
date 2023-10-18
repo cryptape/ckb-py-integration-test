@@ -95,6 +95,9 @@ class RPCClient:
     def get_fee_rate_statics(self, target=None):
         return self.call("get_fee_rate_statics", [target])
 
+    def generate_epochs(self, epoch):
+        return self.call("generate_epochs", [epoch])
+
     def get_deployments_info(self):
         return self.call("get_deployments_info", [])
 
