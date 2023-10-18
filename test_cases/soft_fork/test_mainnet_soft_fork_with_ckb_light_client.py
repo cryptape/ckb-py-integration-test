@@ -21,7 +21,7 @@ class TestMainnetSoftForkWithCkbLightClient(CkbTest):
         cls.cluster.connected_all_nodes()
         cls.Miner.make_tip_height_number(cls.node, 200)
         cls.Node.wait_cluster_height(cls.cluster, 100, 300)
-        cls.ckb_light_node = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.V0_2_4, [cls.node],
+        cls.ckb_light_node = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.CURRENT, [cls.node],
                                                                   "tx_pool_light/node1", 8001)
 
         cls.account = cls.Ckb_cli.util_key_info_by_private_key(cls.Config.MINER_PRIVATE_1)
