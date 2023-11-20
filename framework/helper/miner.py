@@ -21,12 +21,16 @@ def make_tip_height_number(node, number):
     assert current_tip_number == number
 
 
-def miner_until_tx_committed(node, tx_hash):
+def miner_until_tx_committed(node, tx_hash, with_unknown=False):
     for i in range(100):
         tx_response = node.getClient().get_transaction(tx_hash)
         if tx_response['tx_status']['status'] == "committed":
             return
         if tx_response['tx_status']['status'] == "pending" or tx_response['tx_status']['status'] == "proposed":
+            miner_with_version(node, "0x0")
+            time.sleep(1)
+            continue
+        if with_unknown and tx_response['tx_status']['status'] == "unknown":
             miner_with_version(node, "0x0")
             time.sleep(1)
             continue
@@ -87,3 +91,28 @@ def get_hex_timestamp():
     timestamp = int(time.time() * 1000)
     hex_timestamp = hex(timestamp)
     return hex_timestamp
+
+
+
+
+def compact_to_target(compact):
+    exponent = compact >> 24
+    mantissa = compact & 0x00ffffff
+    rtn = 0
+    if (exponent <= 3):
+        mantissa >>= (8 * (3 - exponent))
+        rtn = mantissa
+    else:
+        rtn = mantissa
+        rtn <<= (8 * (exponent - 3))
+    overflow = mantissa != 0 and (exponent > 32)
+    return rtn, overflow
+
+
+def target_to_compact(target):
+    bits = (target).bit_length()
+    exponent = ((bits + 7) // 8)
+    compact = target << (
+        8 * (3 - exponent)) if exponent <= 3 else (target >> (8 * (exponent - 3)))
+    compact = (compact | (exponent << 24))
+    return compact
