@@ -58,6 +58,9 @@ class RPCClient:
     def generate_epochs(self, epoch):
         return self.call("generate_epochs", [epoch])
 
+    def generate_block(self):
+        return self.call("generate_block",[])
+
     def get_deployments_info(self):
         return self.call("get_deployments_info", [])
 
