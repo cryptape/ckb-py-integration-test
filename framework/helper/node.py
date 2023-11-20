@@ -24,6 +24,11 @@ def wait_get_transaction(node, tx_hash, status):
     return node.getClient().get_transaction(tx_hash)['tx_status']['status'] == status
 
 
+@wait_until_timeout(wait_times=60)
+def wait_tx_pool(node, pool_key, gt_size):
+    return int(node.getClient().tx_pool_info()[pool_key], 16) >= gt_size
+
+
 def wait_node_height(node: CkbNode, num, wait_times):
     for i in range(wait_times):
         if node.getClient().get_tip_block_number() >= num:
