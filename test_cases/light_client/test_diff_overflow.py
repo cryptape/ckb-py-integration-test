@@ -28,7 +28,7 @@ class TestDiffOverflow(CkbTest):
         cls.cluster.connected_all_nodes()
         cls.Miner.make_tip_height_number(cls.node, 5)
         cls.Node.wait_cluster_height(cls.cluster, 5, 1000)
-        cls.ckb_light_node = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.V0_2_4, [cls.node],
+        cls.ckb_light_node = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.CURRENT_TEST, [cls.node],
                                                                   "tx_pool_light/node1", 8001)
 
         cls.account = cls.Ckb_cli.util_key_info_by_private_key(cls.Config.MINER_PRIVATE_1)
@@ -49,7 +49,6 @@ class TestDiffOverflow(CkbTest):
         cls.ckb_light_node.stop()
         cls.ckb_light_node.clean()
 
-    @pytest.mark.skip
     def test_light_node_when_diff_very_big(self):
         """
         ckb-light-client sync  successful  when diff very big
@@ -68,26 +67,3 @@ class TestDiffOverflow(CkbTest):
         self.node2.getClient().set_network_active(True)
         self.Node.wait_node_height(self.node, 500, 1000)
         self.Node.wait_light_sync_height(self.ckb_light_node, 500, 30000)
-        # print("stop node ")
-        # self.node2.stop()
-        # self.node.stop()
-        # print("start with other chonfig ")
-        # self.node.prepare(other_ckb_config={'ckb_network_listen_addresses': ["/ip4/0.0.0.0/tcp/8715"]})
-        # self.node.start()
-        # self.node2.prepare(other_ckb_config={'ckb_network_listen_addresses': ["/ip4/0.0.0.0/tcp/8815"]})
-        # self.node2.start()
-        # self.node2.connected(self.node)
-        # print(" miner 10000block ")
-        # make_tip_height_number(self.node,502)
-        # wait_node_height(self.node2,502,500)
-        # self.node2.stop()
-        # print(" restart with old config ")
-        # self.node2.prepare(other_ckb_config={'ckb_network_listen_addresses': ["/ip4/0.0.0.0/tcp/8228"]})
-        # self.node2.start()
-        # # self.node.prepare(other_ckb_config={'ckb_network_listen_addresses': ["/ip4/0.0.0.0/tcp/8227"]})
-        # # self.node.stop()
-        # # self.node.start()
-        # # self.node2.start_miner()
-        # print(" wait node start")
-        # self.node2.getClient().get_transaction()
-        # wait_light_sync_height(self.ckb_light_node,110,30000)

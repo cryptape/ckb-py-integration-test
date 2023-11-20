@@ -43,7 +43,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 2000)
         self.Node.wait_cluster_height(self.cluster, 2000, 100)
 
-        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT,
+        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
                                                                           self.cluster.ckb_nodes,
                                                                           "tx_pool_light/node1", 8001)
         self.ckb_light_node.prepare()
@@ -87,7 +87,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 2000)
         self.Node.wait_cluster_height(self.cluster, 2000, 100)
 
-        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT,
+        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
                                                                           self.cluster.ckb_nodes,
                                                                           "tx_pool_light/node1", 8001)
         self.ckb_light_node.prepare()
@@ -130,7 +130,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 100)
         self.Node.wait_cluster_height(self.cluster, 100, 100)
 
-        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT,
+        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
                                                                           self.cluster.ckb_nodes,
                                                                           "tx_pool_light/node1", 8001)
         self.ckb_light_node.prepare()

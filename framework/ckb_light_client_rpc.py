@@ -10,14 +10,18 @@ class CKBLightRPCClient:
     def __init__(self, url):
         self.url = url
 
-    def set_scripts(self, script_status):
-        return self.call("set_scripts", [script_status])
+    def set_scripts(self, script_status, command="all"):
+        return self.call("set_scripts", [script_status, command])
 
     def get_scripts(self):
         return self.call("get_scripts", [])
 
-    def get_cells_capacity(self,script):
-        return self.call("get_cells_capacity",[script])
+    def get_cells_capacity(self, script):
+        return self.call("get_cells_capacity", [script])
+
+    def fetch_transaction(self, tx_hash):
+        return self.call("fetch_transaction", [tx_hash])
+
 
     def send_transaction(self,tx):
         return self.call("send_transaction",[tx])

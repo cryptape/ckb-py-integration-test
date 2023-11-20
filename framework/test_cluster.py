@@ -49,7 +49,7 @@ class Cluster:
 
     def restart_all_node(self, clean_data=False):
         for node in self.ckb_nodes:
-            node.restart(clean_data=True)
+            node.restart(clean_data=clean_data)
         self.connected_all_nodes()
 
     def get_all_nodes_height(self):
