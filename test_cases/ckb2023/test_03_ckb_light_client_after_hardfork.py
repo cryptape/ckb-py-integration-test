@@ -36,7 +36,7 @@ def get_successful_files():
         f"{get_project_root()}/source/contract/test_cases/ckb_get_memory_limit",
         f"{get_project_root()}/source/contract/test_cases/atomic_i32",
         f"{get_project_root()}/source/contract/test_cases/spawn_current_cycles",
-        f"{get_project_root()}/source/contract/test_cases/load_block_extension",
+        # f"{get_project_root()}/source/contract/test_cases/load_block_extension", //TODO wait https://github.com/nervosnetwork/ckb-light-client/pull/156/files
     ]
 
 
@@ -62,7 +62,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.Miner.make_tip_height_number(cls.cluster.ckb_nodes[0], 2000)
         cls.Node.wait_cluster_height(cls.cluster, 2000, 100)
 
-        cls.ckb_light_node_0_2_5 = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.V0_2_5,
+        cls.ckb_light_node_0_2_5 = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.CURRENT_TEST,
                                                                         cls.cluster.ckb_nodes,
                                                                         "tx_pool_light/node1", 8001)
 
@@ -235,6 +235,12 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         except Exception as e:
             print(e)
             if "Resolve failed Dead" in str(e):
+                try_count -= 1
+                for i in range(2):
+                    self.Miner.miner_with_version(node, "0x0")
+                time.sleep(3)
+                return self.deploy_and_invoke(account, path, node, try_count)
+            if "PoolRejectedRBF" in str(e):
                 try_count -= 1
                 for i in range(2):
                     self.Miner.miner_with_version(node, "0x0")

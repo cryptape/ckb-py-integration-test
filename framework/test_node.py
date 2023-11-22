@@ -11,14 +11,14 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v112/ckb.toml.j2",
         "source/template/ckb/v112/ckb-miner.toml.j2",
         "source/template/ckb/v112/specs/dev.toml",
-        "download/0.112.0"
+        "download/0.112.1"
     )
 
     V112 = (
         "source/template/ckb/v112/ckb.toml.j2",
         "source/template/ckb/v112/ckb-miner.toml.j2",
         "source/template/ckb/v112/specs/dev.toml",
-        "download/0.112.0"
+        "download/0.112.1"
     )
 
     CURRENT_MAIN = ("source/template/ckb/v111/ckb.toml.j2",
