@@ -24,7 +24,7 @@ class CkbNodeConfigPath(Enum):
     CURRENT_MAIN = ("source/template/ckb/v112/ckb.toml.j2",
                     "source/template/ckb/v112/ckb-miner.toml.j2",
                     "source/template/specs/mainnet.toml.j2",
-                    "download/0.112.0")
+                    "download/0.112.1")
     V111 = (
         "source/template/ckb/v111/ckb.toml.j2",
         "source/template/ckb/v111/ckb-miner.toml.j2",
