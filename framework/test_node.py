@@ -141,6 +141,7 @@ class CkbNode:
         time.sleep(3)
 
     def stop(self):
+        self.stop_miner()
         # run_command("kill {pid}".format(pid=self.ckb_pid))
         # self.ckb_pid = -1
         port = self.rpcUrl.split(":")[-1]
@@ -179,6 +180,8 @@ class CkbNode:
         run_command("rm -rf {ckb_dir}".format(ckb_dir=self.ckb_dir))
 
     def start_miner(self):
+        if self.ckb_miner_pid != -1:
+            return
         self.ckb_miner_pid = run_command(
             "cd {ckb_dir} && ./ckb miner > ckb.miner.log 2>&1  &".format(ckb_dir=self.ckb_dir))
         # replace check height upper

@@ -47,7 +47,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
     def setup_class(cls):
         nodes = [
             cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "cluster/hardfork/node{i}".format(i=i),
-                                         8114 + i,
+                                         8124 + i,
                                          8225 + i)
             for
             i in range(1, 5)
@@ -72,7 +72,8 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.ckb_light_node_0_2_5.getClient().set_scripts([{"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
-        # cls.Node.wait_light_sync_height(cls.ckb_light_node_0_2_5, 2000, 200)
+        cls.Node.wait_light_sync_height(cls.ckb_light_node_0_2_5, 2000, 200)
+
 
     @classmethod
     def teardown_class(cls):
@@ -120,11 +121,13 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         Returns:
 
         """
+        self.cluster.ckb_nodes[0].start_miner()
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         self.ckb_light_node_0_2_5.getClient().set_scripts([{"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
         self.Node.wait_light_sync_height(self.ckb_light_node_0_2_5, 2000, 200)
+        self.cluster.ckb_nodes[0].stop_miner()
 
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
                                                               "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
@@ -145,11 +148,13 @@ class TestCkbLightClientAfterHardFork(CkbTest):
            Returns:
         """
         # send rfc50 tx
+        self.cluster.ckb_nodes[0].start_miner()
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         self.ckb_light_node_0_2_5.getClient().set_scripts([{"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
         self.Node.wait_light_sync_height(self.ckb_light_node_0_2_5, 2000, 200)
+        self.cluster.ckb_nodes[0].stop_miner()
 
         code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
@@ -176,11 +181,13 @@ class TestCkbLightClientAfterHardFork(CkbTest):
            Returns:
         """
         # send rfc50 tx
+        self.cluster.ckb_nodes[0].start_miner()
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         self.ckb_light_node_0_2_5.getClient().set_scripts([{"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
         self.Node.wait_light_sync_height(self.ckb_light_node_0_2_5, 2000, 200)
+        self.cluster.ckb_nodes[0].stop_miner()
 
         code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
@@ -201,6 +208,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
 
     @parameterized.expand(success_files)
     def test_06_ckb_light_client_deploy_and_invoke_contract(self, path):
+        self.cluster.ckb_nodes[0].stop_miner()
         self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.cluster.ckb_nodes[0])
 
     # def test_07_ckb_light_client_deploy_and_invoke_contract(self):

@@ -30,7 +30,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         """
         nodes = [
             self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "cluster/hardfork/node{i}".format(i=i),
-                                          8114 + i,
+                                          8124 + i,
                                           8225 + i)
             for
             i in range(1, 5)
@@ -74,7 +74,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         """
         nodes = [
             self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_TEST, "cluster/hardfork/node{i}".format(i=i),
-                                          8114 + i,
+                                          8124 + i,
                                           8225 + i)
             for
             i in range(1, 5)
