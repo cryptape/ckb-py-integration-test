@@ -11,4 +11,4 @@ pkill ckb
 sleep 3
 rm -rf tmp
 rm -rf report/report.html
-echo echo "run cusscessful"
+echo "run cusscessful"
