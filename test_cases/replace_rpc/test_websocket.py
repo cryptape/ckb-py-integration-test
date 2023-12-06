@@ -137,7 +137,11 @@ class TestWebsocket(CkbTest):
         """
         stop ckb when socker is keep live
         112: stop successful
+<<<<<<< HEAD
         113: stop successful
+=======
+        113: stop failed
+>>>>>>> a197a14 (add replace test)
         """
         self.node112.restart()
         socket = self.node112.subscribe_websocket("new_tip_header")
