@@ -99,7 +99,7 @@ class RPCClient:
         return self.call("generate_epochs", [epoch])
 
     def generate_block(self):
-        return self.call("generate_block",[])
+        return self.call("generate_block", [])
 
     def get_deployments_info(self):
         return self.call("get_deployments_info", [])
@@ -145,7 +145,7 @@ class RPCClient:
         return self.call("get_transaction", [tx_hash, verbosity, only_committed])
 
     def get_transactions(self, search_key, order, limit, after):
-        return self.call("get_transactions", [search_key, order, limit,after])
+        return self.call("get_transactions", [search_key, order, limit, after])
 
     def dry_run_transaction(self, tx):
         return self.call("dry_run_transaction", [tx])
@@ -183,8 +183,8 @@ class RPCClient:
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
 
-    def subscribe(self,topic):
-        return self.call("subscribe",[topic])
+    def subscribe(self, topic):
+        return self.call("subscribe", [topic])
 
     def get_cells_capacity(self, script):
         return self.call("get_cells_capacity", [script])
@@ -192,7 +192,7 @@ class RPCClient:
     def get_current_epoch(self):
         return self.call("get_current_epoch", [])
 
-    def call(self, method, params):
+    def call(self, method, params, try_count=15):
 
         headers = {'content-type': 'application/json'}
         data = {
@@ -202,7 +202,7 @@ class RPCClient:
             "params": params
         }
         print(f"request:url:{self.url},data:\n{json.dumps(data)}")
-        for i in range(15):
+        for i in range(try_count):
             try:
                 response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
                 print(f"response:\n{json.dumps(response)}")

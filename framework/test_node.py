@@ -4,14 +4,23 @@ from framework.util import create_config_file, get_project_root, run_command, ge
 from framework.config import get_tmp_path, CKB_DEFAULT_CONFIG, CKB_MINER_CONFIG
 from framework.rpc import RPCClient
 import shutil
+import telnetlib
+from websocket import create_connection, WebSocket
 
 
 class CkbNodeConfigPath(Enum):
     CURRENT_TEST = (
-        "source/template/ckb/v112/ckb.toml.j2",
+        "source/template/ckb/v113/ckb.toml.j2",
         "source/template/ckb/v112/ckb-miner.toml.j2",
         "source/template/ckb/v112/specs/dev.toml",
-        "download/0.112.1"
+        "download/0.113.0"
+    )
+
+    V113 = (
+        "source/template/ckb/v113/ckb.toml.j2",
+        "source/template/ckb/v112/ckb-miner.toml.j2",
+        "source/template/ckb/v112/specs/dev.toml",
+        "download/0.113.0"
     )
 
     V112 = (
@@ -198,3 +207,45 @@ class CkbNode:
 
     def version(self):
         pass
+
+    def subscribe_telnet(self, topic, other_url=None) -> telnetlib.Telnet:
+        # new_tip_header | new_tip_block | new_transaction | proposed_transaction | rejected_transaction
+        if "ckb_tcp_listen_address" not in self.ckb_config.keys():
+            raise Exception("not set ckb_ws_listen_address")
+        ckb_tcp_listen_address = self.ckb_config['ckb_tcp_listen_address']
+        if other_url is not None:
+            ckb_tcp_listen_address = other_url
+        # get host
+        host = ckb_tcp_listen_address.split(":")[0]
+        # get port
+        port = ckb_tcp_listen_address.split(":")[1]
+        #  new telnet
+        tn = telnetlib.Telnet(host, int(port))
+        print("----")
+        topic_str = '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["' + topic + '"]}'
+        tn.write(topic_str.encode('utf-8') + b"\n")
+        data = tn.read_until(b'}\n')
+        if data:
+            output = data.decode('utf-8')
+            print("telnet read:", output)
+        return tn
+
+
+    def subscribe_websocket(self, topic, other_url=None) -> WebSocket:
+        if other_url is None and "ckb_ws_listen_address" not in self.ckb_config.keys():
+            raise Exception("not set ckb_ws_listen_address")
+        print("subscribe_websocket")
+        if other_url is not None:
+            ckb_ws_listen_address = other_url
+        else:
+            ckb_ws_listen_address = self.ckb_config['ckb_ws_listen_address']
+        print(ckb_ws_listen_address)
+        ws = create_connection(f"ws://{ckb_ws_listen_address}")
+        topic_str = '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["' + topic + '"]}'
+        ws.send(topic_str)
+        print("Sent")
+        print("Receiving...")
+        result = ws.recv()
+        print(result)
+        # ws.settimeout(1)
+        return ws
