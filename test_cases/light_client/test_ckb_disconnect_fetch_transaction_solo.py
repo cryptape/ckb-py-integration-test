@@ -69,7 +69,7 @@ class TestCkbDisconnectFetchTransactionSoloNodes(CkbTest):
             self.ckb_light_node.getClient().get_scripts()
             state = self.ckb_light_node.getClient().fetch_transaction(tx_hash)
             print(state['status'])
-            time.sleep(1)
+            time.sleep(2)
             if state['status'] != "fetching":
                 end_time = datetime.now()
                 time_difference = end_time - current_time

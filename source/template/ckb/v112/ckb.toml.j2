@@ -94,8 +94,14 @@ max_request_body_size = {{ ckb_rpc_max_request_body_size | default(10485760) }}
 modules = {{ ckb_rpc_modules | to_json }}
 
 # By default RPC only binds to HTTP service, you can bind it to TCP and WebSocket.
-# tcp_listen_address = "127.0.0.1:18114"
-# ws_listen_address = "127.0.0.1:28114"
+#{% if ckb_tcp_listen_address is defined %}
+tcp_listen_address = "{{ ckb_tcp_listen_address }}"
+#{% endif %}
+
+#{% if ckb_ws_listen_address is defined %}
+ws_listen_address = "{{ ckb_ws_listen_address }}"
+#{% endif %}
+
 reject_ill_transactions = {{ ckb_rpc_reject_ill_transactions | default("true") }}
 
 # By default deprecated rpc methods are disabled.

@@ -3,16 +3,6 @@ import time
 import pytest
 from framework.basic import CkbTest
 
-# from framework.config import ACCOUNT_PRIVATE_2
-# from framework.helper.ckb_cli import util_key_info_by_private_key, wallet_transfer_by_private_key
-# from framework.helper.miner import make_tip_height_number, block_template_transfer_to_submit_block, miner_with_version
-# from framework.helper.node import wait_get_transaction
-# from framework.helper.tx import send_transfer_self_tx_with_input
-# from framework.test_node import CkbNode, CkbNodeConfigPath
-
-
-# import concurrent.futures
-
 
 class TestTxsLifeCycleChain(CkbTest):
     @classmethod

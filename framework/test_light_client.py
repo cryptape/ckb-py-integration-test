@@ -9,7 +9,8 @@ class CkbLightClientConfigPath(Enum):
     V0_2_4 = ("source/template/ckb_light_client/0.2.4/testnet.toml.j2", "download/0.2.4/ckb-light-client")
     V0_3_0 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.0/ckb-light-client")
     V0_3_1 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.1/ckb-light-client")
-    CURRENT_TEST = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.1/ckb-light-client")
+    V0_3_2 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.2/ckb-light-client")
+    CURRENT_TEST = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.2/ckb-light-client")
 
     def __init__(self, ckb_light_client_config_path, ckb_light_bin_path):
         self.ckb_light_client_config_path = ckb_light_client_config_path
@@ -31,7 +32,8 @@ class CkbLightClientNode:
         self.ckb_light_config = {
             "ckb_light_client_chain": ckb_spec_path,
             "ckb_light_client_network_bootnodes": ckb_p2p_infos,
-            "ckb_light_client_rpc_listen_address": f"127.0.0.1:{rpc_port}"
+            "ckb_light_client_rpc_listen_address": f"127.0.0.1:{rpc_port}",
+            "ckb_light_client_network_listen_addresses": [f"/ip4/0.0.0.0/tcp/1{rpc_port}"]
         }
         self.ckb_light_config_path = f"{self.tmp_path}/testnet.toml"
         self.client = CKBLightRPCClient(f"http://127.0.0.1:{rpc_port}")

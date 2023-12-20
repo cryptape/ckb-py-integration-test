@@ -14,6 +14,7 @@ check_failed_html:
         exit 1; \
     fi
 test:
+	bash test.sh test_cases/replace_rpc
 	bash test.sh test_cases/ckb2023
 	bash test.sh test_cases/ckb_cli
 	bash test.sh test_cases/contracts

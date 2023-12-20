@@ -23,10 +23,10 @@ class TestRpc(CkbTest):
     @classmethod
     def teardown_class(cls):
         print("teardown_class")
-        # cls.node112.stop()
-        # cls.node112.clean()
-        # cls.node113.stop()
-        # cls.node113.clean()
+        cls.node112.stop()
+        cls.node112.clean()
+        cls.node113.stop()
+        cls.node113.clean()
 
     def test_without_header(self):
             """
