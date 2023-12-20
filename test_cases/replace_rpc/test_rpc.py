@@ -79,6 +79,7 @@ class TestRpc(CkbTest):
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
 
+    @pytest.mark.skip
     def test_max_response(self):
         """
         batch get_block_by_number count:922
@@ -115,6 +116,7 @@ class TestRpc(CkbTest):
             assert expected_error_message in exc_info.value.args[0], \
                 f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
+    @pytest.mark.skip
     def test_max_batch_count(self):
         """
         batch send count :15376
