@@ -35,6 +35,10 @@ jobs:
     - name: Run tests
       run: make test
 
+    - name: Setup upterm session
+      if: failure()
+      uses: lhotari/action-upterm@v1
+       
     - name: Publish reports
       if: failure()
       uses: actions/upload-artifact@v2

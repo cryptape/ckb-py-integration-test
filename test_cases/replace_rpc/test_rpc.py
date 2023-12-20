@@ -148,10 +148,9 @@ class TestRpc(CkbTest):
             assert expected_error_message in exc_info.value.args[1], \
                 f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
-    @pytest.mark.skip
     def test_websocket(self):
         """
-        support websocket
+        not support websocket
         112: not support,Handshake status 405 Method Not Allowed
         113: not support,Handshake status 500 Internal Server Error
         """
@@ -169,7 +168,6 @@ class TestRpc(CkbTest):
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
-    @pytest.mark.skip
     def test_telnet(self):
         """
         support telnet

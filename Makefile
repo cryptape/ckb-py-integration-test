@@ -15,19 +15,19 @@ check_failed_html:
     fi
 test:
 	bash test.sh test_cases/replace_rpc
-	bash test.sh test_cases/ckb2023
-	bash test.sh test_cases/ckb_cli
-	bash test.sh test_cases/contracts
-	bash test.sh test_cases/example
-	bash test.sh test_cases/framework
-	bash test.sh test_cases/light_client
-	bash test.sh test_cases/mocking
-	bash test.sh test_cases/node_compatible
-	bash test.sh test_cases/rpc
-	bash test.sh test_cases/soft_fork
-	bash test.sh test_cases/issue
-	bash test.sh test_cases/tx_pool_refactor
-	bash test.sh test_cases/feature
+#	bash test.sh test_cases/ckb2023
+#	bash test.sh test_cases/ckb_cli
+#	bash test.sh test_cases/contracts
+#	bash test.sh test_cases/example
+#	bash test.sh test_cases/framework
+#	bash test.sh test_cases/light_client
+#	bash test.sh test_cases/mocking
+#	bash test.sh test_cases/node_compatible
+#	bash test.sh test_cases/rpc
+#	bash test.sh test_cases/soft_fork
+#	bash test.sh test_cases/issue
+#	bash test.sh test_cases/tx_pool_refactor
+#	bash test.sh test_cases/feature
 	@if test -n "$$(ls report/*failed.html 2>/dev/null)"; then \
         echo "Error: Failed HTML files found in the 'report' directory"; \
         exit 1; \

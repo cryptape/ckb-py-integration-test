@@ -153,4 +153,10 @@ class TestHelperContract(CkbTest):
                     self.Miner.miner_with_version(node, "0x0")
                 time.sleep(3)
                 return self.deploy_and_invoke(account, path, node, try_count)
+            if "PoolRejectedRBF" in str(e):
+                try_count -= 1
+                for i in range(2):
+                    self.Miner.miner_with_version(node, "0x0")
+                time.sleep(3)
+                return self.deploy_and_invoke(account, path, node, try_count)
             raise e
