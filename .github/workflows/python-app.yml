@@ -36,7 +36,7 @@ jobs:
       run: make test
 
     - name: Setup upterm session
-      if: failure()
+      if: always()
       uses: lhotari/action-upterm@v1
        
     - name: Publish reports
