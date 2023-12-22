@@ -1,3 +1,4 @@
+import json
 import time
 
 import pytest
@@ -33,7 +34,6 @@ class TestRpc(CkbTest):
 
         cls.node113.stop()
         cls.node113.clean()
-
 
     def test_link_count_max(self):
         """
@@ -163,3 +163,24 @@ class TestRpc(CkbTest):
         assert "ckb" not in str(ret)
         self.node112.restart()
         self.node113.restart()
+
+    def test_unsubscribe(self):
+        """
+        subscribe topic 1
+        unsubscribe topic 1
+            unsubscribe successful
+        """
+        socket = self.node113.subscribe_telnet("new_tip_header")
+        self.Miner.miner_with_version(self.node113, "0x0")
+        ret = socket.read_very_eager()
+        ret = json.loads(ret)
+        print(ret['params']['subscription'])
+        subscribe_str = '{"id": 2, "jsonrpc": "2.0", "method": "unsubscribe", "params": ["' + ret['params'][
+            'subscription'] + '"]}'
+        print("subscribe_str:", subscribe_str)
+        socket.write(subscribe_str.encode('utf-8') + b"\n")
+        data = socket.read_until(b'}\n')
+        assert "true" in data.decode('utf-8')
+        self.Miner.miner_with_version(self.node113, "0x0")
+        ret = socket.read_very_eager()
+        assert ret.decode('utf-8') == ""
