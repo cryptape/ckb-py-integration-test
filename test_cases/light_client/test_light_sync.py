@@ -34,9 +34,8 @@ class TestLightSync(CkbTest):
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
-    @pytest.mark.skip
     def test_sync(self):
-        for i in range(20):
+        for i in range(10):
             print("current idx", i)
             self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
                                                                         [self.node, self.node2],

@@ -10,7 +10,8 @@ class CkbLightClientConfigPath(Enum):
     V0_3_0 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.0/ckb-light-client")
     V0_3_1 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.1/ckb-light-client")
     V0_3_2 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.2/ckb-light-client")
-    CURRENT_TEST = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.2/ckb-light-client")
+    V0_3_3 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.3/ckb-light-client")
+    CURRENT_TEST = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.3/ckb-light-client")
 
     def __init__(self, ckb_light_client_config_path, ckb_light_bin_path):
         self.ckb_light_client_config_path = ckb_light_client_config_path
