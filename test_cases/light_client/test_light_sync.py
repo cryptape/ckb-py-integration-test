@@ -27,6 +27,7 @@ class TestLightSync(CkbTest):
         cls.cluster.connected_all_nodes()
         cls.Miner.make_tip_height_number(cls.node, 13000)
         cls.Node.wait_cluster_height(cls.cluster, 5, 13000)
+        node1.start_miner()
 
     @classmethod
     def teardown_class(cls):
