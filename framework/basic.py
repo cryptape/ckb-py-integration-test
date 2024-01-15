@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 import unittest
 import framework.helper.miner
@@ -10,7 +10,6 @@ import framework.helper.tx
 import framework.test_node
 import framework.test_light_client
 import framework.test_cluster
-import framework.helper
 import framework.config
 import shutil
 from framework.util import get_project_root

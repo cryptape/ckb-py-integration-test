@@ -28,7 +28,6 @@ def get_all_files(directory):
 #                   "spawn_fib",
 #                   "spawn_times"
 #                   ]
-#     []
 #     return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
 
 def get_successful_files():
@@ -36,8 +35,7 @@ def get_successful_files():
         f"{get_project_root()}/source/contract/test_cases/ckb_get_memory_limit",
         f"{get_project_root()}/source/contract/test_cases/atomic_i32",
         f"{get_project_root()}/source/contract/test_cases/spawn_current_cycles",
-        # f"{get_project_root()}/source/contract/test_cases/load_block_extension",
-        # //TODO wait https://github.com/nervosnetwork/ckb-light-client/pull/156/files
+        f"{get_project_root()}/source/contract/test_cases/load_block_extension",
     ]
 
 
@@ -73,7 +71,9 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.ckb_light_node_current.getClient().set_scripts([{"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
+        cls.cluster.ckb_nodes[0].start_miner()
         cls.Node.wait_light_sync_height(cls.ckb_light_node_current, 2000, 200)
+
 
     @classmethod
     def teardown_class(cls):
@@ -83,7 +83,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.ckb_light_node_current.stop()
         cls.ckb_light_node_current.clean()
 
-    @pytest.mark.skip
     def test_01_ckb_light_client_0_3_1_link_node(self):
 
         version = self.CkbLightClientConfigPath.V0_3_1
@@ -104,7 +103,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         ckb_light_node.stop()
         ckb_light_node.clean()
 
-    @pytest.mark.skip
     def test_02_ckb_light_client_current_link_node(self):
         """
         1. setScript miner account
@@ -120,7 +118,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
         self.Node.wait_light_sync_height(self.ckb_light_node_current, 2000, 200)
 
-    @pytest.mark.skip
     def test_03_ckb_light_client_current_set_script_data2(self):
         """
         1. set data2 account
@@ -134,7 +131,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
         self.Node.wait_light_sync_height(self.ckb_light_node_current, 2000, 200)
 
-    @pytest.mark.skip
     def test_04_ckb_light_client_current_transfer_data2_tx(self):
         """
         1. send data2 tx on the ckb light client
@@ -142,13 +138,11 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         Returns:
 
         """
-        self.cluster.ckb_nodes[0].start_miner()
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         self.ckb_light_node_current.getClient().set_scripts([{"script": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
             "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
         self.Node.wait_light_sync_height(self.ckb_light_node_current, 2000, 200)
-        self.cluster.ckb_nodes[0].stop_miner()
 
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
                                                               "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
@@ -162,7 +156,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
 
         assert tx_hash == light_tx_hash
 
-    @pytest.mark.skip
     def test_05_ckb_light_client_current_spawn_contract_use_data2(self):
         """
            1. send spawn tx ( hash type : data2), on the ckb light client
@@ -196,7 +189,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
 
         assert tx_hash == light_tx_hash
 
-    @pytest.mark.skip
     def test_05_ckb_light_client_current_spawn_contract_use_type(self):
         """
            1. send spawn tx ( hash type : type), on the ckb light client
@@ -229,14 +221,18 @@ class TestCkbLightClientAfterHardFork(CkbTest):
 
         assert tx_hash == light_tx_hash
 
-    @pytest.mark.skip
-    # @parameterized.expand(success_files)
+    # @pytest.mark.skip
+    @parameterized.expand(success_files)
     def test_06_ckb_light_client_deploy_and_invoke_contract(self, path):
-        self.cluster.ckb_nodes[0].stop_miner()
+        self.cluster.ckb_nodes[0].start_miner()
         self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.cluster.ckb_nodes[0])
+        self.cluster.ckb_nodes[0].start_miner()
 
     # def test_07_ckb_light_client_deploy_and_invoke_contract(self):
-    #     self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, f"{get_project_root()}/source/contract/test_cases/spawn_demo", self.cluster.ckb_nodes[0])
+    #     self.cluster.ckb_nodes[0].start_miner()
+    #     self.deploy_and_invoke(self.Config.MINER_PRIVATE_1,
+    #                            f"{get_project_root()}/source/contract/test_cases/spawn_demo", self.cluster.ckb_nodes[0])
+    #     self.cluster.ckb_nodes[0].stop_miner()
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
         if try_count < 0:
@@ -247,23 +243,18 @@ class TestCkbLightClientAfterHardFork(CkbTest):
                                                             enable_type_id=True,
                                                             api_url=node.getClient().url)
             self.Miner.miner_until_tx_committed(node, deploy_hash)
-            time.sleep(1)
-            self.ckb_light_node_current.getClient().fetch_transaction(deploy_hash)
-            self.Node.wait_light_sync_height(self.ckb_light_node_current, node.getClient().get_tip_block_number(), 100)
-            time.sleep(10)
-            invoke_hash = self.Contract.invoke_ckb_contract(account_private=account,
-                                                            contract_out_point_tx_hash=deploy_hash,
-                                                            contract_out_point_tx_index=0,
-                                                            type_script_arg="0x02", data="0x1234",
-                                                            hash_type="type",
-                                                            api_url=node.getClient().url)
-            tx = node.getClient().get_transaction(invoke_hash)
-            transaction = tx['transaction']
-            tx_hash = transaction['hash']
-            del transaction['hash']
-            light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(transaction)
-            assert tx_hash == light_tx_hash
-            return invoke_hash
+            self.Node.wait_light_sync_height(self.ckb_light_node_current, node.getClient().get_tip_block_number(), 200)
+            self.Node.wait_fetch_transaction(self.ckb_light_node_current, deploy_hash, "fetched")
+            tx_msg = self.Contract.build_invoke_ckb_contract(account_private=account,
+                                                             contract_out_point_tx_hash=deploy_hash,
+                                                             contract_out_point_tx_index=0,
+                                                             type_script_arg="0x02", data="0x1234",
+                                                             hash_type="type",
+                                                             api_url=node.getClient().url)
+            self.Node.wait_light_sync_height(self.ckb_light_node_current, node.getClient().get_tip_block_number(), 200)
+            light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(tx_msg)
+            self.Miner.miner_until_tx_committed(node, light_tx_hash, with_unknown=True)
+            return light_tx_hash
         except Exception as e:
             print(e)
             if "Resolve failed Dead" in str(e):

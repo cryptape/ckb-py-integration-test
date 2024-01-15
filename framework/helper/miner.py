@@ -38,7 +38,7 @@ def miner_until_tx_committed(node, tx_hash, with_unknown=False):
         if tx_response['tx_status']['status'] == "rejected" or tx_response['tx_status']['status'] == "unknown":
             raise Exception(f"status:{tx_response['tx_status']['status']},reason:{tx_response['tx_status']['reason']}")
 
-    raise Exception(f"miner 100 block ,but tx_response always pending:{tx_hash}")
+    raise Exception(f"miner 100 block ,but tx_response always pending:{tx_hash}，tx_response:{tx_response}")
 
 
 # https://github.com/nervosnetwork/rfcs/pull/416
