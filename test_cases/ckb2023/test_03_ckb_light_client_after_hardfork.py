@@ -74,7 +74,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.cluster.ckb_nodes[0].start_miner()
         cls.Node.wait_light_sync_height(cls.ckb_light_node_current, 2000, 200)
 
-
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
@@ -218,7 +217,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         tx_hash = transaction['hash']
         del transaction['hash']
         light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(transaction)
-
         assert tx_hash == light_tx_hash
 
     # @pytest.mark.skip
@@ -252,7 +250,18 @@ class TestCkbLightClientAfterHardFork(CkbTest):
                                                              hash_type="type",
                                                              api_url=node.getClient().url)
             self.Node.wait_light_sync_height(self.ckb_light_node_current, node.getClient().get_tip_block_number(), 200)
-            light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(tx_msg)
+            for i in range(100):
+                light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(tx_msg)
+                light_ret = node.getClient().get_transaction(light_tx_hash)
+                time.sleep(1)
+                print("light ret status:", light_ret['tx_status']['status'])
+                if light_ret['tx_status']['status'] != 'pending':
+                    continue
+                if light_ret['tx_status']['status'] == 'pending':
+                    print("status is pending i:", i)
+                    break
+                if i == 99:
+                    raise Exception("status is failed ")
             self.Miner.miner_until_tx_committed(node, light_tx_hash, with_unknown=True)
             return light_tx_hash
         except Exception as e:
