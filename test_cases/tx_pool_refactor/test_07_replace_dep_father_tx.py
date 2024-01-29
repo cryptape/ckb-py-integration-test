@@ -190,7 +190,10 @@ class TestDepTx(CkbTest):
                                                            fee=1090,
                                                            api_url=self.node1.getClient().url)
 
+        tx11_hash = tx_hash
         # Send a transaction: tx21 (dep = tx11.output)
+        tx11_response = self.node1.getClient().get_transaction(tx11_hash)
+        print("before tx11 min fee:", int(tx11_response['min_replace_fee'], 16))
         dep_is_tx_hash = self.Tx.send_transfer_self_tx_with_input([tx2_hash], ["0x0"], account_private2,
                                                                   output_count=2,
                                                                   fee=20900,
@@ -201,9 +204,11 @@ class TestDepTx(CkbTest):
                                                                   )
 
         # Send a transaction: will replace the previous tx11
+        tx11_response = self.node1.getClient().get_transaction(tx11_hash)
+        print("after tx11 min fee:", int(tx11_response['min_replace_fee'], 16))
         replace_hash = self.Tx.send_transfer_self_tx_with_input([tx1_hash], ["0x0"], account_private,
                                                                 output_count=2,
-                                                                fee=20900,
+                                                                fee=22900,
                                                                 api_url=self.node1.getClient().url,
                                                                 dep_cells=[{
                                                                     "tx_hash": tx1_hash, "index_hex": "0x0"
@@ -211,7 +216,6 @@ class TestDepTx(CkbTest):
                                                                 )
 
         # Query pool: the previous tx11 and tx21 will be rejected
-
         result = self.node1.getClient().get_transaction(tx_hash)
         assert result['tx_status']['status'] == "rejected"
         result = self.node1.getClient().get_transaction(dep_is_tx_hash)
