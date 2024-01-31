@@ -154,7 +154,7 @@ class TestRpc(CkbTest):
         """
         not support websocket
         112: not support,Handshake status 405 Method Not Allowed
-        113: not support,Handshake status 500 Internal Server Error
+        113: not support,not allowed. POST or OPTIONS is required
         """
         #   112: not support,Handshake status 405 Method Not Allowed
         with pytest.raises(Exception) as exc_info:
@@ -166,7 +166,7 @@ class TestRpc(CkbTest):
         # 113 support
         with pytest.raises(Exception) as exc_info:
             socket = self.node113.subscribe_websocket("new_tip_header", self.node113.rpcUrl.replace("http://", ""))
-        expected_error_message = "Handshake status 500 Internal Server Error"
+        expected_error_message = "not allowed. POST or OPTIONS is required"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
