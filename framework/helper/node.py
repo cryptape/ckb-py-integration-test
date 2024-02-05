@@ -23,6 +23,10 @@ def wait_until_timeout(wait_times):
 def wait_get_transaction(node, tx_hash, status):
     return node.getClient().get_transaction(tx_hash)['tx_status']['status'] == status
 
+@wait_until_timeout(wait_times=60)
+def wait_fetch_transaction(node, tx_hash, status):
+    return node.getClient().fetch_transaction(tx_hash)['status'] == status
+
 
 @wait_until_timeout(wait_times=60)
 def wait_tx_pool(node, pool_key, gt_size):

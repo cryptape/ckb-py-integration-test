@@ -234,16 +234,18 @@ class TestTxReplaceRule(CkbTest):
                                                                api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
             self.Node.wait_get_transaction(self.node, tx_hash, "pending")
+        first_tx = self.node.getClient().get_transaction(first_hash)
         with pytest.raises(Exception) as exc_info:
             self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"],
                                                         360000,
-                                                        self.node.getClient().url, "8800")
-        expected_error_message = "Server error: PoolRejectedRBF: RBF rejected: Tx conflict too many txs, conflict txs count: 101"
+                                                        self.node.getClient().url, int(first_tx['min_replace_fee'], 16))
+        expected_error_message = "RBF rejected: Tx conflict with too many txs, conflict txs count: 101, expect <= 100"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
-
-        self.Tx.send_transfer_self_tx_with_input([first_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=5000,
+        second_tx = self.node.getClient().get_transaction(tx_list[0])
+        self.Tx.send_transfer_self_tx_with_input([first_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
+                                                 fee=int(second_tx['min_replace_fee'], 16),
                                                  api_url=self.node.getClient().url)
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert len(tx_pool['pending'].keys()) == 2
@@ -280,7 +282,7 @@ class TestTxReplaceRule(CkbTest):
         assert tx_a_response['tx_status']['status'] == 'rejected'
         assert "RBFRejected" in tx_a_response['tx_status']['reason']
 
-    def test_replace_proposal_transaction_failure(self):
+    def test_replace_proposal_transaction_successful(self):
         """
         Replacing the transaction for the proposal, replacement failed.
         1. Send a transaction and submit it to the proposal.
@@ -288,7 +290,7 @@ class TestTxReplaceRule(CkbTest):
         2. Replace the transaction for that proposal.
             successful
         3. get_block_template
-            contains proposal that is removed
+            contains proposal that is not removed
         4.  generate empty block
             successful
         5. get_block_template
@@ -311,6 +313,7 @@ class TestTxReplaceRule(CkbTest):
                                                                output_count=1, fee=1000,
                                                                api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
+
         self.Miner.miner_with_version(self.node, "0x0")
         self.Miner.miner_with_version(self.node, "0x0")
         time.sleep(5)
@@ -323,18 +326,11 @@ class TestTxReplaceRule(CkbTest):
             tx_response = self.node.getClient().get_transaction(tx)
             assert tx_response['tx_status']['status'] == 'proposed'
         tx_response = self.node.getClient().get_transaction(proposal_txs[0])
-        # with pytest.raises(Exception) as exc_info:
-
-        # expected_error_message = "RBF rejected: all conflict Txs should be in Pending status"
-        # assert expected_error_message in exc_info.value.args[0], \
-        #     f"Expected substring '{expected_error_message}' " \
-        #     f"not found in actual string '{exc_info.value.args[0]}'"
-
         replace_proposal_hash = self.Tx.send_transfer_self_tx_with_input(
             [tx_response['transaction']['inputs'][0]['previous_output']['tx_hash']], ['0x0'],
             self.Config.ACCOUNT_PRIVATE_2,
             output_count=1,
-            fee=2000,
+            fee=1000000,
             api_url=self.node.getClient().url)
 
         time.sleep(5)
@@ -345,18 +341,6 @@ class TestTxReplaceRule(CkbTest):
         self.node.getClient().generate_block()
         block_template = self.node.getClient().get_block_template()
         assert not proposal_txs[0] in json.dumps(block_template)
-
-        # proposal_tx_response = self.node.getClient().get_transaction(proposal_txs[0])
-        # tx_response = self.node.getClient().get_transaction(tx_hash)
-        # assert tx_response['tx_status']['status'] == 'pending'
-        # assert proposal_tx_response['tx_status']['status'] == 'rejected'
-        # tx_pool = self.node.getClient().get_raw_tx_pool(True)
-        # assert proposal_txs[0] not in list(tx_pool['proposed'].keys())
-        #
-        # for i in range(5):
-        #     miner_with_version(self.node, "0x0")
-        # # miner_until_tx_committed(self.node, proposal_txs[0])
-        # self.node.getClient().get_transaction(proposal_txs[0])
 
     def test_send_transaction_duplicate_input_with_son_tx(self):
         """
@@ -377,31 +361,35 @@ class TestTxReplaceRule(CkbTest):
                                                               api_url=self.node.getClient().url, fee_rate="1000")
         first_tx_hash = tx_hash
         tx_list = [first_tx_hash]
+        self.Miner.miner_until_tx_committed(self.node, first_tx_hash)
         tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
                                                            output_count=1,
                                                            fee=1000,
                                                            api_url=self.node.getClient().url)
         tx_list.append(tx_hash)
         self.Node.wait_get_transaction(self.node, tx_hash, 'pending')
-        for i in range(5):
+        for i in range(10):
             tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_1,
                                                                output_count=1, fee=1000,
                                                                api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
-        replace_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
-                                                                      account["address"]["testnet"], 360000,
-                                                                      api_url=self.node.getClient().url,
-                                                                      fee_rate="10000")
+
+        replace_tx = self.node.getClient().get_transaction(tx_list[1])
+        replace_tx_hash = self.Tx.send_transfer_self_tx_with_input([first_tx_hash], ["0x0"],
+                                                                   self.Config.ACCOUNT_PRIVATE_1,
+                                                                   output_count=1,
+                                                                   fee=int(replace_tx['min_replace_fee'], 16),
+                                                                   api_url=self.node.getClient().url)
 
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert len(tx_pool['pending']) == 1
         assert replace_tx_hash in list(tx_pool['pending'])
-        for tx in tx_list:
+        for tx in tx_list[1:]:
             tx_response = self.node.getClient().get_transaction(tx)
             assert tx_response['tx_status']['status'] == "rejected"
             assert "RBFRejected" in tx_response['tx_status']['reason']
 
-    def test_min_replace_fee_unchanged_with_child_tx(self):
+    def test_min_replace_fee_changed_with_child_tx(self):
         """
         based on transaction A,
         send a child transaction. The 'min_replace_fee' of transaction A will not change,
@@ -414,7 +402,7 @@ class TestTxReplaceRule(CkbTest):
         3. Send a child transaction of transaction A.
             successful
         4. Query the updated 'min_replace_fee' of transaction A.
-            min_replace_fee unchanged
+            min_replace_fee changed
         5.Send B to replace A.
             replace successful
         :return:
@@ -432,9 +420,9 @@ class TestTxReplaceRule(CkbTest):
         self.Tx.send_transfer_self_tx_with_input([tx_hash1], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                                  api_url=self.node.getClient().url)
         after_transaction1 = self.node.getClient().get_transaction(tx_hash1)
-        assert after_transaction1['min_replace_fee'] == transaction1['min_replace_fee']
+        assert after_transaction1['min_replace_fee'] != transaction1['min_replace_fee']
         replace_tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
-                                                                   fee=int(transaction1['min_replace_fee'], 16),
+                                                                   fee=int(after_transaction1['min_replace_fee'], 16),
                                                                    api_url=self.node.getClient().url)
         transaction = self.node.getClient().get_transaction(replace_tx_hash)
         assert transaction['tx_status']['status'] == 'pending'

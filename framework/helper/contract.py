@@ -172,3 +172,106 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
     tx_info(tmp_tx_file, api_url)
     # send tx return hash
     return tx_send(tmp_tx_file, api_url).strip()
+
+
+@exception_use_old_ckb()
+def build_invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_out_point_tx_index, type_script_arg,
+                        hash_type="type",
+                        data="0x", fee=1000,
+                        api_url="http://127.0.0.1:8114"):
+    """
+
+    Args:
+        account_private:
+        contract_out_point_tx_hash:
+        contract_out_point_tx_index:
+        type_script_arg:
+        hash_type:  data ,data1,type data2
+        data:
+        fee:
+        api_url:
+
+    Returns:
+
+    """
+    if hash_type == "type":
+        contract_code_hash = get_ckb_contract_codehash(contract_out_point_tx_hash, contract_out_point_tx_index,
+                                                       enable_type_id=True,
+                                                       api_url=api_url)
+    else:
+        contract_code_hash = get_ckb_contract_codehash(contract_out_point_tx_hash, contract_out_point_tx_index,
+                                                       enable_type_id=False,
+                                                       api_url=api_url)
+    # get input_cell
+    account = util_key_info_by_private_key(account_private)
+    account_address = account["address"]["testnet"]
+    account_live_cells = wallet_get_live_cells(account_address, api_url=api_url)
+    assert len(account_live_cells['live_cells']) > 0
+    input_cell_out_points = []
+    input_cell_cap = 0
+    for i in range(len(account_live_cells['live_cells'])):
+        input_cell_out_point = {
+            'tx_hash': account_live_cells['live_cells'][i]['tx_hash'],
+            'index': account_live_cells['live_cells'][i]['output_index']
+        }
+        input_cell_cap += float(account_live_cells['live_cells'][i]['capacity'].replace('(CKB)', "").strip()) * 100000000
+        input_cell_out_points.append(input_cell_out_point)
+        if  input_cell_cap> 10000000000:
+            break
+
+
+    # get output_cells.cap = input_cell.cap - fee
+    #  "capacity": "21685.0 (CKB)",
+    output_cell_capacity = input_cell_cap - fee
+
+    output_cell = {
+        "capacity": hex(int(output_cell_capacity)),
+        # rand ckb address for pass ckb-cli check lock address
+        "lock": {
+            "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+            "hash_type": "type",
+            "args": "0x470dcdc5e44064909650113a274b3b36aecb6dc7"
+        },
+        "type": {
+            "code_hash": contract_code_hash,
+            "hash_type": hash_type,
+            "args": type_script_arg
+        }
+    }
+    # add dep
+    cell_dep = {
+        'tx_hash': contract_out_point_tx_hash,
+        'index': hex(contract_out_point_tx_index)
+    }
+    # tx file init
+    tmp_tx_file = "/tmp/demo.json"
+    tx_init(tmp_tx_file, api_url)
+    tx_add_multisig_config(account_address, tmp_tx_file, api_url)
+    # add input
+    for i in range(len(input_cell_out_points)):
+        input_cell_out_point = input_cell_out_points[i]
+        tx_add_input(input_cell_out_point['tx_hash'], input_cell_out_point['index'], tmp_tx_file, api_url)
+    transaction = RPCClient(api_url).get_transaction(contract_out_point_tx_hash)
+    tx_add_header_dep(transaction['tx_status']['block_hash'], tmp_tx_file)
+    # add output
+    tx_add_type_out_put(output_cell["type"]["code_hash"], output_cell["type"]["hash_type"], output_cell["type"]["args"],
+                        output_cell["capacity"], data, tmp_tx_file)
+    # add dep
+    tx_add_cell_dep(cell_dep['tx_hash'], cell_dep['index'], tmp_tx_file)
+    # sign
+    sign_data = tx_sign_inputs(account_private, tmp_tx_file, api_url)
+    tx_add_signature(sign_data[0]['lock-arg'], sign_data[0]['signature'], tmp_tx_file, api_url)
+    tx_info(tmp_tx_file, api_url)
+    # send tx return hash
+    return build_tx_info(tmp_tx_file)
+
+
+def build_tx_info(tmp_tx_file):
+    with open(tmp_tx_file, "r") as file:
+        tx_info_str = file.read()
+    tx = json.loads(tx_info_str)
+    sign_keys = list(tx['signatures'].keys())[0]
+    witness = "0x5500000010000000550000005500000041000000" + tx['signatures'][sign_keys][0][2:]
+    tx_msg = tx['transaction']
+    tx_msg['witnesses'] = [witness]
+    return tx_msg
