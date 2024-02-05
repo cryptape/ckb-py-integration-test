@@ -18,7 +18,6 @@ class TestIssues(CkbTest):
         cls.node1.stop()
         cls.node1.clean()
 
-    @pytest.mark.skip
     def test_4315(self):
         """
         1. 发送 tx1

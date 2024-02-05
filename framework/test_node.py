@@ -10,7 +10,7 @@ from websocket import create_connection, WebSocket
 
 class CkbNodeConfigPath(Enum):
     CURRENT_TEST = (
-        "source/template/ckb/v114/ckb.toml.j2",
+        "source/template/ckb/v112/ckb.toml.j2",
         "source/template/ckb/v112/ckb-miner.toml.j2",
         "source/template/ckb/v112/specs/dev.toml",
         "download/0.114.0"
