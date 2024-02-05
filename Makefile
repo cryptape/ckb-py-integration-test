@@ -1,4 +1,6 @@
 prepare:
+	python -m venv venv
+	. venv/bin/activate
 	python -m pip install --upgrade pip
 	pip install -r requirements.txt
 	echo "install ckb"
@@ -32,14 +34,14 @@ test:
         echo "Error: Failed HTML files found in the 'report' directory"; \
         exit 1; \
     fi
+
 clean:
-	-pkill ckb
+	pkill ckb
 	rm -rf tmp
 	rm -rf download
 	rm -rf report
-	rm -rf source/ckb-cli
-	rm -rf source/ckb-cli-old
-
+	rm -rf source/ckb-cli*
+	rm -rf ckb-*
 
 docs:
 	python -m pytest --docs=docs/soft.md --doc-type=md test_cases/soft_fork

@@ -1,7 +1,8 @@
 set -e
-git clone https://github.com/gpBlockchain/ckb-cli.git
+git clone https://github.com/nervosnetwork/ckb-cli.git
+version=`curl -s https://api.github.com/repos/nervosnetwork/ckb-cli/releases/latest | jq -r '.tag_name' `
 cd ckb-cli
-git checkout exec/data2
+git checkout $version
 make prod
 cp target/release/ckb-cli ../source/ckb-cli
 cd ../
