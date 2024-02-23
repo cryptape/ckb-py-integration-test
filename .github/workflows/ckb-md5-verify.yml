@@ -1,0 +1,177 @@
+name: ckb build md5
+
+on:
+  workflow_dispatch:
+    inputs:
+      ckb_version:
+          description: 'ckb version'
+          required: false
+          default: 'v0.113.0'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+  CKB_CLI_VERSION: v1.6.0
+
+jobs:
+  package-for-linux:
+    name: package-for-linux
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - rel_pkg: "x86_64-unknown-linux-gnu"
+            build_target: "prod"
+          - rel_pkg: "x86_64-unknown-linux-gnu-portable"
+            build_target: "prod_portable"
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          ref: ${{ github.event.inputs.ckb_version }}
+          repository: nervosnetwork/ckb
+    - name: Set Env
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        echo "GIT_TAG_NAME=$GIT_TAG_NAME" >> $GITHUB_ENV
+    - name: Build CKB and Package CKB
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        wget https://github.com/nervosnetwork/ckb/releases/download/${CKB_VERSION}/ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
+        tar -zxvf ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
+        wget_md5=$(md5sum "ckb_${CKB_VERSION}_${REL_PKG}/ckb" | awk '{print $1}')
+        docker run --rm -i -w /ckb -v $(pwd):/ckb $BUILDER_IMAGE make ${{ matrix.build_target }}
+        cd target/prod
+        build_md5=$(md5sum "ckb" | awk '{print $1}')
+        if [ "$build_md5" == "$wget_md5" ]; then
+            echo "MD5 sums are equal."
+        else
+            echo "MD5 sums are different:"
+            echo "build_md5 1: $build_md5"
+            echo "wget_md5 2: $wget_md5"
+            # exit 1
+        fi
+    env:
+      BUILDER_IMAGE: nervos/ckb-docker-builder:bionic-rust-1.71.1-openssl-3.1.3
+      REL_PKG: ${{ matrix.rel_pkg }}
+      CKB_VERSION: ${{ github.event.inputs.ckb_version }}
+
+  package-for-linux-aarch64:
+    name: package-for-linux-aarch64
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          ref: ${{ github.event.inputs.ckb_version }}
+          repository: nervosnetwork/ckb
+    - name: Set Env
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        echo "GIT_TAG_NAME=$GIT_TAG_NAME" >> $GITHUB_ENV
+    - name: Add rust target
+      run: rustup target add aarch64-unknown-linux-gnu
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y gcc-multilib && sudo apt-get install -y build-essential clang gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+    - name: Build CKB and Package CKB
+      env:
+        SKIP_CKB_CLI: true
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        wget https://github.com/nervosnetwork/ckb/releases/download/${CKB_VERSION}/ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
+        tar -zxvf ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
+        wget_md5=$(md5sum "ckb_${CKB_VERSION}_${REL_PKG}/ckb" | awk '{print $1}')
+        PKG_CONFIG_ALLOW_CROSS=1 CC=gcc CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc CKB_BUILD_TARGET="--target=aarch64-unknown-linux-gnu" make prod_portable
+        cd target/aarch64-unknown-linux-gnu/prod
+        build_md5=$(md5sum "ckb" | awk '{print $1}')
+        if [ "$build_md5" == "$wget_md5" ]; then
+            echo "MD5 sums are equal."
+        else
+            echo "MD5 sums are different:"
+            echo "build_md5 1: $build_md5"
+            echo "wget_md5 2: $wget_md5"
+            # exit 1
+        fi
+    env:
+      REL_PKG: aarch64-unknown-linux-gnu
+      CKB_VERSION: ${{ github.event.inputs.ckb_version }}
+
+  package-for-centos:
+    name: package-for-centos
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - rel_pkg: "x86_64-unknown-centos-gnu"
+            build_target: "prod"
+          - rel_pkg: "x86_64-unknown-centos-gnu-portable"
+            build_target: "prod_portable"
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          ref: ${{ github.event.inputs.ckb_version }}
+          repository: nervosnetwork/ckb
+    - name: Set Env
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        echo "GIT_TAG_NAME=$GIT_TAG_NAME" >> $GITHUB_ENV
+    - name: Build CKB and Package CKB
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        wget https://github.com/nervosnetwork/ckb/releases/download/${CKB_VERSION}/ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
+        tar -zxvf ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
+        wget_md5=$(md5sum "ckb_${CKB_VERSION}_${REL_PKG}/ckb" | awk '{print $1}')
+        docker run --rm -i -w /ckb -v $(pwd):/ckb $BUILDER_IMAGE make ${{ matrix.build_target }}
+        cd target/prod
+        build_md5=$(md5sum "ckb" | awk '{print $1}')
+        if [ "$build_md5" == "$wget_md5" ]; then
+            echo "MD5 sums are equal."
+        else
+            echo "MD5 sums are different:"
+            echo "build_md5 1: $build_md5"
+            echo "wget_md5 2: $wget_md5"
+            # exit 1
+        fi
+    env:
+      BUILDER_IMAGE: nervos/ckb-docker-builder:centos-7-rust-1.71.1-openssl-3.1.3
+      REL_PKG: ${{ matrix.rel_pkg }}
+      CKB_VERSION: ${{ github.event.inputs.ckb_version }}
+
+  package-for-mac:
+    name: package-for-mac
+    runs-on: macos-11
+    strategy:
+      matrix:
+        include:
+          - rel_pkg: "x86_64-apple-darwin"
+            build_target: "prod"
+          - rel_pkg: "x86_64-apple-darwin-portable"
+            build_target: "prod_portable"
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          ref: ${{ github.event.inputs.ckb_version }}
+          repository: nervosnetwork/ckb
+    - name: Set Env
+      run: |
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        echo "GIT_TAG_NAME=$GIT_TAG_NAME" >> $GITHUB_ENV
+    - name: Build CKB and Package CKB
+      run: |
+        brew install md5sha1sum
+        export GIT_TAG_NAME=` echo ${{ github.ref }} | awk -F '/' '{print $4}' `
+        wget https://github.com/nervosnetwork/ckb/releases/download/${CKB_VERSION}/ckb_${CKB_VERSION}_${REL_PKG}.zip
+        unzip ckb_${CKB_VERSION}_${REL_PKG}.zip
+        wget_md5=$(md5sum "ckb_${CKB_VERSION}_${REL_PKG}/ckb" | awk '{print $1}')
+        make ${{ matrix.build_target }}
+        cd target/prod
+        build_md5=$(md5sum "ckb" | awk '{print $1}')
+        if [ "$build_md5" == "$wget_md5" ]; then
+            echo "MD5 sums are equal."
+        else
+            echo "MD5 sums are different:"
+            echo "build_md5 1: $build_md5"
+            echo "wget_md5 2: $wget_md5"
+            # exit 1
+        fi
+    env:
+      REL_PKG: ${{ matrix.rel_pkg }}
+      CKB_VERSION: ${{ github.event.inputs.ckb_version }}
