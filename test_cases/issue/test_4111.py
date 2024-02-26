@@ -60,7 +60,6 @@ class Test4111(CkbTest):
                                                             api_url=node.getClient().url, fee=-100)
             return invoke_hash
         except Exception as e:
-            print("!!!e:", e)
             if "Resolve failed Dead" in e.args[0]:
                 try_count -= 1
                 time.sleep(3)

@@ -25,9 +25,9 @@ class TestGetTransaction:
         cluster = get_cluster
         account1 = CkbTest.Ckb_cli.util_key_info_by_private_key(CkbTest.Config.ACCOUNT_PRIVATE_1)
         tx_hash = CkbTest.Ckb_cli.wallet_transfer_by_private_key(CkbTest.Config.ACCOUNT_PRIVATE_1,
-                                                              account1["address"]["testnet"],
-                                                              140,
-                                                              cluster.ckb_nodes[0].client.url)
+                                                                 account1["address"]["testnet"],
+                                                                 140,
+                                                                 cluster.ckb_nodes[0].client.url)
 
         # pending tx
         response_enable_commit = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash, None, True)
@@ -74,9 +74,9 @@ class TestGetTransaction:
         cluster = get_cluster
         account1 = CkbTest.Ckb_cli.util_key_info_by_private_key(CkbTest.Config.ACCOUNT_PRIVATE_1)
         tx_hash = CkbTest.Ckb_cli.wallet_transfer_by_private_key(CkbTest.Config.ACCOUNT_PRIVATE_1,
-                                                              account1["address"]["testnet"],
-                                                              140,
-                                                              cluster.ckb_nodes[0].client.url)
+                                                                 account1["address"]["testnet"],
+                                                                 140,
+                                                                 cluster.ckb_nodes[0].client.url)
 
         # pending tx
         response_use_default = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
@@ -84,3 +84,32 @@ class TestGetTransaction:
         assert response['tx_status']['status'] == "pending"
         assert response_use_default['tx_status']['status'] == "pending"
         CkbTest.Miner.miner_until_tx_committed(cluster.ckb_nodes[0], tx_hash)
+
+    def test_tx_status_with_cell_base_tx(self, get_cluster):
+        """
+        https://github.com/nervosnetwork/ckb/pull/4283
+        """
+        cluster = get_cluster
+        tip_number = cluster.ckb_nodes[0].getClient().get_tip_block_number()
+        block = cluster.ckb_nodes[0].getClient().get_block_by_number(hex(tip_number))
+        tx = cluster.ckb_nodes[0].getClient().get_transaction(block['transactions'][0]['hash'])
+        assert tx['tx_status']['block_number'] == hex(tip_number)
+        assert tx['tx_status']['block_hash'] == block['header']['hash']
+
+    def test_tx_status_normal_tx(self, get_cluster):
+        cluster = get_cluster
+        account1 = CkbTest.Ckb_cli.util_key_info_by_private_key(CkbTest.Config.ACCOUNT_PRIVATE_1)
+        tx_hash = CkbTest.Ckb_cli.wallet_transfer_by_private_key(CkbTest.Config.ACCOUNT_PRIVATE_1,
+                                                                 account1["address"]["testnet"],
+                                                                 140,
+                                                                 cluster.ckb_nodes[0].client.url)
+
+        # pending tx
+        response_use_default = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
+        response = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash, None, False)
+        assert response['tx_status']['status'] == "pending"
+        assert response_use_default['tx_status']['status'] == "pending"
+        CkbTest.Miner.miner_until_tx_committed(cluster.ckb_nodes[0], tx_hash)
+        tx = cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
+        block_hash = cluster.ckb_nodes[0].getClient().get_block_hash(tx['tx_status']['block_number'])
+        assert block_hash == tx['tx_status']['block_hash']
