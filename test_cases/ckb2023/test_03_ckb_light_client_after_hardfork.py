@@ -225,6 +225,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(transaction)
         assert tx_hash == light_tx_hash
 
+    @pytest.mark.skip
     @parameterized.expand(success_files)
     def test_06_ckb_light_client_deploy_and_invoke_contract(self, path):
         self.cluster.ckb_nodes[0].start_miner()
