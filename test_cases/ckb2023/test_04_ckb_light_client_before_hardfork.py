@@ -71,8 +71,8 @@ class TestCkbLightClientAfterHardFork(CkbTest):
                                                              hash_type="type",
                                                              api_url=node.getClient().url)
             self.Node.wait_light_sync_height(self.ckb_light_node_current, node.getClient().get_tip_block_number(), 200)
+            light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(tx_msg)
             for i in range(100):
-                light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(tx_msg)
                 light_ret = node.getClient().get_transaction(light_tx_hash)
                 time.sleep(1)
                 print("light ret status:", light_ret['tx_status']['status'])

@@ -170,9 +170,9 @@ class TestRpc(CkbTest):
         unsubscribe topic 1
             unsubscribe successful
         """
+
         client = self.node113.getClient()
         client.url = f"http://{self.node113.ckb_config['ckb_rpc_listen_address']}"
-
         socket = self.node113.subscribe_telnet("new_tip_header")
         self.Miner.miner_with_version(self.node113, "0x0")
         ret = socket.read_very_eager()

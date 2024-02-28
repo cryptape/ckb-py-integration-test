@@ -166,7 +166,9 @@ class TestRpc(CkbTest):
         # 113 support
         with pytest.raises(Exception) as exc_info:
             socket = self.node113.subscribe_websocket("new_tip_header", self.node113.rpcUrl.replace("http://", ""))
+
         expected_error_message = "not allowed. POST or OPTIONS is required"
+
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
