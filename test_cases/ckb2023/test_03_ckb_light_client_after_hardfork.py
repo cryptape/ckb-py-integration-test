@@ -225,12 +225,12 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         light_tx_hash = self.ckb_light_node_current.getClient().send_transaction(transaction)
         assert tx_hash == light_tx_hash
 
-    @pytest.mark.skip
-    @parameterized.expand(success_files)
-    def test_06_ckb_light_client_deploy_and_invoke_contract(self, path):
-        self.cluster.ckb_nodes[0].start_miner()
-        self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.cluster.ckb_nodes[0])
-        self.cluster.ckb_nodes[0].start_miner()
+    # @pytest.mark.skip
+    # @parameterized.expand(success_files)
+    # def test_06_ckb_light_client_deploy_and_invoke_contract(self, path):
+    #     self.cluster.ckb_nodes[0].start_miner()
+    #     self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.cluster.ckb_nodes[0])
+    #     self.cluster.ckb_nodes[0].start_miner()
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
         if try_count < 0:
