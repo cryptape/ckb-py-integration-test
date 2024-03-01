@@ -2,13 +2,13 @@ from framework.helper.contract import deploy_ckb_contract, invoke_ckb_contract, 
 from framework.util import get_project_root
 from framework.config import MINER_PRIVATE_1
 from framework.helper.miner import miner_until_tx_committed
-from test_cases.rpc.node_fixture import get_cluster
+from test_cases.rpc.node_fixture import get_cluster_indexer
 
 
 class TestGetCellsCapacity:
 
-    def test_get_cells_capacity_output_data_filter_mode(self, get_cluster):
-        cluster = get_cluster
+    def test_get_cells_capacity_output_data_filter_mode(self, get_cluster_indexer):
+        cluster = get_cluster_indexer
         deploy_hash = deploy_ckb_contract(MINER_PRIVATE_1,
                                           f"{get_project_root()}/source/contract/always_success",
                                           enable_type_id=True,
@@ -48,7 +48,19 @@ class TestGetCellsCapacity:
             }
         }, "asc", "0xff", None)
 
-        get_cells_capacity_ret = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+        get_cells_capacity_ret_byIndex = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+            "script": {
+                "code_hash": codehash,
+                "hash_type": "type",
+                "args": "0x02"
+            },
+            "script_type": "type",
+            "filter": {
+                "output_data": "0x01",
+                "output_data_filter_mode": "prefix"
+            }
+        })
+        get_cells_capacity_ret_byRichIndex = cluster.ckb_nodes[1].getClient().get_cells_capacity({
             "script": {
                 "code_hash": codehash,
                 "hash_type": "type",
@@ -62,7 +74,7 @@ class TestGetCellsCapacity:
         })
 
         assert ret['objects'][0]['output_data'] == '0x0101'
-        assert get_cells_capacity_ret['capacity'] == ret['objects'][0]['output']['capacity']
+        assert get_cells_capacity_ret_byRichIndex['capacity'] == get_cells_capacity_ret_byIndex['capacity'] == ret['objects'][0]['output']['capacity']
 
         ret = cluster.ckb_nodes[0].getClient().get_cells({
             "script": {
@@ -76,7 +88,19 @@ class TestGetCellsCapacity:
                 "output_data_filter_mode": "prefix"
             }
         }, "asc", "0xff", None)
-        get_cells_capacity_ret = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+        get_cells_capacity_ret_byIndex = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+            "script": {
+                "code_hash": codehash,
+                "hash_type": "type",
+                "args": "0x02"
+            },
+            "script_type": "type",
+            "filter": {
+                "output_data": "0x02",
+                "output_data_filter_mode": "prefix"
+            }
+        })
+        get_cells_capacity_ret_byRichIndex = cluster.ckb_nodes[1].getClient().get_cells_capacity({
             "script": {
                 "code_hash": codehash,
                 "hash_type": "type",
@@ -89,7 +113,7 @@ class TestGetCellsCapacity:
             }
         })
         assert ret['objects'][0]['output_data'] == '0x0202'
-        assert get_cells_capacity_ret['capacity'] == ret['objects'][0]['output']['capacity']
+        assert get_cells_capacity_ret_byRichIndex['capacity'] == get_cells_capacity_ret_byIndex['capacity'] == ret['objects'][0]['output']['capacity']
 
         # output_data_filter_mode : exact
         ret = cluster.ckb_nodes[0].getClient().get_cells({
@@ -104,7 +128,19 @@ class TestGetCellsCapacity:
                 "output_data_filter_mode": "exact"
             }
         }, "asc", "0xff", None)
-        get_cells_capacity_ret = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+        get_cells_capacity_ret_byIndex = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+            "script": {
+                "code_hash": codehash,
+                "hash_type": "type",
+                "args": "0x02"
+            },
+            "script_type": "type",
+            "filter": {
+                "output_data": "0x0303",
+                "output_data_filter_mode": "exact"
+            }
+        })
+        get_cells_capacity_ret_byRichIndex = cluster.ckb_nodes[1].getClient().get_cells_capacity({
             "script": {
                 "code_hash": codehash,
                 "hash_type": "type",
@@ -117,7 +153,7 @@ class TestGetCellsCapacity:
             }
         })
         assert ret['objects'][0]['output_data'] == '0x0303'
-        assert get_cells_capacity_ret['capacity'] == ret['objects'][0]['output']['capacity']
+        assert get_cells_capacity_ret_byRichIndex['capacity'] == get_cells_capacity_ret_byIndex['capacity'] == ret['objects'][0]['output']['capacity']
 
         # output_data_filter_mode : partial
         ret = cluster.ckb_nodes[0].getClient().get_cells({
@@ -132,7 +168,20 @@ class TestGetCellsCapacity:
                 "output_data_filter_mode": "partial"
             }
         }, "asc", "0xff", None)
-        get_cells_capacity_ret = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+
+        get_cells_capacity_ret_byIndexer = cluster.ckb_nodes[0].getClient().get_cells_capacity({
+            "script": {
+                "code_hash": codehash,
+                "hash_type": "type",
+                "args": "0x02"
+            },
+            "script_type": "type",
+            "filter": {
+                "output_data": "0x00000000ffff",
+                "output_data_filter_mode": "partial"
+            }
+        })
+        get_cells_capacity_ret_byRichIndexer = cluster.ckb_nodes[1].getClient().get_cells_capacity({
             "script": {
                 "code_hash": codehash,
                 "hash_type": "type",
@@ -145,4 +194,26 @@ class TestGetCellsCapacity:
             }
         })
         assert ret['objects'][0]['output_data'] == '0xffff00000000ffff'
-        assert get_cells_capacity_ret['capacity'] == ret['objects'][0]['output']['capacity']
+        assert get_cells_capacity_ret_byRichIndexer['capacity'] == get_cells_capacity_ret_byIndexer['capacity'] == ret['objects'][0]['output']['capacity']
+
+        try:
+            cluster.ckb_nodes[0].getClient().get_cells_capacity({
+                "script": {
+                    "code_hash": codehash,
+                    "hash_type": "type",
+                    "args": "0x02"
+                },
+                "script_type": "type",
+                "script_search_mode": "partial",
+                "filter": {
+                    "output_data": "0x00000000ffff",
+                    "output_data_filter_mode": "partial"
+                }
+            })
+
+        except Exception as e:
+            print(f"Caught an exception: {e}")
+            assert "CKB indexer doesn't support search_key.script_search_mode partial search mode" in str(
+                e), f"Unexpected exception: {e}"
+
+
