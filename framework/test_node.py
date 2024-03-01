@@ -16,6 +16,13 @@ class CkbNodeConfigPath(Enum):
         "download/0.114.0"
     )
 
+    v114_rc3 = (
+        "source/template/ckb/v114/ckb.toml.j2",
+        "source/template/ckb/v114/ckb-miner.toml.j2",
+        "source/template/ckb/v114/specs/dev.toml",
+        "download/0.114.0-rc3"
+    )
+
     v114 = (
         "source/template/ckb/v114/ckb.toml.j2",
         "source/template/ckb/v114/ckb-miner.toml.j2",
@@ -162,6 +169,17 @@ class CkbNode:
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
         # //todo replace by rpc
+        # //todo
+        time.sleep(3)
+
+    def startWithRichIndexer(self):
+        """
+        support richIndexer
+        Returns:
+
+        """
+        self.ckb_pid = run_command(
+            "cd {ckb_dir} && ./ckb run --rich-indexer  --skip-spec-check > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
         time.sleep(3)
 
     def stop(self):
