@@ -472,7 +472,6 @@ def tx_add_input_cell_without_check(tx_hash, index, tx_file):
         f.write(tx_info_str)
 
 
-
 def tx_add_header_dep(block_hash, tx_file):
     with open(tx_file, "r") as file:
         tx_info_str = file.read()
@@ -799,3 +798,84 @@ def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only
     yaml_data = yaml.safe_dump(yaml.safe_load(run_command(cmd)))
     parsed_data = yaml.safe_load(yaml_data)
     return parsed_data["deployments"]
+
+
+def get_indexer_tip(raw_data=False, no_color=False, debug=False, local_only=False,
+                    api_url="http://127.0.0.1:8114"):
+    cmd = 'rpc get_indexer_tip'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --output-format yaml'
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    yaml_data = yaml.safe_dump(yaml.safe_load(run_command(cmd)))
+    parsed_data = yaml.safe_load(yaml_data)
+    return parsed_data["block_number"]
+
+
+def get_cells(json_path: str, order="desc", limit=1, raw_data=False, no_color=False, debug=False, local_only=False,
+              output_format='json',
+              api_url="http://127.0.0.1:8114"):
+    cmd = 'rpc get_cells'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --json-path {json_path}'
+    cmd += f' --order {order}'
+    cmd += f' --limit {limit}'
+    cmd += f' --output-format {output_format}'
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    return json.loads(run_command(cmd))
+
+
+def get_transactions(json_path: str, order="desc", limit=1, raw_data=False, no_color=False, debug=False,
+                     local_only=False,
+                     output_format='json',
+                     api_url="http://127.0.0.1:8114"):
+    cmd = 'rpc get_transactions'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --json-path {json_path}'
+    cmd += f' --order {order}'
+    cmd += f' --limit {limit}'
+    cmd += f' --output-format {output_format}'
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    return json.loads(run_command(cmd))
+
+
+def get_cells_capacity(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
+                       output_format='json',
+                       api_url="http://127.0.0.1:8114"):
+    cmd = 'rpc get_cells_capacity'
+    if raw_data:
+        cmd += ' --raw-data'
+    if no_color:
+        cmd += ' --no-color'
+    if debug:
+        cmd += ' --debug'
+    if local_only:
+        cmd += ' --local-only'
+    cmd += f' --json-path {json_path}'
+    cmd += f' --output-format {output_format}'
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    return json.loads(run_command(cmd))

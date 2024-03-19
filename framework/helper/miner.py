@@ -25,7 +25,7 @@ def miner_until_tx_committed(node, tx_hash, with_unknown=False):
     for i in range(100):
         tx_response = node.getClient().get_transaction(tx_hash)
         if tx_response['tx_status']['status'] == "committed":
-            return
+            return tx_response
         if tx_response['tx_status']['status'] == "pending" or tx_response['tx_status']['status'] == "proposed":
             miner_with_version(node, "0x0")
             time.sleep(1)
