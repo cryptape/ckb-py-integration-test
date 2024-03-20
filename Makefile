@@ -1,12 +1,12 @@
 prepare:
-	python3 -m venv venv
+	python -m venv venv
 	. venv/bin/activate
-	python3 -m pip install --upgrade pip
+	python -m pip install --upgrade pip
 	pip install -r requirements.txt
 	echo "install ckb"
-	python3 -m download
+	python -m download
 
-	python3 -m download_ckb_light_client
+	python -m download_ckb_light_client
 	echo "install ckb cli"
 	sh prepare.sh
 
