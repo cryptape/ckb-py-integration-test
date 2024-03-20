@@ -39,6 +39,11 @@ class Cluster:
             # todo remove sleep
         time.sleep(3)
 
+    def start_all_nodesWithRichIndexer(self):
+        for node in self.ckb_nodes:
+            node.startWithRichIndexer()
+        time.sleep(3)
+
     def stop_all_nodes(self):
         for node in self.ckb_nodes:
             node.stop()

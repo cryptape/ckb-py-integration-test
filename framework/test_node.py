@@ -9,13 +9,25 @@ from websocket import create_connection, WebSocket
 
 
 class CkbNodeConfigPath(Enum):
+
     CURRENT_TEST = (
-        "source/template/ckb/v112/ckb.toml.j2",
-        "source/template/ckb/v112/ckb-miner.toml.j2",
-        "source/template/ckb/v112/specs/dev.toml",
-        "download/0.114.0"
+        "source/template/ckb/v115/ckb.toml.j2",
+        "source/template/ckb/v115/ckb-miner.toml.j2",
+        "source/template/ckb/v115/specs/dev.toml",
+        "download/0.115.0"
     )
 
+    CURRENT_MAIN = ("source/template/ckb/v115/ckb.toml.j2",
+                    "source/template/ckb/v115/ckb-miner.toml.j2",
+                    "source/template/specs/mainnet.toml.j2",
+                    "download/0.115.0")
+
+    v115_rc1 = (
+        "source/template/ckb/v115/ckb.toml.j2",
+        "source/template/ckb/v115/ckb-miner.toml.j2",
+        "source/template/ckb/v115/specs/dev.toml",
+        "download/0.115.0"
+    )
     v114 = (
         "source/template/ckb/v114/ckb.toml.j2",
         "source/template/ckb/v114/ckb-miner.toml.j2",
@@ -23,10 +35,6 @@ class CkbNodeConfigPath(Enum):
         "download/0.114.0"
     )
     
-    CURRENT_MAIN = ("source/template/ckb/v112/ckb.toml.j2",
-                    "source/template/ckb/v112/ckb-miner.toml.j2",
-                    "source/template/specs/mainnet.toml.j2",
-                    "download/0.114.0")
 
     V113 = (
         "source/template/ckb/v113/ckb.toml.j2",
@@ -162,6 +170,17 @@ class CkbNode:
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
         # //todo replace by rpc
+        time.sleep(3)
+
+    def startWithRichIndexer(self):
+        """
+        support richIndexer
+        Returns:
+
+        """
+        self.ckb_pid = run_command(
+            "cd {ckb_dir} && ./ckb run --rich-indexer  --skip-spec-check > node.log 2>&1 &".format(
+                ckb_dir=self.ckb_dir))
         time.sleep(3)
 
     def stop(self):

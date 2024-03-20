@@ -6,7 +6,7 @@ set -e
 # cp target/release/ckb-cli ../source/ckb-cli
 # cd ../
 cp download/0.110.2/ckb-cli ./source/ckb-cli-old
-cp download/0.114.0/ckb-cli ./source/ckb-cli
+cp download/0.115.0/ckb-cli ./source/ckb-cli
 #git clone https://github.com/quake/ckb-light-client.git
 #cd ckb-light-client
 #git checkout quake/fix-set-scripts-partial-bug

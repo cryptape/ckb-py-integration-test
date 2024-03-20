@@ -126,7 +126,7 @@ def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
     Returns:
 
     """
-    cmd = f"export API_URL={api_url} && {cli_path} wallet get-live-cells --address {ckb_address} --output-format json"
+    cmd = f"export API_URL={api_url} && {cli_path} wallet get-live-cells --address {ckb_address}  --output-format json"
     return json.loads(run_command(cmd))
 
 

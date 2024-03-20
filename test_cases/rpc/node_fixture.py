@@ -21,7 +21,31 @@ def get_cluster():
     cluster.prepare_all_nodes()
     cluster.start_all_nodes()
     cluster.connected_all_nodes()
-    cluster.ckb_nodes[0].start_miner()
+    # cluster.ckb_nodes[0].start_miner()
+    make_tip_height_number(cluster.ckb_nodes[0], 1100)
+    wait_cluster_height(cluster, 1100, 100)
+
+    yield cluster
+    print("\nTeardown TestClass1")
+    cluster.stop_all_nodes()
+    cluster.clean_all_nodes()
+
+
+@pytest.fixture(scope='module')
+def get_cluster_indexer():
+    nodes = [
+        CkbNode.init_dev_by_port(CkbNodeConfigPath.v115_rc1, "cluster_indexer/node{i}".format(i=i), 8114 + i,
+                                 8225 + i)
+        for
+        i in range(0, 2)
+    ]
+
+    cluster = Cluster(nodes)
+    cluster.prepare_all_nodes()
+    cluster.ckb_nodes[0].start()
+    cluster.ckb_nodes[1].startWithRichIndexer()
+    cluster.connected_all_nodes()
+    # cluster.ckb_nodes[0].start_miner()
     make_tip_height_number(cluster.ckb_nodes[0], 1100)
     wait_cluster_height(cluster, 1100, 100)
 
