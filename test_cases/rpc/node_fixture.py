@@ -34,7 +34,7 @@ def get_cluster():
 @pytest.fixture(scope='module')
 def get_cluster_indexer():
     nodes = [
-        CkbNode.init_dev_by_port(CkbNodeConfigPath.v114_rc3, "cluster_indexer/node{i}".format(i=i), 8114 + i,
+        CkbNode.init_dev_by_port(CkbNodeConfigPath.v115_rc1, "cluster_indexer/node{i}".format(i=i), 8114 + i,
                                  8225 + i)
         for
         i in range(0, 2)
