@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import json
-=======
->>>>>>> a197a14 (add replace test)
 import time
 
 import pytest
@@ -38,10 +35,6 @@ class TestRpc(CkbTest):
         cls.node113.stop()
         cls.node113.clean()
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a197a14 (add replace test)
     def test_link_count_max(self):
         """
             link tcp
@@ -170,7 +163,6 @@ class TestRpc(CkbTest):
         assert "ckb" not in str(ret)
         self.node112.restart()
         self.node113.restart()
-<<<<<<< HEAD
 
     def test_unsubscribe(self):
         """
@@ -195,5 +187,3 @@ class TestRpc(CkbTest):
         self.Miner.miner_with_version(self.node113, "0x0")
         ret = socket.read_very_eager()
         assert ret.decode('utf-8') == ""
-=======
->>>>>>> a197a14 (add replace test)
