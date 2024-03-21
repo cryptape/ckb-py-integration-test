@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 -m pytest "$1" -x --exitfirst
+python3 -m pytest "$1"
 pytest_exit_code=$?
 
 if [ "$pytest_exit_code" -ne 0 ]; then
@@ -8,7 +8,9 @@ if [ "$pytest_exit_code" -ne 0 ]; then
     sleep 3
     rm -rf tmp
     echo "run failed "
-    mv report/report.html "report/${1////_}_failed.html"
+    if [ -e report/report.html ]; then
+        mv report/report.html "report/${1////_}_failed.html"
+    fi
     exit "$pytest_exit_code"
 fi
 
