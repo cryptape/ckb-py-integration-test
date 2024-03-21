@@ -5,7 +5,7 @@ if [ $? == 1 ];then
     rm -rf tmp
     echo "run failed "
     mv report/report.html report/${1////_}_failed.html
-    exit -1
+    exit 1
 fi
 pkill ckb
 sleep 3
