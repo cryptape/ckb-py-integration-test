@@ -1,4 +1,4 @@
-python -m pytest $1
+python3 -m pytest $1 -x --exitfirst
 if [ $? == 1 ];then
     pkill ckb
     sleep 3
@@ -11,4 +11,4 @@ pkill ckb
 sleep 3
 rm -rf tmp
 rm -rf report/report.html
-echo "run cusscessful"
+echo "run successful"
