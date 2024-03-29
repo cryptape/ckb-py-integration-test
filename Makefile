@@ -16,6 +16,17 @@ check_failed_html:
         exit 1; \
     fi
 
+failed_cases=
+
+define run_test
+	echo "Running tests for $1"; \
+	if ! bash test.sh "$1"; then \
+		failed_cases+="$1 "; \
+	fi
+endef
+
+.PHONY: test
+
 test_cases := \
     test_cases/replace_rpc \
     test_cases/ckb2023 \
@@ -32,19 +43,16 @@ test_cases := \
     test_cases/tx_pool_refactor \
     test_cases/feature
 
-.PHONY: test
 test:
 	@failed_cases=; \
     for test_case in $(test_cases); do \
-        echo "Running tests for $$test_case"; \
-        if ! bash test.sh "$$test_case"; then \
-            failed_cases+="$$test_case "; \
-        fi; \
+        $(call run_test,$$test_case); \
     done; \
     if [ -n "$$failed_cases" ]; then \
         echo "Some test cases failed: $$failed_cases"; \
         exit 1; \
     fi
+
 
 clean:
 	pkill ckb
