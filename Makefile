@@ -19,33 +19,35 @@ check_failed_html:
 failed_cases=
 
 define run_test
-	echo "Running tests for $1"; \
-	if ! bash test.sh "$1"; then \
-		failed_cases+="$1 "; \
+	echo "Running tests for $$1"; \
+	cd $$1; \
+	if ! bash ./test.sh; then \
+		failed_cases+="$$1 "; \
 	fi
 endef
 
 .PHONY: test
 
 test_cases := \
-    test_cases/replace_rpc \
-    test_cases/ckb2023 \
-    test_cases/ckb_cli \
-    test_cases/contracts \
-    test_cases/example \
-    test_cases/framework \
-    test_cases/light_client \
-    test_cases/mocking \
-    test_cases/node_compatible \
-    test_cases/rpc \
-    test_cases/soft_fork \
-    test_cases/issue \
-    test_cases/tx_pool_refactor \
-    test_cases/feature
+    "test_cases/replace_rpc" \
+    "test_cases/ckb2023" \
+    "test_cases/ckb_cli" \
+    "test_cases/contracts" \
+    "test_cases/example" \
+    "test_cases/framework" \
+    "test_cases/light_client" \
+    "test_cases/mocking" \
+    "test_cases/node_compatible" \
+    "test_cases/rpc" \
+    "test_cases/soft_fork" \
+    "test_cases/issue" \
+    "test_cases/tx_pool_refactor" \
+    "test_cases/feature"
 
 test:
 	@failed_cases=; \
     for test_case in $(test_cases); do \
+        echo "DEBUG: Test case: $$test_case"; \
         $(call run_test,$$test_case); \
     done; \
     if [ -n "$$failed_cases" ]; then \
