@@ -7,7 +7,7 @@ class TestGenerateEpochs(CkbTest):
     @classmethod
     def setup_class(cls):
         nodes = [
-            cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.v114_rc3,
+            cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST,
                                          "feature/gene_rate_epochs/node{i}".format(i=i), 8114 + i,
                                          8225 + i)
             for
@@ -17,29 +17,15 @@ class TestGenerateEpochs(CkbTest):
         cls.ckb_spec_config_dict = read_toml_file(get_project_root() + "/" + cls.cluster.ckb_nodes[0].ckb_config_path.ckb_spec_path)
         cls.cluster.ckb_nodes[0].startWithRichIndexer()
         cls.cluster.ckb_nodes[1].start()
-        cls.Miner.make_tip_height_number(nodes[0], 1100)
+        cls.Miner.make_tip_height_number(nodes[0], 100)
         cls.cluster.connected_all_nodes()
-        cls.Node.wait_cluster_height(cls.cluster, 1100, 100)
+        cls.Node.wait_cluster_height(cls.cluster, 100, 1000)
 
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
-
-    def test_demo(self):
-        """
-        test
-        Returns:
-
-        """
-        miner_ACCOUNT= self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
-        self.Ckb_cli.wallet_get_capacity(miner_ACCOUNT["address"]["testnet"],self.cluster.ckb_nodes[0].getClient().url)
-        self.Ckb_cli.wallet_get_live_cells(miner_ACCOUNT["address"]["testnet"],self.cluster.ckb_nodes[0].getClient().url)
-        self.Ckb_cli.wallet_get_capacity(miner_ACCOUNT["address"]["testnet"], self.cluster.ckb_nodes[1].getClient().url)
-        self.Ckb_cli.wallet_get_live_cells(miner_ACCOUNT["address"]["testnet"],
-                                           self.cluster.ckb_nodes[1].getClient().url)
-
 
     def test_01_generate_epochs_0x2(self):
         """
@@ -94,5 +80,3 @@ def parse_hex_string(hex_string):
         return None
     value = int(hex_string, 16)
     return EpochNumberWithFraction(value)
-
-
