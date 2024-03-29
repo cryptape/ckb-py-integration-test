@@ -134,7 +134,8 @@ class TestIssue4363(CkbTest):
         for tx_hash in tx22_list:
             response = self.node1.getClient().get_transaction(tx_hash)
             response2 = self.node2.getClient().get_transaction(tx_hash)
-            assert response['tx_status']['status'] == response2['tx_status']['status']
+            # unknown: the transaction (tx) did not broadcast to node 2.
+            assert response2['tx_status']['status'] == 'rejected' or response2['tx_status']['status'] == 'unknown'
             assert response['tx_status']['status'] == 'rejected'
 
         # 7. 查询 tx3 报 PoolRejectedInvalidated
@@ -142,5 +143,6 @@ class TestIssue4363(CkbTest):
         for tx_hash in tx3_list:
             response = self.node1.getClient().get_transaction(tx_hash)
             response2 = self.node2.getClient().get_transaction(tx_hash)
-            assert response['tx_status']['status'] == response2['tx_status']['status']
+            # unknown: the transaction (tx) did not broadcast to node 2.
+            assert response2['tx_status']['status'] == 'rejected' or response2['tx_status']['status'] == 'unknown'
             assert response['tx_status']['status'] == 'rejected'

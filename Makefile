@@ -20,8 +20,7 @@ failed_cases=
 
 define run_test
 	echo "Running tests for $$1"; \
-	cd $$1; \
-	if ! bash ./test.sh; then \
+	if ! bash test.sh "$$1"; then \
 		failed_cases+="$$1 "; \
 	fi
 endef
@@ -54,6 +53,7 @@ test:
         echo "Some test cases failed: $$failed_cases"; \
         exit 1; \
     fi
+
 
 
 clean:
