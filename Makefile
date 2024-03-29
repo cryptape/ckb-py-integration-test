@@ -28,8 +28,8 @@ endef
 .PHONY: test
 
 test_cases := \
+	"test_cases/ckb2023" \
     "test_cases/replace_rpc" \
-    "test_cases/ckb2023" \
     "test_cases/ckb_cli" \
     "test_cases/contracts" \
     "test_cases/example" \
