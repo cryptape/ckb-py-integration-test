@@ -29,17 +29,19 @@ test_cases := \
 #    test_cases/feature
 
 test:
-	@failed_cases=; \
+    @failed_cases=; \
     for test_case in $(test_cases); do \
         echo "Running tests for $$test_case"; \
         if ! bash test.sh "$$test_case"; then \
-            failed_cases+="$$test_case "; \
+            echo "$$test_case" >> failed_test_cases.txt; \
         fi \
     done; \
-    if [ -n "$$failed_cases" ]; then \
-        echo "Some test cases failed: $$failed_cases"; \
+    if [ -s failed_test_cases.txt ]; then \
+        echo "Some test cases failed: $$(cat failed_test_cases.txt)"; \
+        rm -f failed_test_cases.txt; \
         exit 1; \
     fi
+
 
 clean:
 	pkill ckb
