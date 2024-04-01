@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 -m pytest "$1"
+python3 -m pytest -rs "$1"
 pytest_exit_code=$?
 
 if [ "$pytest_exit_code" -ne 0 ]; then
