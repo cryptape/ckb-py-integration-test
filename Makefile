@@ -1,3 +1,5 @@
+.PHONY: prepare test clean docs
+
 prepare:
 	python3 -m venv venv
 	. venv/bin/activate
@@ -10,30 +12,36 @@ prepare:
 	echo "install ckb cli"
 	sh prepare.sh
 
-check_failed_html:
-	@if test -n "$$(ls report/*failed.html 2>/dev/null)"; then \
-        echo "Error: Failed HTML files found in the 'report' directory"; \
-        exit 1; \
-    fi
+test_cases := \
+    test_cases/replace_rpc \
+    test_cases/ckb_cli \
+    test_cases/ckb2023 \
+    test_cases/contracts \
+    test_cases/example \
+    test_cases/framework \
+    test_cases/light_client \
+    test_cases/mocking \
+    test_cases/node_compatible \
+    test_cases/rpc \
+    test_cases/soft_fork \
+    test_cases/issue \
+    test_cases/tx_pool_refactor \
+    test_cases/feature
+
 test:
-	bash test.sh test_cases/replace_rpc
-	bash test.sh test_cases/ckb2023
-	bash test.sh test_cases/ckb_cli
-	bash test.sh test_cases/contracts
-	bash test.sh test_cases/example
-	bash test.sh test_cases/framework
-	bash test.sh test_cases/light_client
-	bash test.sh test_cases/mocking
-	bash test.sh test_cases/node_compatible
-	bash test.sh test_cases/rpc
-	bash test.sh test_cases/soft_fork
-	bash test.sh test_cases/issue
-	bash test.sh test_cases/tx_pool_refactor
-	bash test.sh test_cases/feature
-	@if test -n "$$(ls report/*failed.html 2>/dev/null)"; then \
-        echo "Error: Failed HTML files found in the 'report' directory"; \
+	@failed_cases=; \
+    for test_case in $(test_cases); do \
+        echo "Running tests for $$test_case"; \
+        if ! bash test.sh "$$test_case"; then \
+            echo "$$test_case" >> failed_test_cases.txt; \
+        fi \
+    done; \
+    if [ -s failed_test_cases.txt ]; then \
+        echo "Some test cases failed: $$(cat failed_test_cases.txt)"; \
+        rm -f failed_test_cases.txt; \
         exit 1; \
     fi
+
 
 clean:
 	pkill ckb
