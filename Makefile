@@ -29,7 +29,7 @@ test_cases := \
 #    test_cases/feature
 
 test:
-    @failed_cases=; \
+	@failed_cases=; \
     for test_case in $(test_cases); do \
         echo "Running tests for $$test_case"; \
         if ! bash test.sh "$$test_case"; then \
