@@ -31,20 +31,36 @@ test_cases := \
 #    test_cases/issue \
 #    test_cases/tx_pool_refactor \
 #    test_cases/feature
-
 .PHONY: test
+
+test_cases := \
+	"test_cases/ckb2023" \
+#    "test_cases/replace_rpc" \
+#    "test_cases/ckb_cli" \
+#    "test_cases/contracts" \
+#    "test_cases/example" \
+#    "test_cases/framework" \
+#    "test_cases/light_client" \
+#    "test_cases/mocking" \
+#    "test_cases/node_compatible" \
+#    "test_cases/rpc" \
+#    "test_cases/soft_fork" \
+#    "test_cases/issue" \
+#    "test_cases/tx_pool_refactor" \
+#    "test_cases/feature"
+
 test:
 	@failed_cases=; \
     for test_case in $(test_cases); do \
-        echo "Running tests for $$test_case"; \
-        if ! bash test.sh "$$test_case"; then \
-            failed_cases+="$$test_case "; \
-        fi; \
+        echo "DEBUG: Test case: $$test_case"; \
+        $(call run_test,$$test_case); \
     done; \
     if [ -n "$$failed_cases" ]; then \
         echo "Some test cases failed: $$failed_cases"; \
         exit 1; \
     fi
+
+
 
 clean:
 	pkill ckb
