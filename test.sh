@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# Initialize variables to store passed and failed test cases
-passed_cases=""
-failed_cases=""
-
 # Function to run pytest and process the output
 run_test() {
-    # Run pytest and capture the output
-    pytest_output=$(python3 -m pytest "$1")
+    # Run pytest with verbose and no capture
+    pytest_output=$(python3 -m pytest -v -s "$1")
 
     # Check if pytest output contains "skipped"
     if echo "$pytest_output" | grep -q "skipped"; then
