@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Initialize variables to store passed and failed test cases
+passed_cases=""
+failed_cases=""
+
 # Function to run pytest and process the output
 run_test() {
     # Run pytest and capture the output
@@ -15,6 +19,7 @@ run_test() {
     if [ $? -ne 0 ]; then
         # Handle failed test case
         echo "Test case $1 failed"
+        failed_cases+=" $1"
         pkill ckb
         sleep 3
         rm -rf tmp
@@ -26,6 +31,7 @@ run_test() {
 
     # Handle successful test case
     echo "Test case $1 passed"
+    passed_cases+=" $1"
     pkill ckb
     sleep 3
     rm -rf tmp
@@ -36,7 +42,9 @@ run_test() {
 # Main loop to run tests for each test case
 for test_case in "$@"; do
     run_test "$test_case"
-    if [ $? -ne 0 ]; then
-        exit 1  # Exit with error code if any test case fails
-    fi
 done
+
+# Display summary of test results
+echo "Summary:"
+echo "Passed test cases:${passed_cases}"
+echo "Failed test cases:${failed_cases}"

@@ -15,18 +15,18 @@ prepare:
 test_cases := \
     test_cases/replace_rpc \
     test_cases/ckb_cli \
-#    test_cases/ckb2023 \
-#    test_cases/contracts \
-#    test_cases/example \
-#    test_cases/framework \
-#    test_cases/light_client \
-#    test_cases/mocking \
-#    test_cases/node_compatible \
-#    test_cases/rpc \
-#    test_cases/soft_fork \
-#    test_cases/issue \
-#    test_cases/tx_pool_refactor \
-#    test_cases/feature
+    test_cases/ckb2023 \
+    test_cases/contracts \
+    test_cases/example \
+    test_cases/framework \
+    test_cases/light_client \
+    test_cases/mocking \
+    test_cases/node_compatible \
+    test_cases/rpc \
+    test_cases/soft_fork \
+    test_cases/issue \
+    test_cases/tx_pool_refactor \
+    test_cases/feature
 
 test:
 	@failed_cases=; \
