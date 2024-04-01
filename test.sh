@@ -5,18 +5,22 @@ passed_cases=""
 failed_cases="None"
 
 # Function to run pytest and process the output
+# Function to run pytest and process the output
 run_test() {
-    # Run pytest with verbose and no capture
-    pytest_output=$(python3 -m pytest -v -s "$1")
+    # Run pytest with verbose and no capture, redirect stderr to stdout
+    pytest_output=$(python3 -m pytest -vv "$1" 2>&1)
+
+    # Print pytest output
+    echo "$pytest_output"
 
     # Check if pytest output contains "skipped"
-    if echo "$pytest_output" | grep -q "skipped"; then
+    if grep -q "skipped" <<< "$pytest_output"; then
         echo "Test case $1 was skipped"
         return 0  # Exit with success code
     fi
 
     # Check if pytest output contains "failed"
-    if echo "$pytest_output" | grep -q "failed"; then
+    if grep -q "failed" <<< "$pytest_output"; then
         # Handle failed test case
         echo "Test case $1 failed"
         failed_cases+=" $1"
@@ -29,9 +33,9 @@ run_test() {
     return 0
 }
 
+
 # Main loop to run tests for each test case
 for test_case in "$@"; do
-    echo "Running tests for $test_case"
     run_test "$test_case"
 done
 
