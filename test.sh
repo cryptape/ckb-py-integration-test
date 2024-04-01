@@ -31,6 +31,7 @@ run_test() {
 
 # Main loop to run tests for each test case
 for test_case in "$@"; do
+    echo "Running tests for $test_case"
     run_test "$test_case"
 done
 
