@@ -2,8 +2,8 @@
 
 # Initialize variables to store passed and failed test cases
 passed_cases=""
-failed_cases="None"
-
+failed_cases=""
+error_cases=""
 # Function to run pytest and process the output
 # Function to run pytest and process the output
 run_test() {
@@ -13,17 +13,18 @@ run_test() {
     # Print pytest output
     echo "$pytest_output"
 
-    # Check if pytest output contains "skipped"
-    if grep -q "skipped" <<< "$pytest_output"; then
-        echo "Test case $1 was skipped"
-        return 0  # Exit with success code
-    fi
-
     # Check if pytest output contains "failed"
-    if grep -q "failed" <<< "$pytest_output"; then
+    if grep -q " FAILED " <<< "$pytest_output"; then
         # Handle failed test case
         echo "Test case $1 failed"
         failed_cases+=" $1"
+        return 1
+    fi
+
+    if grep -q " ERROR " <<< "$pytest_output"; then
+        # Handle failed test case
+        echo "Test case $1 error"
+        error_cases+=" $1"
         return 1
     fi
 
@@ -43,3 +44,20 @@ done
 echo "Summary:"
 echo "Passed test cases:${passed_cases}"
 echo "Failed test cases:${failed_cases}"
+echo "ERROR test cases:${error_cases}"
+
+# Check if there are any failed cases
+if [ -n "$failed_cases" ]; then
+    echo "Exist failed cases:${failed_cases//\//_}"
+    mv report/report.html "report/${failed_cases//\//_}.html"
+    exit 1
+fi
+
+# Check if there are any error cases
+if [ -n "$error_cases" ]; then
+    echo "Exist error cases:${error_cases//\//_}"
+    mv report/report.html "report/${error_cases//\//_}.html"
+    exit 2
+fi
+rm -rf report/report.html
+echo "No failed or error cases found"
