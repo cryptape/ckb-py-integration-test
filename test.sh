@@ -20,7 +20,7 @@ run_test() {
     fi
 
     # Check if pytest output contains "failed"
-    if grep -q "failed" <<< "$pytest_output"; then
+    if grep -q "FAILED" <<< "$pytest_output"; then
         # Handle failed test case
         echo "Test case $1 failed"
         failed_cases+=" $1"
