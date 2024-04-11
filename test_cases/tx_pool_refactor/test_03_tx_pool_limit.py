@@ -72,7 +72,7 @@ class TestTxPoolLimit(CkbTest):
         """
         test linked tx limit
         1. keep sending linked transactions until an error occurs
-            ERROR :PoolRejectedTransactionByMaxAncestorsCountLimit
+            ERROR :PoolIsFull
         2. query max max_ancestors_count
          max_ancestors_count == 125
         :return:
@@ -92,7 +92,7 @@ class TestTxPoolLimit(CkbTest):
                 self.Node.wait_get_transaction(self.node, tx_hash, "pending")
                 num += 1
         print(exc_info)
-        expected_error_message = "PoolRejectedTransactionByMaxAncestorsCountLimit"
+        expected_error_message = "PoolIsFull"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}'" \
             f" not found in actual string '{exc_info.value.args[0]}'"
