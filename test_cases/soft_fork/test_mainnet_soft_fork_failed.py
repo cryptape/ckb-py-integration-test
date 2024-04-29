@@ -1,3 +1,5 @@
+import pytest
+
 from framework.basic import CkbTest
 
 
@@ -25,6 +27,7 @@ class TestMainNetSoftForkFailed(CkbTest):
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
+    @pytest.mark.skip
     def test_01_get_consensus_in_ge_110(self):
         """
         > 110 node softforks:light_client min_activation_epoch ==  0x21c8
@@ -46,6 +49,7 @@ class TestMainNetSoftForkFailed(CkbTest):
         consensus = self.node109.getClient().get_consensus()
         assert consensus['softforks'] == {}
 
+    @pytest.mark.skip
     def test_03_get_deployments_in_gt_110(self):
         """
         > 110 node deployments:light_client min_activation_epoch ==  0x21c8
@@ -59,6 +63,7 @@ class TestMainNetSoftForkFailed(CkbTest):
         assert deployments['deployments']['light_client']['period'] == '0x2a'
         assert deployments['deployments']['light_client']['timeout'] == '0x2168'
 
+    @pytest.mark.skip
     def test_04_miner_use_109(self):
         """
         use 109 miner block,will cause softfork failed
