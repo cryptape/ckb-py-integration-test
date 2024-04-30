@@ -192,6 +192,9 @@ class RPCClient:
     def get_current_epoch(self):
         return self.call("get_current_epoch", [])
 
+    def test_tx_pool_accept(self,tx, outputs_validator):
+        return self.call("test_tx_pool_accept",[tx, outputs_validator])
+
     def call(self, method, params, try_count=15):
 
         headers = {'content-type': 'application/json'}
