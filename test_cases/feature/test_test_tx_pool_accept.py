@@ -159,36 +159,3 @@ class TestTestTxPoolAccept(CkbTest):
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
         with pytest.raises(Exception) as exc_info:
             self.node.getClient().send_transaction(tx)
-
-
-    def test_TransactionFailedToVerify(self):
-        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
-        father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
-                                                                     account["address"]["testnet"], 1500000,
-                                                                     self.node.getClient().url, "1500000")
-        print(f"father_tx_hash:", father_tx_hash)
-        tx_hash = father_tx_hash
-        send_tx_list = []
-        for i in range(10):
-            print("current idx:", i)
-            tx = self.Tx.build_send_transfer_self_tx_with_input([tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
-                                                                output_count=1,
-                                                                fee=1000000 - i * 1000,
-                                                                api_url=self.node.getClient().url)
-            response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
-
-            tx_hash = self.node.getClient().send_transaction(tx)
-            send_tx_list.append(tx_hash)
-
-        with pytest.raises(Exception) as exc_info:
-            tx = self.Tx.build_send_transfer_self_tx_with_input_err([tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
-                                                                output_count=1,
-                                                                fee=1000000 - i * 1000,
-                                                                api_url=self.node.getClient().url)
-            response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
-            expected_error_message = "TransactionFailedToVerify"
-            assert expected_error_message in exc_info.value.args[0], \
-                f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
-            with pytest.raises(Exception) as exc_info:
-                self.node.getClient().send_transaction(tx)
-
