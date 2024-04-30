@@ -14,14 +14,24 @@ class TestTestTxPoolAccept(CkbTest):
         cls.node.start()
         cls.Miner.make_tip_height_number(cls.node, 200)
 
+        cls.node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST,
+                                                 "feature/TestTxPoolAccept/node2", 8115,
+                                                 8226)
+        cls.node2.prepare()
+        cls.node2.start()
+        cls.Miner.make_tip_height_number(cls.node2, 200)
+
     @classmethod
     def teardown_class(cls):
         print("\nTeardown TestClass1")
         cls.node.stop()
         cls.node.clean()
+        cls.node2.stop()
+        cls.node2.clean()
 
     def setup_method(self, method):
-        self.node.getClient().clear_tx_pool()
+        for i in range(5):
+            self.Miner.miner_with_version(self.node,"0x0")
 
     def test_normal_tx(self):
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
@@ -38,24 +48,6 @@ class TestTestTxPoolAccept(CkbTest):
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert tx_pool['pending'][tx_hash]['fee'] == response['fee']
         assert tx_pool['pending'][tx_hash]['cycles'] == response['cycles']
-
-    def test_min_fee_rejected(self):
-        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
-        father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
-                                                                     account["address"]["testnet"], 100000,
-                                                                     self.node.getClient().url, "1500000")
-
-        tx = self.Tx.build_send_transfer_self_tx_with_input([father_tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_1,
-                                                            output_count=15,
-                                                            fee=15,
-                                                            api_url=self.node.getClient().url)
-
-        with pytest.raises(Exception) as exc_info:
-            response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
-        expected_error_message = "PoolRejectedTransactionByMinFeeRate"
-        print("exc_info.value.args[0]:", exc_info.value.args[0])
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
     def test_err_outputs_validator(self):
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
@@ -155,6 +147,77 @@ class TestTestTxPoolAccept(CkbTest):
                                                                 api_url=self.node.getClient().url)
             response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
         expected_error_message = "PoolIsFull"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        with pytest.raises(Exception) as exc_info:
+            self.node.getClient().send_transaction(tx)
+
+    def test_send_link_tx_PoolRejectedTransactionByMaxAncestorsCountLimit(self):
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
+                                                                     account["address"]["testnet"], 100000,
+                                                                     self.node2.getClient().url, "1500000")
+        tx_hash = father_tx_hash
+        with pytest.raises(Exception) as exc_info:
+            for i in range(300):
+                tx = self.Tx.build_send_transfer_self_tx_with_input([tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
+                                                                    output_count=1,
+                                                                    fee=1100090 + i * 1000,
+                                                                    api_url=self.node2.getClient().url)
+                test_tx_pool_accept_response = self.node2.getClient().test_tx_pool_accept(tx, "passthrough")
+                tx_hash = self.node2.getClient().send_transaction(tx)
+        expected_error_message = "PoolRejectedTransactionByMaxAncestorsCountLimit"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        with pytest.raises(Exception) as exc_info:
+            self.node.getClient().send_transaction(tx)
+
+    def test_TransactionFailedToResolve(self):
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
+                                                                     account["address"]["testnet"], 1500000,
+                                                                     self.node.getClient().url, "1500000")
+        tx_hash = father_tx_hash
+        tx_list = []
+        for i in range(3):
+            tx = self.Tx.build_send_transfer_self_tx_with_input([tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
+                                                                output_count=1,
+                                                                fee=1000000 - i * 1000,
+                                                                api_url=self.node.getClient().url)
+            response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
+
+            tx_hash = self.node.getClient().send_transaction(tx)
+            tx_list.append(tx)
+        self.node.getClient().clear_tx_pool()
+
+        with pytest.raises(Exception) as exc_info:
+            self.node.getClient().test_tx_pool_accept(tx_list[-1], "passthrough")
+        expected_error_message = "TransactionFailedToResolve"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        with pytest.raises(Exception) as exc_info:
+            self.node.getClient().send_transaction(tx)
+
+    def test_TransactionFailedToVerify(self):
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
+                                                                     account["address"]["testnet"], 1500000,
+                                                                     self.node.getClient().url, "1500000")
+        tx_hash = father_tx_hash
+        tx = self.Tx.build_send_transfer_self_tx_with_input([tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
+                                                            output_count=1,
+                                                            fee=1000000,
+                                                            api_url=self.node.getClient().url)
+        self.node.getClient().test_tx_pool_accept(tx, "passthrough")
+        tx['witnesses'][0] = "0x00"
+        with pytest.raises(Exception) as exc_info:
+            self.node.getClient().test_tx_pool_accept(tx, "passthrough")
+            txhash = self.node.getClient().send_transaction(tx, "passthrough")
+            response = self.node.getClient().get_transaction(txhash)
+            print("response:", response)
+            self.Miner.miner_until_tx_committed(self.node, txhash)
+
+        expected_error_message = "TransactionFailedToVerify"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
         with pytest.raises(Exception) as exc_info:
