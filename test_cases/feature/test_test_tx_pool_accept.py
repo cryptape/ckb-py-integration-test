@@ -121,10 +121,11 @@ class TestTestTxPoolAccept(CkbTest):
                                                                      account["address"]["testnet"], 100000,
                                                                      self.node.getClient().url, "1500000")
         with pytest.raises(Exception) as exc_info:
-            self.Tx.send_transfer_self_tx_with_input([father_tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
+            tx = self.Tx.build_send_transfer_self_tx_with_input([father_tx_hash], [hex(0)], self.Config.ACCOUNT_PRIVATE_1,
                                                      output_count=1,
                                                      fee=100,
                                                      api_url=self.node.getClient().url)
+            self.node.getClient().test_tx_pool_accept(tx,"passthrough")
         expected_error_message = "PoolRejectedTransactionByMinFeeRate"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
