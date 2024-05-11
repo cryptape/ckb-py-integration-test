@@ -1,4 +1,5 @@
 import time
+from ctypes import Union
 
 import requests
 
@@ -177,8 +178,19 @@ class RPCClient:
     def remove_transaction(self, tx_hash):
         return self.call("remove_transaction", [tx_hash])
 
-    def get_live_cell(self, index, tx_hash, with_data=True):
-        return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data])
+    def get_live_cell(self, index, tx_hash, with_data=True, include_tx_pool: Union[bool, None] = None):
+        """
+        https://github.com/nervosnetwork/ckb/blob/bb677558efdc3e5f0759556720b62169469b555d/rpc/README.md#chain-get_live_cell
+        Args:
+            index:
+            tx_hash:
+            with_data:boolean
+            include_tx_pool:boolean | null
+
+        Returns:CellWithStatus
+
+        """
+        return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data, include_tx_pool])
 
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
