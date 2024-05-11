@@ -25,7 +25,7 @@ class TestGetLiveCell(CkbTest):
                                                               self.node.getClient().url, "1500")
         print(f"txHash:{tx_hash}")
         transaction = self.node.getClient().get_transaction(tx_hash)
-        result = self.node.getClient().get_live_cell(
+        result = self.node.getClient().get_live_cell_with_include_tx_pool(
             transaction["transaction"]["inputs"][0]["previous_output"]["index"],
             transaction["transaction"]["inputs"][0]["previous_output"]["tx_hash"])
         assert result['status'] == 'live'

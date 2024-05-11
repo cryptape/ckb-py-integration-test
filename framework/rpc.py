@@ -178,8 +178,9 @@ class RPCClient:
     def remove_transaction(self, tx_hash):
         return self.call("remove_transaction", [tx_hash])
 
-    def get_live_cell(self, index, tx_hash, with_data=True, include_tx_pool: Union[bool, None] = None):
+    def get_live_cell_with_include_tx_pool(self, index, tx_hash, with_data=True, include_tx_pool: Union[bool, None] = None):
         """
+        over ckb v116.1 version
         https://github.com/nervosnetwork/ckb/blob/bb677558efdc3e5f0759556720b62169469b555d/rpc/README.md#chain-get_live_cell
         Args:
             index:
@@ -191,6 +192,20 @@ class RPCClient:
 
         """
         return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data, include_tx_pool])
+
+    def get_live_cell(self, index, tx_hash, with_data=True):
+        """
+        under ckb v116.1 version
+        https://github.com/nervosnetwork/ckb/blob/bb677558efdc3e5f0759556720b62169469b555d/rpc/README.md#chain-get_live_cell
+        Args:
+            index:
+            tx_hash:
+            with_data:boolean
+
+        Returns:CellWithStatus
+
+        """
+        return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data])
 
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
