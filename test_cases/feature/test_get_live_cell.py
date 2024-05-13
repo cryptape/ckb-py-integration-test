@@ -47,8 +47,6 @@ class TestGetLiveCell(CkbTest):
                                                             output_count=15,
                                                             fee=15000,
                                                             api_url=self.node.getClient().url)
-        response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
-        print(f"send transaction use cellB result:{response}")
         tx_hash = self.node.getClient().send_transaction(tx)
         transaction = self.node.getClient().get_transaction(tx_hash)
         result = self.node.getClient().get_live_cell_with_include_tx_pool(
