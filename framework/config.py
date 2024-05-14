@@ -40,6 +40,7 @@ CKB_MINER_CONFIG = {
 # contract
 ALWAYS_SUCCESS_CONTRACT_PATH = f"{get_project_root()}/source/contract/always_success"
 SPAWN_CONTRACT_PATH = f"{get_project_root()}/source/contract/spawn_peak_memory_2m_to_32m"
+LOOP_CONTRACT_PATH = f"{get_project_root()}/source/contract/test_cases/loop_contract"
 
 
 def get_tmp_path():

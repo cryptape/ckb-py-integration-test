@@ -178,7 +178,8 @@ class RPCClient:
     def remove_transaction(self, tx_hash):
         return self.call("remove_transaction", [tx_hash])
 
-    def get_live_cell_with_include_tx_pool(self, index, tx_hash, with_data=True, include_tx_pool: Union[bool, None] = None):
+    def get_live_cell_with_include_tx_pool(self, index, tx_hash, with_data=True,
+                                           include_tx_pool: Union[bool, None] = None):
         """
         over ckb v116.1 version
         https://github.com/nervosnetwork/ckb/blob/bb677558efdc3e5f0759556720b62169469b555d/rpc/README.md#chain-get_live_cell
@@ -219,8 +220,20 @@ class RPCClient:
     def get_current_epoch(self):
         return self.call("get_current_epoch", [])
 
-    def test_tx_pool_accept(self,tx, outputs_validator):
-        return self.call("test_tx_pool_accept",[tx, outputs_validator])
+    def test_tx_pool_accept(self, tx, outputs_validator="passthrough"):
+        return self.call("test_tx_pool_accept", [tx, outputs_validator])
+
+    def send_test_verify_action(self, action):
+        """
+        suspend
+        resume
+        Args:
+            action:
+
+        Returns:
+
+        """
+        return self.call("send_test_verify_action", [action])
 
     def call(self, method, params, try_count=15):
 

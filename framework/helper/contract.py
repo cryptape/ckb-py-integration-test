@@ -122,11 +122,11 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
             'tx_hash': account_live_cells['live_cells'][i]['tx_hash'],
             'index': account_live_cells['live_cells'][i]['output_index']
         }
-        input_cell_cap += float(account_live_cells['live_cells'][i]['capacity'].replace('(CKB)', "").strip()) * 100000000
+        input_cell_cap += float(
+            account_live_cells['live_cells'][i]['capacity'].replace('(CKB)', "").strip()) * 100000000
         input_cell_out_points.append(input_cell_out_point)
-        if  input_cell_cap> 10000000000:
+        if input_cell_cap > 10000000000:
             break
-
 
     # get output_cells.cap = input_cell.cap - fee
     #  "capacity": "21685.0 (CKB)",
@@ -176,9 +176,9 @@ def invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_ou
 
 @exception_use_old_ckb()
 def build_invoke_ckb_contract(account_private, contract_out_point_tx_hash, contract_out_point_tx_index, type_script_arg,
-                        hash_type="type",
-                        data="0x", fee=1000,
-                        api_url="http://127.0.0.1:8114"):
+                              hash_type="type",
+                              data="0x", fee=1000,
+                              api_url="http://127.0.0.1:8114"):
     """
 
     Args:
@@ -204,6 +204,7 @@ def build_invoke_ckb_contract(account_private, contract_out_point_tx_hash, contr
                                                        api_url=api_url)
     # get input_cell
     account = util_key_info_by_private_key(account_private)
+
     account_address = account["address"]["testnet"]
     account_live_cells = wallet_get_live_cells(account_address, api_url=api_url)
     assert len(account_live_cells['live_cells']) > 0
@@ -214,16 +215,19 @@ def build_invoke_ckb_contract(account_private, contract_out_point_tx_hash, contr
             'tx_hash': account_live_cells['live_cells'][i]['tx_hash'],
             'index': account_live_cells['live_cells'][i]['output_index']
         }
-        input_cell_cap += float(account_live_cells['live_cells'][i]['capacity'].replace('(CKB)', "").strip()) * 100000000
+        input_cell_cap += float(
+            account_live_cells['live_cells'][i]['capacity'].replace('(CKB)', "").strip()) * 100000000
         input_cell_out_points.append(input_cell_out_point)
-        if  input_cell_cap> 10000000000:
+        if input_cell_cap > 15000000000:
             break
-
 
     # get output_cells.cap = input_cell.cap - fee
     #  "capacity": "21685.0 (CKB)",
     output_cell_capacity = input_cell_cap - fee
-
+    change_cell_capacity = 0
+    if output_cell_capacity > 3000000000:
+        change_cell_capacity = output_cell_capacity - 15000000000
+        output_cell_capacity = 15000000000
     output_cell = {
         "capacity": hex(int(output_cell_capacity)),
         # rand ckb address for pass ckb-cli check lock address
@@ -256,6 +260,11 @@ def build_invoke_ckb_contract(account_private, contract_out_point_tx_hash, contr
     # add output
     tx_add_type_out_put(output_cell["type"]["code_hash"], output_cell["type"]["hash_type"], output_cell["type"]["args"],
                         output_cell["capacity"], data, tmp_tx_file)
+
+    if change_cell_capacity > 0:
+        tx_add_type_out_put("0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "type",
+                            account["lock_arg"],
+                            hex(int(change_cell_capacity)), '0x00', tmp_tx_file, False)
     # add dep
     tx_add_cell_dep(cell_dep['tx_hash'], cell_dep['index'], tmp_tx_file)
     # sign
