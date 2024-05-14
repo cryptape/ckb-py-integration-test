@@ -218,8 +218,34 @@ class TestTestTxPoolAccept(CkbTest):
                                                                 fee=1000000 - i * 1000,
                                                                 api_url=self.node.getClient().url)
             response = self.node.getClient().test_tx_pool_accept(tx, "passthrough")
-            expected_error_message = "TransactionFailedToResolve"
-            assert expected_error_message in exc_info.value.args[0], \
-                f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
-            with pytest.raises(Exception) as exc_info:
-                self.node.getClient().send_transaction(tx)
+        expected_error_message = "TransactionFailedToResolve"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        with pytest.raises(Exception) as exc_info:
+            self.node.getClient().send_transaction(tx)
+
+    def test_change_cache_tx(self):
+        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
+                                                                     account["address"]["testnet"], 100000,
+                                                                     self.node.getClient().url, "1500000")
+
+        tx = self.Tx.build_send_transfer_self_tx_with_input([father_tx_hash], ['0x0'], self.Config.ACCOUNT_PRIVATE_1,
+                                                            output_count=15,
+                                                            fee=15000,
+                                                            api_url=self.node.getClient().url)
+        tx_hash = self.node.getClient().send_transaction(tx)
+        self.node.getClient().remove_transaction(tx_hash)
+        tx['witnesses'][0] = "0x00"
+        with pytest.raises(Exception) as exc_info:
+            tx_hash = self.node.getClient().send_transaction(tx)
+        expected_error_message = "ValidationFailure"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        with pytest.raises(Exception) as exc_info:
+            tx_hash = self.node.getClient().test_tx_pool_accept(tx,"passthrough")
+        expected_error_message = "ValidationFailure"
+        assert expected_error_message in exc_info.value.args[0], \
+            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+
+
