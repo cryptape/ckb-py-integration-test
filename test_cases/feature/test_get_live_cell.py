@@ -6,7 +6,7 @@ class TestGetLiveCell(CkbTest):
 
     @classmethod
     def setup_class(cls):
-        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
+        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "livecell/node1", 8120,
                                                 8225)
         cls.node.prepare(other_ckb_config={"ckb_tx_pool_max_tx_pool_size": "180_000"})
         cls.node.start()
@@ -17,7 +17,7 @@ class TestGetLiveCell(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
-    @pytest.mark.skip("wait v116.1 release")
+    @pytest.mark.skip("wait v117.0 release")
     def test_get_live_cell_with_unspend(self):
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
@@ -30,7 +30,7 @@ class TestGetLiveCell(CkbTest):
             transaction["transaction"]["inputs"][0]["previous_output"]["tx_hash"])
         assert result['status'] == 'live'
 
-    @pytest.mark.skip("wait v116.1 release")
+    @pytest.mark.skip("wait v117.0 release")
     def test_get_live_cell_with_spend(self):
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
