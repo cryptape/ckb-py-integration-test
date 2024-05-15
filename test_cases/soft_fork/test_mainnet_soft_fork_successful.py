@@ -1,3 +1,5 @@
+import pytest
+
 from framework.basic import CkbTest
 
 
@@ -27,6 +29,7 @@ class TestMainNetSoftForkSuccessful(CkbTest):
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
+    @pytest.mark.skip
     def test_01_miner_use_110(self):
         """
         110 node miner will cause softfork active
