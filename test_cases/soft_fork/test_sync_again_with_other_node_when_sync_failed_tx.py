@@ -33,12 +33,14 @@ class TestSyncAgainWithOtherNodeWhenSyncFailedTx(CkbTest):
         2. node2 and node3 can't sync 8669 block
             tip block == 8668
         3. node2 miner
-        4. node2 restart and miner
-        5. node1 stop
+        4. node1 stop
+        5. node2 restart and miner
         6. link node2 and node3
         7. node3 sync node2 successful
         Returns:
         """
+
+        # 1. can sync 6000 block
         node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
         node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
         node3 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node3", 8113, 8229)
@@ -63,19 +65,28 @@ class TestSyncAgainWithOtherNodeWhenSyncFailedTx(CkbTest):
         time.sleep(10)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
+
+        # 2. node2 and node3 can't sync 8669 block
         node2_banned_result = node2.getClient().get_banned_addresses()
         node3_banned_result = node3.getClient().get_banned_addresses()
         assert "BlockIsInvalid" in node2_banned_result[0]['ban_reason']
         assert "BlockIsInvalid" in node3_banned_result[0]['ban_reason']
+
+        # 4. node1 stop
         node1.stop()
         node2.getClient().clear_banned_addresses()
         node3.getClient().clear_banned_addresses()
+
+        # 5. node2 restart and miner
         self.Miner.make_tip_height_number(node2, 10000)
         node2.restart()
         self.node2.start_miner()
+
+        # 6. link node2 and node3
         node2.connected(node3)
         node3.connected(node2)
 
+        # 7. node3 sync node2 successful
         self.Node.wait_node_height(self.node2, 10001, 120)
         self.Node.wait_node_height(self.node3, 10001, 120)
 

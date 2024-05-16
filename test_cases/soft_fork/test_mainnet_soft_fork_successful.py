@@ -7,6 +7,15 @@ class TestMainNetSoftForkSuccessful(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 2 node
+        2. connected 2 node
+        3. miner until 200 block
+        Returns:
+
+        """
+
+        # 1. start 2 node
         node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
                                              8227)
         node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
@@ -19,7 +28,11 @@ class TestMainNetSoftForkSuccessful(CkbTest):
         node2.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
 
         cls.cluster.start_all_nodes()
+
+        # 2. connected 2 node
         cls.cluster.connected_all_nodes()
+
+        # 3. miner until 200 block
         cls.Miner.make_tip_height_number(node1, 200)
         cls.Node.wait_cluster_height(cls.cluster, 100, 300)
 
