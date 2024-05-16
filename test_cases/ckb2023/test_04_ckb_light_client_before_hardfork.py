@@ -1,6 +1,5 @@
 import time
 
-
 from framework.basic import CkbTest
 from framework.util import get_project_root
 
@@ -9,6 +8,16 @@ class TestCkbLightClientAfterHardFork(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 4 ckb node in tmp/cluster/hardfork/node dir
+        2. link ckb node each other
+        3. deploy contract
+        4. miner 2000 block
+        5. start light node link 4 ckb
+        6. wait light sync 20 block
+        Returns:
+
+        """
         nodes = [
             cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "cluster/hardfork/node{i}".format(i=i),
                                          8124 + i,
@@ -47,10 +56,24 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.ckb_light_node_current.clean()
 
     def test_01_ckb_light_client_deploy_and_invoke_contract(self):
+        """
+        send tx to node by light node
+        1. start node miner
+        2. send tx to node by light node
+        3. stop miner
+        Returns:
+
+        """
+
+        # 1. start node miner
         self.cluster.ckb_nodes[0].start_miner()
+
+        # 2. send tx to node by light node
         self.deploy_and_invoke(self.Config.MINER_PRIVATE_1,
                                f"{get_project_root()}/source/contract/test_cases/always_success",
                                self.cluster.ckb_nodes[0])
+
+        # stop miner
         self.cluster.ckb_nodes[0].stop_miner()
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
