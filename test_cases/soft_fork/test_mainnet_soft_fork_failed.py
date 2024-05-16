@@ -7,6 +7,15 @@ class TestMainNetSoftForkFailed(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 2 node
+        2. connected 2 node
+        3. miner until 200 block
+        Returns:
+
+        """
+
+        # 1. start 2 node
         node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8119,
                                          8227)
         node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V109_MAIN, "tx_pool_main/node2", 8120, 8228)
@@ -17,7 +26,11 @@ class TestMainNetSoftForkFailed(CkbTest):
         node1.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
         node2.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb"})
         cls.cluster.start_all_nodes()
+
+        # 2. connected 2 node
         cls.cluster.connected_all_nodes()
+
+        # 3. miner until 200 block
         cls.Miner.make_tip_height_number(node2, 200)
         cls.Node.wait_cluster_height(cls.cluster, 100, 300)
 
@@ -36,6 +49,8 @@ class TestMainNetSoftForkFailed(CkbTest):
         1. query get_consensus
         :return:
         """
+
+        # 1. query get_consensus
         consensus = self.node.getClient().get_consensus()
         assert consensus['softforks']['light_client']['rfc0043']['min_activation_epoch'] == '0x21c8'
         assert consensus['softforks']['light_client']['rfc0043']['start'] == '0x205a'
@@ -45,7 +60,10 @@ class TestMainNetSoftForkFailed(CkbTest):
         """
         < 110 node  softforks == {}
         :return:
+        1. query get_consensus
         """
+
+        # 1. query get_consensus
         consensus = self.node109.getClient().get_consensus()
         assert consensus['softforks'] == {}
 

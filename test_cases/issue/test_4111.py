@@ -11,6 +11,14 @@ class Test4111(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start node in issue/node1
+        2. miner 400 block
+        Returns:
+
+        """
+
+        # 1. start node in issue/node1
         node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "issue/node1", 8914,
                                              8927)
         cls.node = node1
@@ -18,6 +26,8 @@ class Test4111(CkbTest):
             other_ckb_config={'ckb_logger_filter': 'debug'}
         )
         node1.start()
+
+        # 2. miner 400 block
         cls.Miner.make_tip_height_number(cls.node, 400)
 
     @classmethod
@@ -32,7 +42,11 @@ class Test4111(CkbTest):
         expected contains (outputs capacity) > (inputs capacity) msg
         but current ckb-cli not return error.data msg :
         Returns: error:Malformed Overflow transaction
+
+        1. send tx that output cap > input cap
         """
+
+        # 1. send tx that output cap > input cap
         with pytest.raises(Exception) as exc_info:
             self.deploy_and_invoke(self.Config.MINER_PRIVATE_1,
                                    f"{get_project_root()}/source/contract/always_success",

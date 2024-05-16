@@ -73,7 +73,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
                                f"{get_project_root()}/source/contract/test_cases/always_success",
                                self.cluster.ckb_nodes[0])
 
-        # stop miner
+        # 3. stop miner
         self.cluster.ckb_nodes[0].stop_miner()
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
