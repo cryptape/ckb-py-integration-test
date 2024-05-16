@@ -10,6 +10,13 @@ class TestWebsocket(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1.start ckb version 113 and 112
+        2. connect ckb node 112 and 113 version
+        3. miner node112 and 113 height = 100
+        Returns:
+
+        """
         cls.node113 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115)
         cls.node113.prepare(
             other_ckb_config={
@@ -29,6 +36,12 @@ class TestWebsocket(CkbTest):
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop node 112 and 113 version
+        2. clear node 112 and 113 dir
+        Returns:
+
+        """
         cls.node112.stop()
         cls.node112.clean()
 
@@ -38,9 +51,10 @@ class TestWebsocket(CkbTest):
     def test_link_count_max(self):
 
         """
-        link tcp
-        112: 1022
-        113: > 10234
+        1. link tcp
+        2. 112: 1022
+        3. 113: > 10234
+        4. test 113 max link count
         """
         # test 112  max link count
         websockets = []
@@ -72,9 +86,9 @@ class TestWebsocket(CkbTest):
 
     def test_link_time_max(self):
         """
-        link time
-        112: keep link
-        113: keep link
+        1. link time
+        2. 112: keep link
+        3. 113: keep link
         """
         websocket112 = self.node112.subscribe_websocket("new_tip_header")
         websocket113 = self.node113.subscribe_websocket("new_tip_header")
@@ -93,9 +107,9 @@ class TestWebsocket(CkbTest):
         websocket112.close()
     def test_rpc(self):
         """
-        support rpc
-        112: not support
-        113: support
+        1. support rpc
+        2. 112: not support
+        3. 113: support
         """
         client = self.node112.getClient()
         client.url = f"http://{self.node112.ckb_config['ckb_ws_listen_address']}"
@@ -118,6 +132,12 @@ class TestWebsocket(CkbTest):
         #     f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
     def test_telnet(self):
+        """
+        1. assert telnet connection closed which 112 subscribe 113 node
+        2. assert telnet connection closed which 113 subscribe 112 node
+        Returns:
+
+        """
         socket = self.node112.subscribe_telnet("new_tip_header", self.node112.ckb_config['ckb_ws_listen_address'])
         with pytest.raises(Exception) as exc_info:
             socket.read_very_eager()
@@ -135,9 +155,9 @@ class TestWebsocket(CkbTest):
 
     def test_stop_node_when_link_websocket(self):
         """
-        stop ckb when socker is keep live
-        112: stop successful
-        113: stop failed
+        1. stop ckb when socker is keep live
+        2. 112: stop successful
+        3. 113: stop failed
         """
         self.node112.restart()
         socket = self.node112.subscribe_websocket("new_tip_header")

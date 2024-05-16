@@ -11,6 +11,15 @@ class TestDiffOverflow(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 2 ckb node in tmp/tx_pool_main/node1 and node2 dir
+        2. link ckb node1 node2 each other
+        3. miner 5 block
+        4. start ckb light client and link ckb light client
+        5. set scripts and wait light client sync height = 5
+        Returns:
+
+        """
         node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node1", 8115,
                                              8227)
         node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node2", 8116,
@@ -41,6 +50,14 @@ class TestDiffOverflow(CkbTest):
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb node
+        2. clean ckb node  tmp dir
+        3. stop ckb light client node
+        4. clean ckb light client node tmp dir
+        Returns:
+
+        """
         print("\nTeardown TestClass1")
         cls.node.stop()
         cls.node.clean()

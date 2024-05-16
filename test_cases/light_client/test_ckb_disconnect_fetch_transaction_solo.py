@@ -9,6 +9,15 @@ class TestCkbDisconnectFetchTransactionSoloNodes(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 4 ckb node in tmp/cluster2/node dir
+        2. link ckb node each other
+        3. miner 100 block
+        4. start ckb light client and link ckb light client
+        5. wait light client sync height = 5
+        Returns:
+
+        """
         nodes = [
             cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "cluster2/node{i}".format(i=i), 8214 + i,
                                          8225 + i)
@@ -36,6 +45,14 @@ class TestCkbDisconnectFetchTransactionSoloNodes(CkbTest):
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb node
+        2. clean ckb node  tmp dir
+        3. stop ckb light client node
+        4. clean ckb light client node tmp dir
+        Returns:
+
+        """
         print("\nTeardown TestClass1")
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()

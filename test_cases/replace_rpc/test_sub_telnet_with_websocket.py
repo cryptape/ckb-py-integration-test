@@ -8,6 +8,13 @@ class TestTelnetAndWebsocket(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 112 and 113 node
+        2. p2p connect 112 and 113 version ckb node
+        3. miner ckb node block height 100
+        Returns:
+
+        """
         cls.node113 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8119, 8129)
         cls.node113.prepare(
             other_ckb_config={
@@ -27,6 +34,12 @@ class TestTelnetAndWebsocket(CkbTest):
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb node include 112 and 113
+        2. clear ckb node dir
+        Returns:
+
+        """
         cls.node112.stop()
         cls.node112.clean()
 
@@ -34,6 +47,16 @@ class TestTelnetAndWebsocket(CkbTest):
         cls.node113.clean()
 
     def test_01_sub_tip_block_number(self):
+        """
+        1. ckb node 112 subscribe_telnet new tip header
+        2. ckb node 113 subscribe_telnet new tip header
+        3. ckb node 112 subscribe_websocket new tip header
+        4. ckb node 112 subscribe_websocket new tip header
+        5. check recv telnet_new_tip_header_113_ret and 112_ret
+        6. assert 113_ret and 112_ret recv content
+        Returns:
+
+        """
         telnet_new_tip_header_112 = self.node112.subscribe_telnet("new_tip_header")
         telnet_new_tip_header_113 = self.node113.subscribe_telnet("new_tip_header")
         ws_new_tip_header_112 = self.node112.subscribe_websocket("new_tip_header")
@@ -62,6 +85,16 @@ class TestTelnetAndWebsocket(CkbTest):
         ws_new_tip_header_113.close()
 
     def test_02_sub_new_tip_block(self):
+        """
+        1. ckb node 112 subscribe_telnet new tip header
+        2. ckb node 113 subscribe_telnet new tip header
+        3. ckb node 112 subscribe_websocket new tip header
+        4. ckb node 112 subscribe_websocket new tip header
+        5. check recv telnet_new_tip_header_113_ret and 112_ret
+        6. assert 113_ret and 112_ret recv content
+        Returns:
+
+        """
         telnet_new_tip_block_112 = self.node112.subscribe_telnet("new_tip_block")
         telnet_new_tip_block_113 = self.node113.subscribe_telnet("new_tip_block")
         ws_new_tip_block_112 = self.node112.subscribe_websocket("new_tip_block")
@@ -86,6 +119,16 @@ class TestTelnetAndWebsocket(CkbTest):
         ws_new_tip_block_113.close()
 
     def test_03_sub_new_tx(self):
+        """
+        1. ckb node 112 subscribe_telnet new_transaction
+        2. ckb node 113 subscribe_telnet new_transaction
+        3. ckb node 112 subscribe_websocket new_transaction
+        4. ckb node 112 subscribe_websocket new_transaction
+        5. check recv telnet_new_tip_header_113_ret and 112_ret
+        6. assert 113_ret and 112_ret recv content
+        Returns:
+
+        """
         telnet_new_tx_112 = self.node112.subscribe_telnet("new_transaction")
         ws_new_tx_112 = self.node112.subscribe_websocket("new_transaction")
         telnet_new_tx_113 = self.node113.subscribe_telnet("new_transaction")
@@ -117,6 +160,16 @@ class TestTelnetAndWebsocket(CkbTest):
         ws_new_tx_113.close()
 
     def test_04_sub_proposal_tx(self):
+        """
+        1. ckb node 112 subscribe_telnet proposed_transaction
+        2. ckb node 113 subscribe_telnet proposed_transaction
+        3. ckb node 112 subscribe_websocket proposed_transaction
+        4. ckb node 112 subscribe_websocket proposed_transaction
+        5. check recv telnet_new_tip_header_113_ret and 112_ret
+        6. assert 113_ret and 112_ret recv content
+        Returns:
+
+        """
         telnet_new_tx_112 = self.node112.subscribe_telnet("proposed_transaction")
         ws_new_tx_112 = self.node112.subscribe_websocket("proposed_transaction")
         telnet_new_tx_113 = self.node113.subscribe_telnet("proposed_transaction")
@@ -149,6 +202,16 @@ class TestTelnetAndWebsocket(CkbTest):
         ws_new_tx_113.close()
 
     def test_05_reject_tx(self):
+        """
+        1. ckb node 112 subscribe_telnet rejected_transaction
+        2. ckb node 113 subscribe_telnet rejected_transaction
+        3. ckb node 112 subscribe_websocket rejected_transaction
+        4. ckb node 112 subscribe_websocket rejected_transaction
+        5. check recv telnet_new_tip_header_113_ret and 112_ret
+        6. assert 113_ret and 112_ret recv content
+        Returns:
+
+        """
         telnet_new_tx_112 = self.node112.subscribe_telnet("rejected_transaction")
         ws_new_tx_112 = self.node112.subscribe_websocket("rejected_transaction")
         telnet_new_tx_113 = self.node113.subscribe_telnet("rejected_transaction")

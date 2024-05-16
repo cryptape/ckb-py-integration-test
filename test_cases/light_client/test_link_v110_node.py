@@ -4,6 +4,17 @@ from framework.basic import CkbTest
 class CKbLightClientLinkV110Node(CkbTest):
 
     def teardown_method(self, method):
+        """
+        1. stop ckb node
+        2. clean ckb node  tmp dir
+        3. stop ckb light client node
+        4. clean ckb light client node tmp dir
+        Args:
+            method:
+
+        Returns:
+
+        """
         super().teardown_method(method)
         self.cluster.stop_all_nodes()
         self.cluster.clean_all_nodes()

@@ -6,12 +6,24 @@ class Test4309(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start ckb node 113.0 version on tmp/telnet/node dir
+        Returns:
+
+        """
+        #1. start ckb node 113.0 version on tmp/telnet/node dir
         cls.node113 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115)
         cls.node113.prepare()
         cls.node113.start()
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb node and clear ckb node dir
+        Returns:
+
+        """
+        #1. stop ckb node and clear ckb node dir
         print("teardown_class")
         cls.node113.stop()
         cls.node113.clean()

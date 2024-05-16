@@ -6,6 +6,14 @@ class TestGenerateEpochs(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 2 ckb node in tmp/feature/gene_rate_epochs node dir
+        2. link ckb node each other
+        3. miner 100block
+        Returns:
+
+        """
+        #1. start 2 ckb node in tmp/feature/gene_rate_epochs node dir
         nodes = [
             cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST,
                                          "feature/gene_rate_epochs/node{i}".format(i=i), 8114 + i,
@@ -18,11 +26,19 @@ class TestGenerateEpochs(CkbTest):
         cls.cluster.ckb_nodes[0].startWithRichIndexer()
         cls.cluster.ckb_nodes[1].start()
         cls.Miner.make_tip_height_number(nodes[0], 100)
+        #2. link ckb node each other
         cls.cluster.connected_all_nodes()
+        #3. miner 100block
         cls.Node.wait_cluster_height(cls.cluster, 100, 1000)
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb node
+        2. clean ckb node  tmp dir
+        Returns:
+
+        """
         print("\nTeardown TestClass1")
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()

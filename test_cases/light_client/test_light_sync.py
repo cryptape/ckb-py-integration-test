@@ -10,6 +10,13 @@ class TestLightSync(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1. start 2 ckb node in tmp/tx_pool_main/node1 and node2 dir
+        2. link ckb node1 node2 each other
+        3. miner 13000 block
+        Returns:
+
+        """
         node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V113, "tx_pool_main/node1", 8115,
                                              8227)
         node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V113, "tx_pool_main/node2", 8116,
@@ -31,11 +38,27 @@ class TestLightSync(CkbTest):
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb node
+        2. clean ckb node  tmp dir
+        Returns:
+
+        """
         print("\nTeardown TestClass1")
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
     def test_sync(self):
+        """
+        1. start light client node and link
+        2. sync old account
+        3. sync new account
+        4. compare new account data
+        5. stop light client node and clear dir
+        Returns:
+
+        """
+        # 1. start light client node and link
         for i in range(10):
             print("current idx", i)
             self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
@@ -56,7 +79,7 @@ class TestLightSync(CkbTest):
             add_sync_new_account_block_number = 8000
             new_sync_until_number = 12000
 
-            print("sync old account")
+            #2. sync old account
             setScripts = []
             for account_private in old_sync_account:
                 acc = self.Ckb_cli.util_key_info_by_private_key(account_private)
@@ -68,7 +91,7 @@ class TestLightSync(CkbTest):
 
             print(f"until sync:{add_sync_new_account_block_number}")
             self.Node.wait_light_sync_height(self.ckb_light_node, add_sync_new_account_block_number, 1000000)
-            print("sync new account ")
+            # 3. sync new account
             scripts = self.ckb_light_node.getClient().get_scripts()
             newSetScripts = []
             for i in scripts:
@@ -82,7 +105,7 @@ class TestLightSync(CkbTest):
             self.ckb_light_node.getClient().set_scripts(newSetScripts)
             print("until sync ")
             self.Node.wait_light_sync_height(self.ckb_light_node, new_sync_until_number, 100000)
-            print("compare new account data")
+            #4. compare new account data
             for acc in new_sync_account:
                 print("------------~~~----------------------")
                 acc = self.Ckb_cli.util_key_info_by_private_key(acc)
@@ -109,5 +132,6 @@ class TestLightSync(CkbTest):
                 assert len(light_cells['objects']) == len(full_cells['objects'])
                 print(len(light_cells['objects']))
                 print(len(full_cells['objects']))
+            #5. stop light client node and clear dir
             self.ckb_light_node.stop()
             self.ckb_light_node.clean()

@@ -8,6 +8,13 @@ class TestRpc(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        1.start ckb version 113 and 112
+        2. p2p connnect 112 and 113 node
+        3. miner 113 node block number = 100
+        Returns:
+
+        """
         cls.node113 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115)
         cls.node113.prepare(other_ckb_config={"ckb_tcp_listen_address": "127.0.0.1:18114",
                                               "ckb_ws_listen_address": "127.0.0.1:18124"})
@@ -22,6 +29,12 @@ class TestRpc(CkbTest):
 
     @classmethod
     def teardown_class(cls):
+        """
+        1. stop ckb version 112 and 113
+        2. clear ckb node dir
+        Returns:
+
+        """
         print("teardown_class")
         cls.node112.stop()
         cls.node112.clean()
