@@ -105,6 +105,9 @@ class RPCClient:
     def get_deployments_info(self):
         return self.call("get_deployments_info", [])
 
+    def get_pool_tx_detail_info(self, tx_hash):
+        return self.call("get_pool_tx_detail_info", [tx_hash])
+
     def get_blockchain_info(self):
         return self.call("get_blockchain_info", [])
 
