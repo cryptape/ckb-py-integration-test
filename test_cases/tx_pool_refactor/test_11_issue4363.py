@@ -30,17 +30,17 @@ class TestIssue4363(CkbTest):
     def test_01_4363(self):
         """
         https://github.com/nervosnetwork/ckb/pull/4363/files
-        插入消费cellDep时，如果链条太长，就会将多余的链条交易删除
-        0. 生成250个live cell 和 cell=a
-        1. 发送200笔 tx1(cellDep=a)
-        2. 发送 tx2(input = 低手续费的tx1.putput(1 || 2 || 3 || 4 || 5))
-        3. 发送 tx3(cellDep = 低手续费的tx1.output(1 || 2 || 3 || 4 || 5))
-        4. 发送 tx4(消费 a)
-        5. 查询低手续费的tx1 报 PoolRejectedInvalidated
-        6. 查询下tx2 报 PoolRejectedInvalidated
-        7. 查询 tx3 报 PoolRejectedInvalidated
+        When inserting a cellDep, if the chain is too long, excess transactions in the chain will be deleted.
+        0. Generate 250 live cells and cell=a
+        1. Send 200 transactions tx1(cellDep=a)
+        2. Send tx2(input = low-fee tx1.output(1 || 2 || 3 || 4 || 5))
+        3. Send tx3(cellDep = low-fee tx1.output(1 || 2 || 3 || 4 || 5))
+        4. Send tx4(consuming a)
+        5. Query low-fee tx1 reports PoolRejectedInvalidated
+        6. Query tx2 reports PoolRejectedInvalidated
+        7. Query tx3 reports PoolRejectedInvalidated
         """
-        # 0. 生成250个live cell
+        # 0. Generate 250 live cells and cell=a
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
         account_private = self.Config.ACCOUNT_PRIVATE_1
         tx1_hash = self.Ckb_cli.wallet_transfer_by_private_key(account_private,
@@ -60,12 +60,12 @@ class TestIssue4363(CkbTest):
                                                                     api_url=self.node1.getClient().url)
         self.Miner.miner_until_tx_committed(self.node1, tx_3_father_hash)
 
-        # 0 生成cell a
+        # 0. Generate cell a
         tx_a_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_2,
                                                                 account["address"]["testnet"], 1000000,
                                                                 self.node1.getClient().url, "1500000")
         self.Miner.miner_until_tx_committed(self.node1, tx_a_hash)
-        # 1. 发送200笔 tx1(cellDep=a)
+        # 1. Send 200 transactions tx1(cellDep=a)
         tx1_list = []
         for i in range(200):
             print("current i:", i)
@@ -76,7 +76,7 @@ class TestIssue4363(CkbTest):
                                                                dep_cells=[{"tx_hash": tx_a_hash, "index_hex": "0x0"}])
             tx1_list.append(tx_hash)
 
-        # 2. 发送 tx2(input = 低手续费的tx1.putput(1 || 2 || 3 || 4 || 5))
+        # 2. Send tx2(input = low-fee tx1.output(1 || 2 || 3 || 4 || 5))
         tx2_list = []
         tx22_list = []
         for i in range(3):
@@ -91,7 +91,7 @@ class TestIssue4363(CkbTest):
                                                                api_url=self.node1.getClient().url)
             tx22_list.append(tx_hash)
 
-        # 3. 发送 tx3(cellDep = 低手续费的tx1.output(1 || 2 || 3 || 4 || 5))
+        # 3. Send tx3(cellDep = low-fee tx1.output(1 || 2 || 3 || 4 || 5))
         tx3_list = []
         for i in range(3):
             tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_3_father_hash], [hex(i)], account_private,
@@ -101,14 +101,14 @@ class TestIssue4363(CkbTest):
                                                                dep_cells=[{"tx_hash": tx1_list[1], "index_hex": "0x0"}])
             tx3_list.append(tx_hash)
 
-        # 4. 发送 tx4(消费 a)
+        # 4. Send tx4(consuming a)
         tx_a_cost_hash = self.Tx.send_transfer_self_tx_with_input([tx_a_hash], ["0x0"], account_private,
                                                                   output_count=1,
                                                                   fee=100090,
                                                                   api_url=self.node1.getClient().url)
         # TODO remove sleep
         time.sleep(10)
-        # 5. 查询低手续费的tx1 报 PoolRejectedInvalidated
+        # 5. Query low-fee tx1 reports PoolRejectedInvalidated
         print("---- tx1_list------")
         pending_status = 0
         rejected_status = 0
@@ -122,7 +122,7 @@ class TestIssue4363(CkbTest):
                 rejected_status += 1
         assert pending_status == 124
         assert rejected_status == 76
-        # 6. 查询下tx2 报 PoolRejectedInvalidated
+        # 6. Query tx2 reports PoolRejectedInvalidated
         print("---- tx2_hash------")
         for tx_hash in tx2_list:
             response = self.node1.getClient().get_transaction(tx_hash)
@@ -138,7 +138,7 @@ class TestIssue4363(CkbTest):
             assert response2['tx_status']['status'] == 'rejected' or response2['tx_status']['status'] == 'unknown'
             assert response['tx_status']['status'] == 'rejected'
 
-        # 7. 查询 tx3 报 PoolRejectedInvalidated
+        # 7. Query tx3 reports PoolRejectedInvalidated
         print("---- tx3_list------")
         for tx_hash in tx3_list:
             response = self.node1.getClient().get_transaction(tx_hash)

@@ -47,6 +47,7 @@ class TestTxsLifeCycleChain(CkbTest):
                                                  api_url=self.node.getClient().url, fee_rate="1000")
         first_tx_hash = tx_hash
         tx_list = [first_tx_hash]
+        # 1. send tx father tx(fee=10000)
         tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_2, output_count=1500,
                                                    fee=800000,
                                                    api_url=self.node.getClient().url)
@@ -60,6 +61,7 @@ class TestTxsLifeCycleChain(CkbTest):
         #                                api_url=self.node.getClient().url) for i in range(0, 1500)]
         # concurrent.futures.wait(futures)
 
+        # 2. send  1500 linked tx(fee=900000)
         for i in range(1500):
             self.Tx.send_transfer_self_tx_with_input([tx_hash],
                                              [hex(i)],
@@ -71,6 +73,9 @@ class TestTxsLifeCycleChain(CkbTest):
         pool_info = self.node.getClient().tx_pool_info()
         assert int(pool_info['pending'], 16) == 1502
         print(f"pool info:{pool_info}")
+        # 3. get_block_template
+        #     proposal length = 1500
+        #     father tx not in proposal list
         for i in range(100):
             block_template = self.node.getClient().get_block_template()
             if len(block_template['proposals']) == 1500:
@@ -97,10 +102,12 @@ class TestTxsLifeCycleChain(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
+        # 1. send father tx, successful
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_2, account["address"]["testnet"], 360000,
                                                  api_url=self.node.getClient().url, fee_rate="1000")
         first_tx_hash = tx_hash
         tx_list = [first_tx_hash]
+        # 2. send linked tx 10, successful
         tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_2, output_count=1,
                                                    fee=1000,
                                                    api_url=self.node.getClient().url)
@@ -120,6 +127,10 @@ class TestTxsLifeCycleChain(CkbTest):
             if len(block['transactions']) > 0:
                 print("transactions > 1")
                 break
+            # 3. remove father tx in the proposals and submit block
+            #     submit  successful
+            #     linked tx stuck in the proposal stage.
+            #     father tx stuck in the pending stage.
             block['proposals'].remove(first_tx_hash[0:len('0x9b93e149e1f90a8a5436')])
             self.node.getClient().submit_block(block["work_id"], self.Miner.block_template_transfer_to_submit_block(block, '0x0'))
             for j in range(100):

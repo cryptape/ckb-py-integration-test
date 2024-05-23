@@ -8,6 +8,7 @@ class TestRBFConfig(CkbTest):
     def setup_class(cls):
         cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
                                                 8225)
+        # 1. starting the node, modify ckb.toml with min_rbf_rate = 800 < min_fee_rate.node starts successfully.
         cls.node.prepare(other_ckb_config={"ckb_tx_pool_min_rbf_rate": "800"})
         cls.node.start()
         cls.Miner.make_tip_height_number(cls.node, 30)
@@ -33,8 +34,10 @@ class TestRBFConfig(CkbTest):
                                                     self.node.getClient().url, "1500")
 
         with pytest.raises(Exception) as exc_info:
+            # 2. send tx use same input cell
             self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 200,
                                                         self.node.getClient().url, "2000")
+        # ERROR:  TransactionFailedToResolve: Resolve failed Dead
         expected_error_message = " TransactionFailedToResolve: Resolve failed Dead"
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
@@ -51,9 +54,12 @@ class TestRBFConfig(CkbTest):
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
 
+        # send tx
         tx = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"],
                                                          100,
                                                          self.node.getClient().url, "1500")
+        # 2. get_transaction
         transaction = self.node.getClient().get_transaction(tx)
         assert transaction['fee'] is not None
+        # min_rbf_rate == null
         assert transaction['min_replace_fee'] is None

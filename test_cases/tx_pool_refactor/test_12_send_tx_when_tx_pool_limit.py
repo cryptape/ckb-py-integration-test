@@ -30,9 +30,9 @@ class TestSendTxWhenPoolLimit(CkbTest):
 
     def test_replace_same_father_link_tx_when_tx_pool_full(self):
         """
-        能够替换父交易其他output产生的子交易
-        cellDep的交易手续费很低，子交易只会替换其他交易不会替换被其他高fee交易当cellDep的交易
-        父交易手续费最低，子交易只会替换其他交易不会替换父交易
+        Can replace child transactions generated from other outputs of the parent transaction.
+        The transaction with a cellDep has a very low fee; child transactions will only replace other transactions, not those used as cellDeps by higher-fee transactions.
+        The parent transaction has the lowest fee; child transactions will replace other transactions but not the parent transaction.
 
         Returns:
 
@@ -74,14 +74,12 @@ class TestSendTxWhenPoolLimit(CkbTest):
 
     def test_replace_normal_tx_when_tx_pool_full(self):
         """
-        交易池都是普通交易, 交易池满时，发送一笔手续费比较高的交易，发送成功，手续费比较低的交易会被移除
+        When the transaction pool is full of standard transactions, sending a transaction with a higher fee will succeed, and transactions with lower fees will be removed.
 
         1. send 10 normal tx
         2. send 12 tx that  fee > 10 normal tx
         3. 12 tx status == pending
         4. 8 normal tx status == unknown
-        Returns:
-
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
@@ -92,6 +90,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
                                                            fee=1500000,
                                                            api_url=self.node.getClient().url)
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        # 1. send 10 normal tx
         tx_list = []
         for i in range(0, 10):
             print("current i:", i)
@@ -101,6 +100,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
                                                                 api_url=self.node.getClient().url)
             tx_list.append(tx_hash1)
 
+        # 2. send 12 tx that  fee > 10 normal tx
         tx_hash_a = tx_hash
         tx_hash_a_list = []
         for i in range(12):
@@ -110,6 +110,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
                                                                  fee=11090 + i * 1000,
                                                                  api_url=self.node.getClient().url)
             tx_hash_a_list.append(tx_hash_a)
+        # 4. 8 normal tx status == unknown
         unknown_status_size = 0
         for tx_hash in tx_list:
             tx = self.node.getClient().get_transaction(tx_hash)
@@ -122,10 +123,9 @@ class TestSendTxWhenPoolLimit(CkbTest):
 
     def test_replace_link_tx_when_ckb_tx_pool_full(self):
         """
-        xxxx 交易(fee = 500000000)
-        链式交易:a(fee=1000)-> b(fee=2000)- ->c(fee=3000)- -> d(fee=4000) -> e(fee=5000)
-        插入tx(fee=500000),那会导致a,b,c,d,e 交易都被移除
-        Returns:
+        Transaction xxxx(fee = 500000000)
+        Chain transactions:a(fee=1000)-> b(fee=2000)- ->c(fee=3000)- -> d(fee=4000) -> e(fee=5000)
+        Inserting tx(fee=500000) will result in the removal of transactions a, b, c, d, and e.
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
@@ -169,7 +169,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
 
     def test_cant_replace_father_tx_when_ckb_tx_pool_full(self):
         """
-        交易池全是父交易，子交易手续费给再高，都是报pool is full
+        If the transaction pool is full of parent transactions, even if a child transaction has a higher fee, it will still report 'pool is full'.
 
         Returns:
 

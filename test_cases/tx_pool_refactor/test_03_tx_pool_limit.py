@@ -39,6 +39,7 @@ class TestTxPoolLimit(CkbTest):
                                                               self.node.getClient().url, "2800")
         num = 0
         self.Node.wait_get_transaction(self.node, tx_hash, "pending")
+        # 1. keep sending linked transactions until an error occurs
         with pytest.raises(Exception) as exc_info:
 
             while True:
@@ -54,6 +55,7 @@ class TestTxPoolLimit(CkbTest):
             f" not found in actual string '{exc_info.value.args[0]}'"
         raw_tx_pools = self.node.getClient().get_raw_tx_pool(True)
         self.node.getClient().clear_tx_pool()
+        # 2. query max max_ancestors_count
         max_ancestors_count = 0
         for tx_hash in raw_tx_pools['pending'].keys():
             max_ancestors_count = max(max_ancestors_count, int(raw_tx_pools['pending'][tx_hash]['ancestors_count'], 16))

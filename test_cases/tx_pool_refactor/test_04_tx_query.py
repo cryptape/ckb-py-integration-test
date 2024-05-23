@@ -31,6 +31,7 @@ class TestTxQuery(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        # 1. send transaction a-> b
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                  self.node.getClient().url, "1900")
         print(f"txHash:{tx_hash}")
@@ -38,6 +39,7 @@ class TestTxQuery(CkbTest):
         del transaction['transaction']['hash']
         with open("/tmp/tmp.json", 'w') as tmp_file:
             tmp_file.write(json.dumps(transaction['transaction']))
+        # 2. estimate_cycles a->b
         result = self.Ckb_cli.estimate_cycles("/tmp/tmp.json",
                                  api_url=self.node.getClient().url)
         print(f"estimate_cycles:{result}")
@@ -52,13 +54,14 @@ class TestTxQuery(CkbTest):
             estimate_cycles pending tx will successful
         Steps:
         1. send transaction a-> b
-        2. estimate_cycles a->b
+        2. remove transaction a->b
         Result:
         1. send successful
-        2. estimate_cycles successful
+        2. remove transaction successful
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        # 1. send transaction a-> b
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                  self.node.getClient().url, "1500")
         print(f"txHash:{tx_hash}")
@@ -67,6 +70,7 @@ class TestTxQuery(CkbTest):
             transaction["transaction"]["inputs"][0]["previous_output"]["index"],
             transaction["transaction"]["inputs"][0]["previous_output"]["tx_hash"])
         assert result['status'] == 'live'
+        # 2. remove transaction a->b
         remove_result = self.node.getClient().remove_transaction(tx_hash)
         assert remove_result == True
 
@@ -90,6 +94,7 @@ class TestTxQuery(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        # 1. send tx
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
                                                  self.node.getClient().url, "1500")
 
@@ -98,6 +103,7 @@ class TestTxQuery(CkbTest):
                                                    api_url=self.node.getClient().url)
 
         print(f"txHash:{tx_hash}")
+        # 2. get_transaction in pending
         transaction = self.node.getClient().get_transaction(tx_hash)
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert tx_pool['pending'][tx_hash]['fee'] == transaction['fee']
@@ -106,12 +112,14 @@ class TestTxQuery(CkbTest):
         time.sleep(1)
         self.Miner.miner_with_version(self.node, "0x0")
         time.sleep(1)
+        # 3. miner until  get_transaction in proposed
         self.Miner.miner_with_version(self.node, "0x0")
         self.Node.wait_get_transaction(self.node, tx_hash, 'proposed')
         transaction = self.node.getClient().get_transaction(tx_hash)
         assert transaction['tx_status']['status'] == 'proposed'
         assert transaction['fee'] is not None
         assert transaction['min_replace_fee'] is None
+        # 4. miner until get_transaction in committed
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
         transaction = self.node.getClient().get_transaction(tx_hash)
 
