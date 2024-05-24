@@ -11,8 +11,10 @@ class Test4309(CkbTest):
         Returns:
 
         """
-        #1. start ckb node 113.0 version on tmp/telnet/node dir
-        cls.node113 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115)
+        # 1. start ckb node 113.0 version on tmp/telnet/node dir
+        cls.node113 = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115
+        )
         cls.node113.prepare()
         cls.node113.start()
 
@@ -23,7 +25,7 @@ class Test4309(CkbTest):
         Returns:
 
         """
-        #1. stop ckb node and clear ckb node dir
+        # 1. stop ckb node and clear ckb node dir
         print("teardown_class")
         cls.node113.stop()
         cls.node113.clean()
@@ -34,5 +36,6 @@ class Test4309(CkbTest):
         """
         ret = run_command(
             """curl -s -X GET http://127.0.0.1:8114 -H 'Content-Type: application/json' -d '{ "id": 42, "jsonrpc": 
-            "2.0", "method": "sync_state", "params": [ ] }'""")
+            "2.0", "method": "sync_state", "params": [ ] }'"""
+        )
         assert "Used HTTP Method is not allowed. POST or OPTIONS is required" in ret

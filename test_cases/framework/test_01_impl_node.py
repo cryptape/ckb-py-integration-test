@@ -5,10 +5,11 @@ from framework.basic import CkbTest
 
 class TestImplCkbTest(CkbTest):
 
-
     @classmethod
     def setup_class(cls):
-        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "node/node", 8114, 8115)
+        cls.node = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.CURRENT_TEST, "node/node", 8114, 8115
+        )
         cls.node.prepare()
         cls.node.start()
 

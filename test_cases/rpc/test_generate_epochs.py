@@ -16,4 +16,4 @@ class TestGenerateEpochs:
         print("current epoch:", epoch)
         assert "0x" in result
         assert tip_number < current_tip_number
-        assert int(pre_epoch['number'], 16) + 2 == int(epoch['number'], 16)
+        assert int(pre_epoch["number"], 16) + 2 == int(epoch["number"], 16)

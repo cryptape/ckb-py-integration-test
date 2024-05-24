@@ -41,15 +41,33 @@ class TestSyncAgainWithOtherNodeWhenSyncFailedTx(CkbTest):
         """
 
         # 1. can sync 6000 block
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
-        node3 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node3", 8113, 8229)
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
+        node3 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node3", 8113, 8229
+        )
         self.node1 = node1
         self.node2 = node2
         self.node3 = node3
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
-        node3.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
+        node1.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
+        node2.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
+        node3.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
@@ -69,8 +87,8 @@ class TestSyncAgainWithOtherNodeWhenSyncFailedTx(CkbTest):
         # 2. node2 and node3 can't sync 8669 block
         node2_banned_result = node2.getClient().get_banned_addresses()
         node3_banned_result = node3.getClient().get_banned_addresses()
-        assert "BlockIsInvalid" in node2_banned_result[0]['ban_reason']
-        assert "BlockIsInvalid" in node3_banned_result[0]['ban_reason']
+        assert "BlockIsInvalid" in node2_banned_result[0]["ban_reason"]
+        assert "BlockIsInvalid" in node3_banned_result[0]["ban_reason"]
 
         # 4. node1 stop
         node1.stop()

@@ -8,10 +8,12 @@ class ManyTx(CkbTest):
 
     @classmethod
     def setup_class(cls):
-        cls.current_node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
-                                                        8225)
-        cls.node_111 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V111, "tx_pool/node2", 8121,
-                                                    8226)
+        cls.current_node = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120, 8225
+        )
+        cls.node_111 = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.V111, "tx_pool/node2", 8121, 8226
+        )
         cls.cluster = cls.Cluster([cls.current_node, cls.node_111])
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
@@ -33,9 +35,13 @@ class ManyTx(CkbTest):
         TEST_PRIVATE_1 = self.Config.MINER_PRIVATE_1
 
         account = self.Ckb_cli.util_key_info_by_private_key(TEST_PRIVATE_1)
-        tx1 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
-                                                          account["address"]["testnet"], 100,
-                                                          self.current_node.getClient().url, "1500")
+        tx1 = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.MINER_PRIVATE_1,
+            account["address"]["testnet"],
+            100,
+            self.current_node.getClient().url,
+            "1500",
+        )
         self.Miner.miner_until_tx_committed(self.current_node, tx1)
         tip_number = self.current_node.getClient().get_tip_block_number()
         self.Node.wait_node_height(self.node_111, tip_number, 1000)
@@ -44,19 +50,26 @@ class ManyTx(CkbTest):
         txs = []
         # Concurrently send conflicting child transactions to node 1
         for i in range(10):
-            tx = self.Tx.send_transfer_self_tx_with_input([tx1], ["0x0"], TEST_PRIVATE_1,
-                                                          output_count=1,
-                                                          fee=1090 + i,
-                                                          api_url=self.node_111.getClient().url)
+            tx = self.Tx.send_transfer_self_tx_with_input(
+                [tx1],
+                ["0x0"],
+                TEST_PRIVATE_1,
+                output_count=1,
+                fee=1090 + i,
+                api_url=self.node_111.getClient().url,
+            )
             transaction = self.node_111.getClient().get_transaction(tx)
-            transaction = transaction['transaction']
-            del transaction['hash']
+            transaction = transaction["transaction"]
+            del transaction["hash"]
             txs.insert(0, transaction)
 
         successfulSize = 0
         successfulTxHash = ""
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.current_node.getClient().send_transaction, tx): tx for tx in txs}
+            futures = {
+                executor.submit(self.current_node.getClient().send_transaction, tx): tx
+                for tx in txs
+            }
             for future in concurrent.futures.as_completed(futures):
                 tx = futures[future]
                 try:
@@ -69,8 +82,8 @@ class ManyTx(CkbTest):
                     print(f"Error sending transaction: {e}")
         before_pool = self.current_node.getClient().tx_pool_info()
         assert successfulSize == 1
-        assert before_pool['pending'] == '0x1'
-        assert before_pool['proposed'] == '0x0'
+        assert before_pool["pending"] == "0x1"
+        assert before_pool["proposed"] == "0x0"
         self.node_111.getClient().set_network_active(True)
         self.node_111.connected(self.current_node)
         for i in range(10):
@@ -79,10 +92,10 @@ class ManyTx(CkbTest):
         self.Node.wait_node_height(self.current_node, tip_number, 1000)
         # 2. Query the node's pool
         pool = self.current_node.getClient().tx_pool_info()
-        assert pool['pending'] == '0x0'
-        assert pool['proposed'] == '0x0'
+        assert pool["pending"] == "0x0"
+        assert pool["proposed"] == "0x0"
         ret = self.current_node.getClient().get_transaction(successfulTxHash)
-        assert ret['tx_status']['status'] == 'rejected'
+        assert ret["tx_status"]["status"] == "rejected"
 
     def test_orphan_turn_pending(self):
         """
@@ -99,29 +112,40 @@ class ManyTx(CkbTest):
         account = self.Ckb_cli.util_key_info_by_private_key(TEST_PRIVATE_1)
         self.node_111.getClient().set_network_active(False)
         # 1. Send tx1
-        tx1 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
-                                                          account["address"]["testnet"], 100,
-                                                          self.node_111.getClient().url, "1500")
+        tx1 = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.MINER_PRIVATE_1,
+            account["address"]["testnet"],
+            100,
+            self.node_111.getClient().url,
+            "1500",
+        )
         transaction1 = self.node_111.getClient().get_transaction(tx1)
-        transaction1 = transaction1['transaction']
-        del transaction1['hash']
+        transaction1 = transaction1["transaction"]
+        del transaction1["hash"]
         txs = []
         # 2. Send child transaction tx(1,10): input = tx1.input
         for i in range(10):
-            tx = self.Tx.send_transfer_self_tx_with_input([tx1], ["0x0"], TEST_PRIVATE_1,
-                                                          output_count=1,
-                                                          fee=1090 + i,
-                                                          api_url=self.node_111.getClient().url)
+            tx = self.Tx.send_transfer_self_tx_with_input(
+                [tx1],
+                ["0x0"],
+                TEST_PRIVATE_1,
+                output_count=1,
+                fee=1090 + i,
+                api_url=self.node_111.getClient().url,
+            )
             transaction = self.node_111.getClient().get_transaction(tx)
-            transaction = transaction['transaction']
-            del transaction['hash']
+            transaction = transaction["transaction"]
+            del transaction["hash"]
             txs.append(transaction)
         self.node_111.getClient().remove_transaction(tx1)
         self.node_111.getClient().set_network_active(True)
         # 3. First, forward the child transaction to another node
         successfulSize = 0
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.node_111.getClient().send_transaction, tx): tx for tx in txs}
+            futures = {
+                executor.submit(self.node_111.getClient().send_transaction, tx): tx
+                for tx in txs
+            }
             for future in concurrent.futures.as_completed(futures):
                 tx = futures[future]
                 try:
@@ -136,8 +160,8 @@ class ManyTx(CkbTest):
         time.sleep(3)
         # 4. Check if the other node's pool has >0 orphan transactions, 0 pending
         before_pool = self.current_node.getClient().tx_pool_info()
-        assert before_pool['pending'] == '0x0'
-        assert before_pool['orphan'] != '0x0'
+        assert before_pool["pending"] == "0x0"
+        assert before_pool["orphan"] != "0x0"
         # 5. Send tx1 to the other node
         self.current_node.getClient().send_transaction(transaction1)
         try:
@@ -146,7 +170,7 @@ class ManyTx(CkbTest):
             pass
         # 6. At the other node, check the pool for only 2 transactions
         before_pool = self.current_node.getClient().tx_pool_info()
-        assert before_pool['pending'] == '0x2'
+        assert before_pool["pending"] == "0x2"
 
         for i in range(11):
             self.Miner.miner_with_version(self.node_111, "0x0")
@@ -155,11 +179,11 @@ class ManyTx(CkbTest):
         tip_number = self.node_111.getClient().get_tip_block_number()
         self.Node.wait_node_height(self.current_node, tip_number, 1000)
         node111_pool = self.node_111.getClient().tx_pool_info()
-        assert node111_pool['pending'] == '0x0'
-        assert node111_pool['orphan'] == '0x0'
+        assert node111_pool["pending"] == "0x0"
+        assert node111_pool["orphan"] == "0x0"
         after_pool = self.current_node.getClient().tx_pool_info()
-        assert after_pool['pending'] == '0x0'
-        assert after_pool['orphan'] == '0x0'
+        assert after_pool["pending"] == "0x0"
+        assert after_pool["orphan"] == "0x0"
 
     def test_dep_tx_clean(self):
         """
@@ -176,38 +200,52 @@ class ManyTx(CkbTest):
         account = self.Ckb_cli.util_key_info_by_private_key(TEST_PRIVATE_1)
         account2 = self.Ckb_cli.util_key_info_by_private_key(TEST_PRIVATE_2)
         # 1. Send tx1
-        tx1 = self.Ckb_cli.wallet_transfer_by_private_key(TEST_PRIVATE_1,
-                                                          account["address"]["testnet"], 100,
-                                                          self.current_node.getClient().url, "1500")
+        tx1 = self.Ckb_cli.wallet_transfer_by_private_key(
+            TEST_PRIVATE_1,
+            account["address"]["testnet"],
+            100,
+            self.current_node.getClient().url,
+            "1500",
+        )
         # 2. Send tx2
-        tx2 = self.Ckb_cli.wallet_transfer_by_private_key(TEST_PRIVATE_2,
-                                                          account2["address"]["testnet"], 100,
-                                                          self.current_node.getClient().url, "1500")
+        tx2 = self.Ckb_cli.wallet_transfer_by_private_key(
+            TEST_PRIVATE_2,
+            account2["address"]["testnet"],
+            100,
+            self.current_node.getClient().url,
+            "1500",
+        )
         self.Miner.miner_until_tx_committed(self.current_node, tx1)
         self.Miner.miner_until_tx_committed(self.current_node, tx2)
         tip_number = self.current_node.getClient().get_tip_block_number()
         self.Node.wait_node_height(self.node_111, tip_number, 1000)
         # 3. Send tx21: input = tx2.input, dep = tx1.input
-        tx21_dep1 = self.Tx.send_transfer_self_tx_with_input([tx2], ["0x0"], TEST_PRIVATE_2,
-                                                             output_count=1,
-                                                             fee=1090,
-                                                             api_url=self.current_node.getClient().url,
-                                                             dep_cells=[{
-                                                                 "tx_hash": tx1, "index_hex": "0x0"
-                                                             }])
+        tx21_dep1 = self.Tx.send_transfer_self_tx_with_input(
+            [tx2],
+            ["0x0"],
+            TEST_PRIVATE_2,
+            output_count=1,
+            fee=1090,
+            api_url=self.current_node.getClient().url,
+            dep_cells=[{"tx_hash": tx1, "index_hex": "0x0"}],
+        )
 
         # 4. Send tx11: input = tx1.input, dep
-        tx11 = self.Tx.send_transfer_self_tx_with_input([tx1], ["0x0"], TEST_PRIVATE_1,
-                                                        output_count=1,
-                                                        fee=1090,
-                                                        api_url=self.current_node.getClient().url)
+        tx11 = self.Tx.send_transfer_self_tx_with_input(
+            [tx1],
+            ["0x0"],
+            TEST_PRIVATE_1,
+            output_count=1,
+            fee=1090,
+            api_url=self.current_node.getClient().url,
+        )
         # 5. Commit tx11 first
-        self.Node.wait_get_transaction(self.node_111, tx21_dep1, 'pending')
-        self.Node.wait_get_transaction(self.node_111, tx11, 'pending')
+        self.Node.wait_get_transaction(self.node_111, tx21_dep1, "pending")
+        self.Node.wait_get_transaction(self.node_111, tx11, "pending")
         self.node_111.getClient().remove_transaction(tx21_dep1)
         for i in range(10):
             self.Miner.miner_with_version(self.node_111, "0x0")
         pool = self.current_node.getClient().tx_pool_info()
         # 6. Check the status of tx21
         ret = self.current_node.getClient().get_transaction(tx21_dep1)
-        assert ret['tx_status']['status'] == 'rejected'
+        assert ret["tx_status"]["status"] == "rejected"

@@ -16,33 +16,45 @@ def to_remove_str(value):
 
 # ckb config ,ckb miner config ,ckb spec config
 def get_ckb_configs(p2p_port, rpc_port, spec='{ file = "dev.toml" }'):
-    return {
-        # 'ckb_chain_spec': '{ bundled = "specs/mainnet.toml" }',
-        'ckb_chain_spec': spec,
-        'ckb_network_listen_addresses': ["/ip4/0.0.0.0/tcp/{p2p_port}".format(p2p_port=p2p_port)],
-        'ckb_rpc_listen_address': '127.0.0.1:{rpc_port}'.format(rpc_port=rpc_port),
-        'ckb_rpc_modules': ["Net", "Pool", "Miner", "Chain", "Stats", "Subscription", "Experiment", "Debug",
-                            "IntegrationTest"],
-        'ckb_block_assembler_code_hash': '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8',
-        'ckb_block_assembler_args': '0x8883a512ee2383c01574a328f60eeccbb4d78240',
-        'ckb_block_assembler_hash_type': 'type',
-        'ckb_block_assembler_message': '0x'
-    }, {
-        'ckb_miner_rpc_url': '127.0.0.1:{rpc_port}'.format(rpc_port=rpc_port),
-        'ckb_chain_spec': spec,
-    }, {}
+    return (
+        {
+            # 'ckb_chain_spec': '{ bundled = "specs/mainnet.toml" }',
+            "ckb_chain_spec": spec,
+            "ckb_network_listen_addresses": [
+                "/ip4/0.0.0.0/tcp/{p2p_port}".format(p2p_port=p2p_port)
+            ],
+            "ckb_rpc_listen_address": "127.0.0.1:{rpc_port}".format(rpc_port=rpc_port),
+            "ckb_rpc_modules": [
+                "Net",
+                "Pool",
+                "Miner",
+                "Chain",
+                "Stats",
+                "Subscription",
+                "Experiment",
+                "Debug",
+                "IntegrationTest",
+            ],
+            "ckb_block_assembler_code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+            "ckb_block_assembler_args": "0x8883a512ee2383c01574a328f60eeccbb4d78240",
+            "ckb_block_assembler_hash_type": "type",
+            "ckb_block_assembler_message": "0x",
+        },
+        {
+            "ckb_miner_rpc_url": "127.0.0.1:{rpc_port}".format(rpc_port=rpc_port),
+            "ckb_chain_spec": spec,
+        },
+        {},
+    )
 
 
 def create_config_file(config_values, template_path, output_file):
     file_loader = FileSystemLoader(get_project_root())
     # 创建一个环境
-    env = Environment(
-        loader=file_loader,
-        autoescape=select_autoescape(['html', 'xml'])
-    )
+    env = Environment(loader=file_loader, autoescape=select_autoescape(["html", "xml"]))
     # 添加新的过滤器
-    env.filters['to_json'] = to_json
-    env.filters['to_remove_str'] = to_remove_str
+    env.filters["to_json"] = to_json
+    env.filters["to_remove_str"] = to_remove_str
     # 加载模板
     template = env.get_template(template_path)
 
@@ -53,7 +65,7 @@ def create_config_file(config_values, template_path, output_file):
     output = template.render(**config_values)
 
     # 将渲染的模板写入文件
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         f.write(output)
 
 
@@ -79,23 +91,25 @@ def run_command(cmd, check_exit_code=True):
             return pid + 1
 
     print("cmd:{cmd}".format(cmd=cmd))
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
     stdout, stderr = process.communicate()
     exit_code = process.returncode
 
     if exit_code != 0:
         print("Command failed with exit code:", exit_code)
         if stderr:
-            print("Error:", stderr.decode('utf-8'))
+            print("Error:", stderr.decode("utf-8"))
         if not check_exit_code:
             return exit_code
-        raise Exception(stderr.decode('utf-8'))
-    if stderr.decode('utf-8') != "" and stdout.decode('utf-8') != "":
-        print("wain:{result}".format(result=stderr.decode('utf-8')))
-        print("result:{result}".format(result=stdout.decode('utf-8')))
-        return stdout.decode('utf-8')
-    print("result:{result}".format(result=stdout.decode('utf-8')))
-    return stdout.decode('utf-8')
+        raise Exception(stderr.decode("utf-8"))
+    if stderr.decode("utf-8") != "" and stdout.decode("utf-8") != "":
+        print("wain:{result}".format(result=stderr.decode("utf-8")))
+        print("result:{result}".format(result=stdout.decode("utf-8")))
+        return stdout.decode("utf-8")
+    print("result:{result}".format(result=stdout.decode("utf-8")))
+    return stdout.decode("utf-8")
 
 
 def get_project_root():

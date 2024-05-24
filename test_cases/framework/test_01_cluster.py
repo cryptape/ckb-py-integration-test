@@ -3,17 +3,19 @@ import time
 from framework.basic import CkbTest
 
 
-
-
 class TestCluster(CkbTest):
 
     @classmethod
     def setup_class(cls):
         nodes = [
-            cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "cluster/node{i}".format(i=i), 8114 + i,
-                                         8225 + i)
-            for
-            i in range(1, 5)]
+            cls.CkbNode.init_dev_by_port(
+                cls.CkbNodeConfigPath.CURRENT_TEST,
+                "cluster/node{i}".format(i=i),
+                8114 + i,
+                8225 + i,
+            )
+            for i in range(1, 5)
+        ]
         cls.cluster = cls.Cluster(nodes)
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()

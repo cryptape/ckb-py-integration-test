@@ -75,7 +75,7 @@ class TestCkbCliRpc114(CkbTest):
             json.dump(search_json, json_file, indent=2)
 
         limit_number = 3
-        #3. through get cells compare lock args
+        # 3. through get cells compare lock args
         result = self.Ckb_cli.get_cells(
             limit=3,
             order="asc",
@@ -203,7 +203,7 @@ class TestCkbCliRpc114(CkbTest):
                 }
             },
         }
-        #3. get cells and compare search_json_by_lock and by type
+        # 3. get cells and compare search_json_by_lock and by type
         with open("/tmp/filter_by_type.json", "w") as json_file:
             json.dump(search_json_by_lock, json_file, indent=2)
         by_lock_result = self.Ckb_cli.get_cells(
@@ -259,7 +259,7 @@ class TestCkbCliRpc114(CkbTest):
         )
         objects_number = len(exact_result["objects"])
         assert objects_number == 1
-        #4. get cells search mode use prefix return live cell and compare cell number assert
+        # 4. get cells search mode use prefix return live cell and compare cell number assert
         # mode: prefix
         prefix_search_json = {
             "script": {
@@ -312,10 +312,10 @@ class TestCkbCliRpc114(CkbTest):
         Returns:
 
         """
-        #1. get tip blocknumber and get block struct by number
+        # 1. get tip blocknumber and get block struct by number
         block_number = self.node.getClient().get_tip_block_number()
         block = self.node.getClient().get_block_by_number(hex(block_number))
-        #2. get output lock script info by block["transactions"][0]["outputs"][0]["lock"]
+        # 2. get output lock script info by block["transactions"][0]["outputs"][0]["lock"]
         lock = block["transactions"][0]["outputs"][0]["lock"]
         lock_code_hash = lock["code_hash"]
         lock_args = lock["args"]
@@ -327,7 +327,7 @@ class TestCkbCliRpc114(CkbTest):
             },
             "script_type": "lock",
         }
-        #3. get transactions and assert block_number and others in indexerTxWithCell Type
+        # 3. get transactions and assert block_number and others in indexerTxWithCell Type
         with open("/tmp/transactions.json", "w") as json_file:
             json.dump(search_json, json_file, indent=2)
         result = self.Ckb_cli.get_transactions(
@@ -351,7 +351,7 @@ class TestCkbCliRpc114(CkbTest):
         Returns:
 
         """
-        #1. get tip blocknumber and get block struct by number
+        # 1. get tip blocknumber and get block struct by number
         block_number = self.node.getClient().get_tip_block_number()
         block = self.node.getClient().get_block_by_number(hex(block_number))
         lock = block["transactions"][0]["outputs"][0]["lock"]
@@ -365,7 +365,7 @@ class TestCkbCliRpc114(CkbTest):
             },
             "script_type": "lock",
         }
-        #2. get cells capacity and assert block_number and others in Type IndexerCellsCapacity
+        # 2. get cells capacity and assert block_number and others in Type IndexerCellsCapacity
         with open("/tmp/cells_capacity.json", "w") as json_file:
             json.dump(search_json, json_file, indent=2)
         result = self.Ckb_cli.get_cells_capacity(

@@ -13,22 +13,29 @@ class TestGenerateEpochs(CkbTest):
         Returns:
 
         """
-        #1. start 2 ckb node in tmp/feature/gene_rate_epochs node dir
+        # 1. start 2 ckb node in tmp/feature/gene_rate_epochs node dir
         nodes = [
-            cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST,
-                                         "feature/gene_rate_epochs/node{i}".format(i=i), 8114 + i,
-                                         8225 + i)
-            for
-            i in range(0, 2)]
+            cls.CkbNode.init_dev_by_port(
+                cls.CkbNodeConfigPath.CURRENT_TEST,
+                "feature/gene_rate_epochs/node{i}".format(i=i),
+                8114 + i,
+                8225 + i,
+            )
+            for i in range(0, 2)
+        ]
         cls.cluster = cls.Cluster(nodes)
         cls.cluster.prepare_all_nodes()
-        cls.ckb_spec_config_dict = read_toml_file(get_project_root() + "/" + cls.cluster.ckb_nodes[0].ckb_config_path.ckb_spec_path)
+        cls.ckb_spec_config_dict = read_toml_file(
+            get_project_root()
+            + "/"
+            + cls.cluster.ckb_nodes[0].ckb_config_path.ckb_spec_path
+        )
         cls.cluster.ckb_nodes[0].startWithRichIndexer()
         cls.cluster.ckb_nodes[1].start()
         cls.Miner.make_tip_height_number(nodes[0], 100)
-        #2. link ckb node each other
+        # 2. link ckb node each other
         cls.cluster.connected_all_nodes()
-        #3. miner 100block
+        # 3. miner 100block
         cls.Node.wait_cluster_height(cls.cluster, 100, 1000)
 
     @classmethod
@@ -67,13 +74,19 @@ class TestGenerateEpochs(CkbTest):
         assert int(f"0x{epoch_info.number():06X}", 16) == int("0x2", 16)
         print(f"Index: 0x{epoch_info.index():04X}")
         print(f"Length: 0x{epoch_info.length():04X}")
-        assert int(f"0x{epoch_info.length():04X}", 16) == self.ckb_spec_config_dict.get("params", {}).get("epoch_duration_target")/8
-        current_tip_number = self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
+        assert (
+            int(f"0x{epoch_info.length():04X}", 16)
+            == self.ckb_spec_config_dict.get("params", {}).get("epoch_duration_target")
+            / 8
+        )
+        current_tip_number = (
+            self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
+        )
         epoch = self.cluster.ckb_nodes[0].getClient().get_current_epoch()
         print("current epoch:", epoch)
         assert "0x" in result
         assert tip_number < current_tip_number
-        assert int(pre_epoch['number'], 16) + 2 == int(epoch['number'], 16)
+        assert int(pre_epoch["number"], 16) + 2 == int(epoch["number"], 16)
         self.Node.wait_cluster_height(self.cluster, current_tip_number, 1000)
 
 
@@ -89,6 +102,7 @@ class EpochNumberWithFraction:
 
     def length(self):
         return (self.value >> 40) & ((1 << 16) - 1)
+
 
 def parse_hex_string(hex_string):
     hex_string = hex_string[2:]

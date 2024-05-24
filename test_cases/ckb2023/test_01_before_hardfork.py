@@ -21,12 +21,13 @@ class TestBeforeHardFork(CkbTest):
         """
         # 1. start 4 ckb node in tmp/cluster/hardfork/node dir
         nodes = [
-            cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST,
-                                         f"cluster/hardfork/node{i}",
-                                         8114 + i,
-                                         8225 + i)
-            for
-            i in range(1, 5)
+            cls.CkbNode.init_dev_by_port(
+                cls.CkbNodeConfigPath.CURRENT_TEST,
+                f"cluster/hardfork/node{i}",
+                8114 + i,
+                8225 + i,
+            )
+            for i in range(1, 5)
         ]
         cls.cluster = cls.Cluster(nodes)
         cls.cluster.prepare_all_nodes()
@@ -36,7 +37,9 @@ class TestBeforeHardFork(CkbTest):
         cls.cluster.connected_all_nodes()
 
         # 3. deploy contract
-        contracts = cls.Contract_util.deploy_contracts(cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
+        contracts = cls.Contract_util.deploy_contracts(
+            cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0]
+        )
         cls.spawn_contract = contracts["SpawnContract"]
 
         # 4. miner 850 block
@@ -66,9 +69,9 @@ class TestBeforeHardFork(CkbTest):
         current_epoch_result = self.cluster.ckb_nodes[0].getClient().get_current_epoch()
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
         # current epoch <  consensus epoch .length
-        assert int(current_epoch_result['number'].replace("0x", "")) \
-               < get_epoch_number_by_consensus_response(
-            consensus_response, '0048')
+        assert int(
+            current_epoch_result["number"].replace("0x", "")
+        ) < get_epoch_number_by_consensus_response(consensus_response, "0048")
 
     def test_01_rfc_0048_in_consensus(self):
         """
@@ -79,7 +82,9 @@ class TestBeforeHardFork(CkbTest):
 
         # 1. Check if the consensus response  includes RFC 0048
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
-        epoch_number = get_epoch_number_by_consensus_response(consensus_response, "0048")
+        epoch_number = get_epoch_number_by_consensus_response(
+            consensus_response, "0048"
+        )
         assert epoch_number >= 0
 
     def test_02_rfc_0049_in_consensus(self):
@@ -91,7 +96,9 @@ class TestBeforeHardFork(CkbTest):
 
         # 1. Check if the consensus response  includes RFC 0049
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
-        epoch_number = get_epoch_number_by_consensus_response(consensus_response, '0049')
+        epoch_number = get_epoch_number_by_consensus_response(
+            consensus_response, "0049"
+        )
         assert epoch_number >= 0
 
     def test_03_0048_miner_with_0x0(self):
@@ -119,9 +126,10 @@ class TestBeforeHardFork(CkbTest):
         with pytest.raises(Exception) as exc_info:
             self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x1")
         expected_error_message = "BlockVersionError"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}" \
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}"
             f"' not found in actual string '{exc_info.value.args[0]}'"
+        )
 
     def test_05_0049_transfer_to_data2_address(self):
         """
@@ -134,9 +142,12 @@ class TestBeforeHardFork(CkbTest):
         :return:
         """
         # 1. check account1 have enough money
-        account1 = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
-        account1_capacity = self.Ckb_cli.wallet_get_capacity(account1['address']['testnet'],
-                                                             self.cluster.ckb_nodes[0].client.url)
+        account1 = self.Ckb_cli.util_key_info_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1
+        )
+        account1_capacity = self.Ckb_cli.wallet_get_capacity(
+            account1["address"]["testnet"], self.cluster.ckb_nodes[0].client.url
+        )
         assert account1_capacity > 0
 
         # 2. send capacity to data2 address
@@ -154,12 +165,14 @@ class TestBeforeHardFork(CkbTest):
                 self.Config.ACCOUNT_PRIVATE_1,
                 "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
                 140,
-                self.cluster.ckb_nodes[0].client.url)
+                self.cluster.ckb_nodes[0].client.url,
+            )
         print(exc_info)
-        expected_error_message = "the feature \"VM Version 2\" is used in current transaction, but not enabled in current chain"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}'" \
+        expected_error_message = 'the feature "VM Version 2" is used in current transaction, but not enabled in current chain'
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}'"
             f" not found in actual string '{exc_info.value.args[0]}'"
+        )
 
     def test_06_0050_invoke_spawn_use_type(self):
         """
@@ -173,20 +186,25 @@ class TestBeforeHardFork(CkbTest):
         code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
         with pytest.raises(Exception) as exc_info:
-            tip_block_number = self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
-            print('tip_block_number:', tip_block_number)
-            tx_hash = self.Contract.invoke_ckb_contract(self.Config.MINER_PRIVATE_1,
-                                                        code_tx_hash,
-                                                        code_tx_index,
-                                                        invoke_arg,
-                                                        "type",
-                                                        invoke_data,
-                                                        api_url=self.cluster.ckb_nodes[0].getClient().url)
+            tip_block_number = (
+                self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
+            )
+            print("tip_block_number:", tip_block_number)
+            tx_hash = self.Contract.invoke_ckb_contract(
+                self.Config.MINER_PRIVATE_1,
+                code_tx_hash,
+                code_tx_index,
+                invoke_arg,
+                "type",
+                invoke_data,
+                api_url=self.cluster.ckb_nodes[0].getClient().url,
+            )
             print("tx hash :", tx_hash)
         expected_error_message = "InvalidEcall(2101)"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' " \
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
+        )
 
     def test_07_0049_transfer_tx_when_10th_block_before_fork(self):
         """
@@ -199,7 +217,9 @@ class TestBeforeHardFork(CkbTest):
 
         # 1. miner until  the 10th block before the fork
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
-        epoch_number = get_epoch_number_by_consensus_response(consensus_response, '0049') * 1000
+        epoch_number = (
+            get_epoch_number_by_consensus_response(consensus_response, "0049") * 1000
+        )
 
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], epoch_number - 10)
         self.Node.wait_cluster_height(self.cluster, epoch_number - 10, 100)
@@ -218,15 +238,18 @@ class TestBeforeHardFork(CkbTest):
             self.Config.MINER_PRIVATE_1,
             "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
             140,
-            self.cluster.ckb_nodes[0].client.url)
+            self.cluster.ckb_nodes[0].client.url,
+        )
         print(f"txHash:{tx_hash}")
 
         # 3. querying the transaction status shows it as rejected or unknown.
         self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
         print(f"tx response:{tx_response['tx_status']['status']}")
-        assert tx_response['tx_status']['status'] == "rejected" \
-               or tx_response['tx_status']['status'] == "unknown"
+        assert (
+            tx_response["tx_status"]["status"] == "rejected"
+            or tx_response["tx_status"]["status"] == "unknown"
+        )
 
     def test_08_send_transfer_tx_when_10th_block_before_fork(self):
         """
@@ -247,7 +270,9 @@ class TestBeforeHardFork(CkbTest):
 
         # 1. miner until  the 10th block before the fork
         consensus_response = self.cluster.ckb_nodes[0].getClient().get_consensus()
-        epoch_number = get_epoch_number_by_consensus_response(consensus_response, '0049') * 1000
+        epoch_number = (
+            get_epoch_number_by_consensus_response(consensus_response, "0049") * 1000
+        )
 
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], epoch_number - 10)
         self.Node.wait_cluster_height(self.cluster, epoch_number - 10, 100)
@@ -262,39 +287,45 @@ class TestBeforeHardFork(CkbTest):
         #     }
         # )
         # ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0
-        account = self.Ckb_cli.util_key_info_by_private_key(account_private=self.Config.ACCOUNT_PRIVATE_2)
+        account = self.Ckb_cli.util_key_info_by_private_key(
+            account_private=self.Config.ACCOUNT_PRIVATE_2
+        )
         tx_hash1 = self.Ckb_cli.wallet_transfer_by_private_key(
             self.Config.ACCOUNT_PRIVATE_1,
             account["address"]["testnet"],
             140,
-            self.cluster.ckb_nodes[0].client.url)
+            self.cluster.ckb_nodes[0].client.url,
+        )
         tx_hash2 = self.Ckb_cli.wallet_transfer_by_private_key(
             self.Config.ACCOUNT_PRIVATE_2,
             "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
             140,
-            self.cluster.ckb_nodes[0].client.url)
+            self.cluster.ckb_nodes[0].client.url,
+        )
         print(f"txHash:{tx_hash1}")
 
         # 3. querying the transaction status shows it as rejected or unknown.
-        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], '0x0')
+        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash1)
         print(f"tx response:{tx_response['tx_status']['status']}")
-        assert tx_response['tx_status']['status'] == 'unknown'
+        assert tx_response["tx_status"]["status"] == "unknown"
 
         # 4. miner until the 20th block after the fork
         for _ in range(30):
-            self.Miner.miner_with_version(self.cluster.ckb_nodes[0], '0x0')
+            self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
 
         # 5. querying the transaction status shows it as committed,committed number > 10th after fork
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash1)
         print(f"tx response:{tx_response['tx_status']['status']}")
-        block = self.cluster.ckb_nodes[0]. \
-            getClient(). \
-            get_block(tx_response['tx_status']['block_hash'])
+        block = (
+            self.cluster.ckb_nodes[0]
+            .getClient()
+            .get_block(tx_response["tx_status"]["block_hash"])
+        )
         print(int(block["header"]["number"], 16))
         assert int(block["header"]["number"], 16) >= 1010
         tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash2)
-        assert tx_response['tx_status']['status'] == 'committed'
+        assert tx_response["tx_status"]["status"] == "committed"
 
 
 def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
@@ -310,6 +341,10 @@ def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
     :param rfc_name: example : 0048
     :return:
     """
-    hardfork_features = consensus_response['hardfork_features']
-    return int(list(filter(lambda obj: rfc_name in obj['rfc'], hardfork_features))[0][
-                   'epoch_number'].replace("0x", ""), 16)
+    hardfork_features = consensus_response["hardfork_features"]
+    return int(
+        list(filter(lambda obj: rfc_name in obj["rfc"], hardfork_features))[0][
+            "epoch_number"
+        ].replace("0x", ""),
+        16,
+    )

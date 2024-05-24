@@ -12,8 +12,9 @@ class TestDevNetSoftFork(CkbTest):
         Returns:
 
         """
-        node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool_test/node1", 8114,
-                                             8227)
+        node1 = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool_test/node1", 8114, 8227
+        )
         cls.node = node1
         node1.prepare()
         node1.start()
@@ -35,7 +36,10 @@ class TestDevNetSoftFork(CkbTest):
         # 1. query  get_consensus
         consensus = self.node.getClient().get_consensus()
         print(consensus)
-        assert consensus['softforks']['light_client']['rfc0043']['min_activation_epoch'] == "0x0"
+        assert (
+            consensus["softforks"]["light_client"]["rfc0043"]["min_activation_epoch"]
+            == "0x0"
+        )
 
     def test_02_get_deployments_info(self):
         """
@@ -52,7 +56,7 @@ class TestDevNetSoftFork(CkbTest):
 
         # 2. query get_deployments_info
         info = self.node.getClient().get_deployments_info()
-        assert info['deployments']['light_client']['state'] == 'active'
+        assert info["deployments"]["light_client"]["state"] == "active"
 
     def test_03_get_block_tmp(self):
         """
@@ -64,4 +68,4 @@ class TestDevNetSoftFork(CkbTest):
 
         # 1. query get_block_template
         template = self.node.getClient().get_block_template()
-        assert template['extension'] is not None
+        assert template["extension"] is not None

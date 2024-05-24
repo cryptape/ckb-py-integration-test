@@ -3,13 +3,18 @@ import pytest
 from framework.basic import CkbTest
 from parameterized import parameterized
 
+
 class TestBeforeCkb2023(CkbTest):
 
-    node_current = CkbTest.CkbNode.init_dev_by_port(CkbTest.CkbNodeConfigPath.CURRENT_TEST,
-                                                    "node_compatible/current/node1", 8115,
-                                                    8225)
-    node_110 = CkbTest.CkbNode.init_dev_by_port(CkbTest.CkbNodeConfigPath.V110, "node_compatible/current/node2", 8116,
-                                                8226)
+    node_current = CkbTest.CkbNode.init_dev_by_port(
+        CkbTest.CkbNodeConfigPath.CURRENT_TEST,
+        "node_compatible/current/node1",
+        8115,
+        8225,
+    )
+    node_110 = CkbTest.CkbNode.init_dev_by_port(
+        CkbTest.CkbNodeConfigPath.V110, "node_compatible/current/node2", 8116, 8226
+    )
     nodes = [node_current, node_110]
     cluster: CkbTest.Cluster = CkbTest.Cluster(nodes)
 
@@ -30,7 +35,9 @@ class TestBeforeCkb2023(CkbTest):
 
         # 2. connected 2 node
         cls.cluster.connected_all_nodes()
-        contracts = cls.Contract_util.deploy_contracts(cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0])
+        contracts = cls.Contract_util.deploy_contracts(
+            cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0]
+        )
         cls.spawn_contract = contracts["SpawnContract"]
 
         # 3. miner 100 block
@@ -87,14 +94,18 @@ class TestBeforeCkb2023(CkbTest):
         """
 
         # 1. send transfer tx
-        account = self.Ckb_cli.util_key_info_by_private_key(account_private=self.Config.ACCOUNT_PRIVATE_2)
-        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
-                                                              account["address"]["testnet"],
-                                                              140,
-                                                              node.getClient().url)
+        account = self.Ckb_cli.util_key_info_by_private_key(
+            account_private=self.Config.ACCOUNT_PRIVATE_2
+        )
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1,
+            account["address"]["testnet"],
+            140,
+            node.getClient().url,
+        )
         print(f"txHash:{tx_hash}")
         transaction = node.getClient().get_transaction(tx_hash)
-        assert transaction['tx_status']['status'] == 'pending'
+        assert transaction["tx_status"]["status"] == "pending"
         for query_node in self.cluster.ckb_nodes:
             self.Node.wait_get_transaction(query_node, tx_hash, "pending")
 
@@ -120,20 +131,32 @@ class TestBeforeCkb2023(CkbTest):
         code_tx_hash, code_tx_index = self.spawn_contract.get_deploy_hash_and_index()
         invoke_arg, invoke_data = self.spawn_contract.get_arg_and_data("demo")
         with pytest.raises(Exception) as exc_info:
-            self.Contract.invoke_ckb_contract(self.Config.MINER_PRIVATE_1, code_tx_hash, code_tx_index,
-                                                        invoke_arg, "data1",
-                                                        invoke_data,
-                                                        api_url=node.getClient().url)
+            self.Contract.invoke_ckb_contract(
+                self.Config.MINER_PRIVATE_1,
+                code_tx_hash,
+                code_tx_index,
+                invoke_arg,
+                "data1",
+                invoke_data,
+                api_url=node.getClient().url,
+            )
         expected_error_message = "InvalidEcall(2101)"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        assert (
+            expected_error_message in exc_info.value.args[0]
+        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
         # 2.  send spawn tx by type .
         with pytest.raises(Exception) as exc_info:
-            self.Contract.invoke_ckb_contract(self.Config.MINER_PRIVATE_1, code_tx_hash, code_tx_index,
-                                                        invoke_arg, "type",
-                                                        invoke_data,
-                                                        api_url=node.getClient().url)
+            self.Contract.invoke_ckb_contract(
+                self.Config.MINER_PRIVATE_1,
+                code_tx_hash,
+                code_tx_index,
+                invoke_arg,
+                "type",
+                invoke_data,
+                api_url=node.getClient().url,
+            )
         expected_error_message = "InvalidEcall(2101)"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
+        assert (
+            expected_error_message in exc_info.value.args[0]
+        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"

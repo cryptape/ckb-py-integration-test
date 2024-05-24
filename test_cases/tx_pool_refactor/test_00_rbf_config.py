@@ -6,8 +6,9 @@ from framework.basic import CkbTest
 class TestRBFConfig(CkbTest):
     @classmethod
     def setup_class(cls):
-        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120,
-                                                8225)
+        cls.node = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120, 8225
+        )
         # 1. starting the node, modify ckb.toml with min_rbf_rate = 800 < min_fee_rate.node starts successfully.
         cls.node.prepare(other_ckb_config={"ckb_tx_pool_min_rbf_rate": "800"})
         cls.node.start()
@@ -30,18 +31,29 @@ class TestRBFConfig(CkbTest):
 
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
 
-        self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 100,
-                                                    self.node.getClient().url, "1500")
+        self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.MINER_PRIVATE_1,
+            account["address"]["testnet"],
+            100,
+            self.node.getClient().url,
+            "1500",
+        )
 
         with pytest.raises(Exception) as exc_info:
             # 2. send tx use same input cell
-            self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 200,
-                                                        self.node.getClient().url, "2000")
+            self.Ckb_cli.wallet_transfer_by_private_key(
+                self.Config.MINER_PRIVATE_1,
+                account["address"]["testnet"],
+                200,
+                self.node.getClient().url,
+                "2000",
+            )
         # ERROR:  TransactionFailedToResolve: Resolve failed Dead
         expected_error_message = " TransactionFailedToResolve: Resolve failed Dead"
-        assert expected_error_message in exc_info.value.args[0], \
-            f"Expected substring '{expected_error_message}' " \
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
+        )
 
     def test_disable_rbf_and_check_min_replace_fee(self):
         """
@@ -52,14 +64,20 @@ class TestRBFConfig(CkbTest):
             min_rbf_rate == null
         :return:
         """
-        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        account = self.Ckb_cli.util_key_info_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1
+        )
 
         # send tx
-        tx = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"],
-                                                         100,
-                                                         self.node.getClient().url, "1500")
+        tx = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1,
+            account["address"]["testnet"],
+            100,
+            self.node.getClient().url,
+            "1500",
+        )
         # 2. get_transaction
         transaction = self.node.getClient().get_transaction(tx)
-        assert transaction['fee'] is not None
+        assert transaction["fee"] is not None
         # min_rbf_rate == null
-        assert transaction['min_replace_fee'] is None
+        assert transaction["min_replace_fee"] is None

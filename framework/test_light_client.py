@@ -6,16 +6,43 @@ from enum import Enum
 
 
 class CkbLightClientConfigPath(Enum):
-    V0_2_4 = ("source/template/ckb_light_client/0.2.4/testnet.toml.j2", "download/0.2.4/ckb-light-client")
-    V0_3_0 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.0/ckb-light-client")
-    V0_3_1 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.1/ckb-light-client")
-    V0_3_2 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.2/ckb-light-client")
-    V0_3_3 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.3/ckb-light-client")
-    V0_3_4 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.4/ckb-light-client")
-    V0_3_5 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.5/ckb-light-client")
-    V0_3_6 = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.6/ckb-light-client")
+    V0_2_4 = (
+        "source/template/ckb_light_client/0.2.4/testnet.toml.j2",
+        "download/0.2.4/ckb-light-client",
+    )
+    V0_3_0 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.0/ckb-light-client",
+    )
+    V0_3_1 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.1/ckb-light-client",
+    )
+    V0_3_2 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.2/ckb-light-client",
+    )
+    V0_3_3 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.3/ckb-light-client",
+    )
+    V0_3_4 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.4/ckb-light-client",
+    )
+    V0_3_5 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.5/ckb-light-client",
+    )
+    V0_3_6 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.6/ckb-light-client",
+    )
 
-    CURRENT_TEST = ("source/template/ckb_light_client/0.3.0/testnet.toml.j2", "download/0.3.6/ckb-light-client")
+    CURRENT_TEST = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.3.6/ckb-light-client",
+    )
 
     def __init__(self, ckb_light_client_config_path, ckb_light_bin_path):
         self.ckb_light_client_config_path = ckb_light_client_config_path
@@ -27,8 +54,14 @@ class CkbLightClientConfigPath(Enum):
 
 class CkbLightClientNode:
 
-    def __init__(self, ckb_light_client_config_path: CkbLightClientConfigPath, ckb_p2p_infos, ckb_spec_path, rpc_port,
-                 tmp_path):
+    def __init__(
+        self,
+        ckb_light_client_config_path: CkbLightClientConfigPath,
+        ckb_p2p_infos,
+        ckb_spec_path,
+        rpc_port,
+        tmp_path,
+    ):
         self.ckbLightClientConfigPath = ckb_light_client_config_path
         self.ckb_p2p_infos = ckb_p2p_infos
         self.ckb_spec_path = ckb_spec_path
@@ -38,14 +71,21 @@ class CkbLightClientNode:
             "ckb_light_client_chain": ckb_spec_path,
             "ckb_light_client_network_bootnodes": ckb_p2p_infos,
             "ckb_light_client_rpc_listen_address": f"127.0.0.1:{rpc_port}",
-            "ckb_light_client_network_listen_addresses": [f"/ip4/0.0.0.0/tcp/1{rpc_port}"]
+            "ckb_light_client_network_listen_addresses": [
+                f"/ip4/0.0.0.0/tcp/1{rpc_port}"
+            ],
         }
         self.ckb_light_config_path = f"{self.tmp_path}/testnet.toml"
         self.client = CKBLightRPCClient(f"http://127.0.0.1:{rpc_port}")
 
     @classmethod
-    def init_by_nodes(cls, ckb_light_client_config_path: CkbLightClientConfigPath, ckb_nodes, dec_dir,
-                      rpc_port, ):
+    def init_by_nodes(
+        cls,
+        ckb_light_client_config_path: CkbLightClientConfigPath,
+        ckb_nodes,
+        dec_dir,
+        rpc_port,
+    ):
         ckb_p2p_infos = []
         for node in ckb_nodes:
             address = node.get_peer_address()
@@ -53,20 +93,32 @@ class CkbLightClientNode:
             print(f"{address}/p2p/{peer_id}")
             ckb_p2p_infos.append(f"{address}/p2p/{peer_id}")
         ckb_spec_path = ckb_nodes[0].ckb_specs_config_path
-        return CkbLightClientNode(ckb_light_client_config_path, ckb_p2p_infos, ckb_spec_path, rpc_port, dec_dir)
+        return CkbLightClientNode(
+            ckb_light_client_config_path,
+            ckb_p2p_infos,
+            ckb_spec_path,
+            rpc_port,
+            dec_dir,
+        )
 
     def prepare(self):
         print("mkdir tmp path ")
-        create_config_file(self.ckb_light_config, self.ckbLightClientConfigPath.ckb_light_client_config_path,
-                           self.ckb_light_config_path)
+        create_config_file(
+            self.ckb_light_config,
+            self.ckbLightClientConfigPath.ckb_light_client_config_path,
+            self.ckb_light_config_path,
+        )
 
         print("init ckb light config ")
-        shutil.copy(f"{get_project_root()}/{self.ckbLightClientConfigPath.ckb_light_bin_path}",
-                    self.tmp_path)
+        shutil.copy(
+            f"{get_project_root()}/{self.ckbLightClientConfigPath.ckb_light_bin_path}",
+            self.tmp_path,
+        )
 
     def start(self):
         run_command(
-            f"cd {self.tmp_path} && RUST_LOG=info,ckb_light_client=trace ./ckb-light-client run --config-file testnet.toml > node.log 2>&1 &")
+            f"cd {self.tmp_path} && RUST_LOG=info,ckb_light_client=trace ./ckb-light-client run --config-file testnet.toml > node.log 2>&1 &"
+        )
         # wait rpc start
         time.sleep(2)
         print("start clb_light client ")
@@ -75,7 +127,7 @@ class CkbLightClientNode:
         return self.client
 
     def stop(self):
-        run_command(f"kill $(lsof -t -i:{self.rpc_port})",False)
+        run_command(f"kill $(lsof -t -i:{self.rpc_port})", False)
         time.sleep(3)
 
     def clean(self):

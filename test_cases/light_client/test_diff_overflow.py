@@ -20,33 +20,61 @@ class TestDiffOverflow(CkbTest):
         Returns:
 
         """
-        node1 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node1", 8115,
-                                             8227)
-        node2 = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node2", 8116,
-                                             8228)
+        node1 = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node1", 8115, 8227
+        )
+        node2 = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node2", 8116, 8228
+        )
 
         cls.node = node1
         cls.node2 = node2
         cls.cluster = cls.Cluster([node1, node2])
-        node1.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb_dev",
-                                             "ckb_params_genesis_compact_target": "0x2020000"})
-        node2.prepare(other_ckb_spec_config={"ckb_params_genesis_epoch_length": "1", "ckb_name": "ckb_dev",
-                                             "ckb_params_genesis_compact_target": "0x2020000"})
+        node1.prepare(
+            other_ckb_spec_config={
+                "ckb_params_genesis_epoch_length": "1",
+                "ckb_name": "ckb_dev",
+                "ckb_params_genesis_compact_target": "0x2020000",
+            }
+        )
+        node2.prepare(
+            other_ckb_spec_config={
+                "ckb_params_genesis_epoch_length": "1",
+                "ckb_name": "ckb_dev",
+                "ckb_params_genesis_compact_target": "0x2020000",
+            }
+        )
 
         cls.cluster.start_all_nodes()
         cls.cluster.connected_all_nodes()
         cls.Miner.make_tip_height_number(cls.node, 5)
         cls.Node.wait_cluster_height(cls.cluster, 5, 1000)
-        cls.ckb_light_node = cls.CkbLightClientNode.init_by_nodes(cls.CkbLightClientConfigPath.CURRENT_TEST, [cls.node],
-                                                                  "tx_pool_light/node1", 8001)
+        cls.ckb_light_node = cls.CkbLightClientNode.init_by_nodes(
+            cls.CkbLightClientConfigPath.CURRENT_TEST,
+            [cls.node],
+            "tx_pool_light/node1",
+            8001,
+        )
 
-        cls.account = cls.Ckb_cli.util_key_info_by_private_key(cls.Config.MINER_PRIVATE_1)
+        cls.account = cls.Ckb_cli.util_key_info_by_private_key(
+            cls.Config.MINER_PRIVATE_1
+        )
 
         cls.ckb_light_node.prepare()
         cls.ckb_light_node.start()
-        cls.ckb_light_node.getClient().set_scripts([{"script": {
-            "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
-            "args": cls.account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
+        cls.ckb_light_node.getClient().set_scripts(
+            [
+                {
+                    "script": {
+                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "type",
+                        "args": cls.account["lock_arg"],
+                    },
+                    "script_type": "lock",
+                    "block_number": "0x0",
+                }
+            ]
+        )
 
     @classmethod
     def teardown_class(cls):

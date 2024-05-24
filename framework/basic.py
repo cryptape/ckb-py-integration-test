@@ -23,9 +23,15 @@ class CkbTest(ABC, unittest.TestCase):
     Node: framework.helper.node = framework.helper.node
     Cluster: framework.test_cluster.Cluster = framework.test_cluster.Cluster
     CkbNode: framework.test_node.CkbNode = framework.test_node.CkbNode
-    CkbNodeConfigPath: framework.test_node.CkbNodeConfigPath = framework.test_node.CkbNodeConfigPath
-    CkbLightClientConfigPath: framework.test_light_client.CkbLightClientConfigPath = framework.test_light_client.CkbLightClientConfigPath
-    CkbLightClientNode: framework.test_light_client = framework.test_light_client.CkbLightClientNode
+    CkbNodeConfigPath: framework.test_node.CkbNodeConfigPath = (
+        framework.test_node.CkbNodeConfigPath
+    )
+    CkbLightClientConfigPath: framework.test_light_client.CkbLightClientConfigPath = (
+        framework.test_light_client.CkbLightClientConfigPath
+    )
+    CkbLightClientNode: framework.test_light_client = (
+        framework.test_light_client.CkbLightClientNode
+    )
     Config = framework.config
     Tx: framework.helper.tx = framework.helper.tx
 
@@ -43,7 +49,10 @@ class CkbTest(ABC, unittest.TestCase):
 
     def teardown_method(self, method):
         print("\nTearing down method", method.__name__)
-        print('\nself.did_pass =', self.did_pass)
+        print("\nself.did_pass =", self.did_pass)
         if not self.did_pass:
             print("back log data")
-            shutil.copytree(f"{get_project_root()}/tmp", f"{get_project_root()}/report/{method.__name__}")
+            shutil.copytree(
+                f"{get_project_root()}/tmp",
+                f"{get_project_root()}/report/{method.__name__}",
+            )

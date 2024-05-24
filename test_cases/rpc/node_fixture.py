@@ -7,14 +7,16 @@ from framework.test_node import CkbNode, CkbNodeConfigPath
 from framework.util import get_project_root
 
 
-
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def get_cluster():
     nodes = [
-        CkbNode.init_dev_by_port(CkbNodeConfigPath.CURRENT_TEST, "cluster/hardfork/node{i}".format(i=i), 8114 + i,
-                                 8225 + i)
-        for
-        i in range(1, 5)
+        CkbNode.init_dev_by_port(
+            CkbNodeConfigPath.CURRENT_TEST,
+            "cluster/hardfork/node{i}".format(i=i),
+            8114 + i,
+            8225 + i,
+        )
+        for i in range(1, 5)
     ]
 
     cluster = Cluster(nodes)
@@ -31,13 +33,16 @@ def get_cluster():
     cluster.clean_all_nodes()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def get_cluster_indexer():
     nodes = [
-        CkbNode.init_dev_by_port(CkbNodeConfigPath.v115, "cluster_indexer/node{i}".format(i=i), 8114 + i,
-                                 8225 + i)
-        for
-        i in range(0, 2)
+        CkbNode.init_dev_by_port(
+            CkbNodeConfigPath.v115,
+            "cluster_indexer/node{i}".format(i=i),
+            8114 + i,
+            8225 + i,
+        )
+        for i in range(0, 2)
     ]
 
     cluster = Cluster(nodes)

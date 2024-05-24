@@ -9,8 +9,6 @@ DATA_ERROR_TAT = f"{get_project_root()}/source/data/data.err.tar.gz"
 
 class TestSyncDaoLockSizeMismatch(CkbTest):
 
-
-
     def teardown_method(self, method):
         super().teardown_method(method)
         print("\nTearing down method", method.__name__)
@@ -38,12 +36,24 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
         """
 
         # 1. start with config starting_block_limiting_dao_withdrawing_lock:5495
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
         self.node1 = node1
         self.node2 = node2
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
+        node1.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5495"
+            }
+        )
+        node2.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5495"
+            }
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
@@ -71,12 +81,24 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
         """
 
         # 1. start with config starting_block_limiting_dao_withdrawing_lock:5494
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
         self.node1 = node1
         self.node2 = node2
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
+        node1.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
+        node2.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
@@ -106,12 +128,20 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
         """
 
         # 1. can sync 6000 block
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
         self.node1 = node1
         self.node2 = node2
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
+        node1.prepare(
+            other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"}
+        )
+        node2.prepare(
+            other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"}
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
