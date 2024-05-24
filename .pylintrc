@@ -1,0 +1,13 @@
+[MASTER]
+ignore=venv
+persistent=yes
+load-plugins=pylint_django
+
+[MESSAGES CONTROL]
+disable=duplicate-code,missing-docstring
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-args=5
