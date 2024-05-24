@@ -24,11 +24,13 @@ class TestHelperContract(CkbTest):
         cls.node.clean()
 
     def test_01_get_deploy_data_contract_hash(self):
+        # The code_hash of a data contract is determined by the tx_data, which is the contract itself, therefore it is a distinct and unique value.
         code_hash = self.Contract.get_ckb_contract_codehash(self.always_success_deploy_hash, 0, False,
                                                             self.node.getClient().url)
         assert code_hash == "0x28e83a1277d48add8e72fadaa9248559e1b632bab2bd60b27955ebc4c03800a5"
 
     def test_02_get_deploy_type_contract_hash(self):
+        # The code_hash of a type contract is determined by the type_args, which are returned by the VM, therefore it cannot be determined.
         self.Contract.get_ckb_contract_codehash(self.always_success_deploy_hash, 0, True,
                                                 self.node.getClient().url)
         # assert code_hash == "0xc68ad51e90b6cd00a93815b4dab30b2568f0543b11b5632f1a331ff1b4b0963a"

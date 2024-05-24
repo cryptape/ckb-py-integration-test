@@ -20,12 +20,12 @@ class TestIssues(CkbTest):
 
     def test_4315(self):
         """
-        1. 发送 tx1
-        2. 发送 tx(1000): dep(tx1.output)
-        3. 发送消费 tx1.output
-        4. 发送 依赖tx1.output
+        1. Send tx1
+        2. Send tx(1000): dep(tx1.output)
+        3. Send transaction consuming tx1.output
+        4. Send dependent on tx1.output
         """
-        # 1. 发送 tx1
+        # 1. Send tx1
 
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
         account_private = self.Config.ACCOUNT_PRIVATE_2
@@ -39,7 +39,7 @@ class TestIssues(CkbTest):
 
             })
         self.Miner.miner_until_tx_committed(self.node1, tx11_hash)
-        # 2. 发送 tx(1000): dep(tx1.output)
+        # 2. Send tx(1000): dep(tx1.output)
         for j in range(10):
             tx_hash = self.Tx.send_transfer_self_tx_with_input([tx11_hash], [hex(j)], account_private,
                                                                output_count=1,
@@ -56,12 +56,12 @@ class TestIssues(CkbTest):
                                                                    dep_cells=[
                                                                        {"tx_hash": tx11_hash, "index_hex": hex(19)}])
 
-        #       3. 发送消费 tx1.output
+        # 3. Send transaction consuming tx1.output
         tx_hash = self.Tx.send_transfer_self_tx_with_input([tx11_hash], [hex(19)], account_private,
                                                            output_count=1,
                                                            fee=1090000,
                                                            api_url=self.node1.getClient().url, dep_cells=[])
-        # 发送 依赖tx1.output
+        # 4. Send dependent on tx1.output
         with pytest.raises(Exception) as exc_info:
             tx_hash = self.Tx.send_transfer_self_tx_with_input([tx11_hash], [hex(11)], account_private,
                                                                output_count=1,
@@ -76,14 +76,14 @@ class TestIssues(CkbTest):
 
     def test_4306(self):
         """
-        老的交易串 A -> B -> C ，新发一个交易 D，但是交易 D cell dep C，那么 RBF 不会成功
-        之前的代码逻辑只是检查了 D 是否 cell dep A，应该检查所有的 desendants
-        1. 发送 tx1
-        2. 发送 tx11
-        3. 发送 tx111
-        4. 发送 tx12(cellDep = tx111.output )
+        Old transaction chain A -> B -> C, a new transaction D is issued, but transaction D has a cell dependency on C, hence RBF (Replace-By-Fee) will not succeed.
+        The previous code logic only checked whether D was cell dependent on A; it should check all descendants.
+        1. Send tx1
+        2. Send tx11
+        3. Send tx111
+        4. Send tx12(cellDep = tx111.output )
         """
-        # 1. 发送 tx1
+        # 1. Send tx1
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
         account_private = self.Config.ACCOUNT_PRIVATE_1
         tx1_hash = self.Ckb_cli.wallet_transfer_by_private_key(account_private,
@@ -96,12 +96,12 @@ class TestIssues(CkbTest):
                                                              fee=1090,
                                                              api_url=self.node1.getClient().url)
 
-        # 3. 发送 tx111
+        # 3. Send tx111
         tx111_hash = self.Tx.send_transfer_self_tx_with_input([tx11_hash], ["0x0"], account_private,
                                                               output_count=2,
                                                               fee=1090,
                                                               api_url=self.node1.getClient().url)
-        # 4. 发送 tx12(cellDep = tx111.output )
+        # 4. Send tx12(cellDep = tx111.output )
         with pytest.raises(Exception) as exc_info:
 
             replace_hash = self.Tx.send_transfer_self_tx_with_input([tx1_hash], ["0x0"], account_private,

@@ -4,6 +4,7 @@ from test_cases.rpc.node_fixture import get_cluster
 class TestGenerateEpochs:
 
     def test_generate_epochs(self, get_cluster):
+        # epoch=pre_epoch+generate_epochs
         cluster = get_cluster
         tip_number = cluster.ckb_nodes[0].getClient().get_tip_block_number()
         pre_epoch = cluster.ckb_nodes[0].getClient().get_current_epoch()

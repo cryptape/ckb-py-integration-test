@@ -123,8 +123,10 @@ class TestTxReplaceRule(CkbTest):
                                                            self.node.getClient().url, "5000")
         self.node.getClient().get_raw_tx_pool(True)
         with pytest.raises(Exception) as exc_info:
+            # 1. send tx that tx fee == old tx fee
             self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"], 101,
                                                         self.node.getClient().url, "5000")
+            # 2. get_transaction, min_fee_rate in PoolRejectedRBF
             self.node.getClient().get_raw_tx_pool(True)
 
         expected_error_message = "PoolRejectedRBF"
@@ -154,16 +156,23 @@ class TestTxReplaceRule(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        # 1. send transaction A, sending input cell to address B, send successful
         tx_hash1 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
                                                                account["address"]["testnet"], 100,
                                                                self.node.getClient().url, "1500")
+        # 2. send transaction B, sending the same input cell to address B and fee > A(fee), send successful
         tx_hash2 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
                                                                account["address"]["testnet"], 200,
                                                                self.node.getClient().url, "3000")
 
+        # 3. send transaction C, sending the same input cell to address B and fee > B(fee), send successful
         tx_hash3 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
                                                                account["address"]["testnet"], 300,
                                                                self.node.getClient().url, "6000")
+        # 4. query transaction (A,B,C) status
+        #       A status : rejected  ; reason : RBFRejected
+        #       B status : rejected  ; reason : RBFRejected
+        #       C status : pending   ;
         tx1_response = self.node.getClient().get_transaction(tx_hash1)
         tx2_response = self.node.getClient().get_transaction(tx_hash2)
         tx3_response = self.node.getClient().get_transaction(tx_hash3)
@@ -181,16 +190,18 @@ class TestTxReplaceRule(CkbTest):
              send successful
         2. send transaction B use A.min_replace_fee
             send successful
-        4. query transaction (A,B) status
+        3. query transaction (A,B) status
               A status : rejected  ; reason : RBFRejected
               B status : pending   ;
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        # 1. send transaction A, send successful
         tx_hash1 = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1,
                                                                account["address"]["testnet"], 100,
                                                                self.node.getClient().url, "1500")
 
+        # 2. send transaction B use A.min_replace_fee, send successful
         tx_hash2 = self.Tx.send_transfer_self_tx_with_input([tx_hash1], ['0x0'], self.Config.MINER_PRIVATE_1, fee=1500,
                                                             api_url=self.node.getClient().url)
         transaction = self.node.getClient().get_transaction(tx_hash2)
@@ -198,6 +209,9 @@ class TestTxReplaceRule(CkbTest):
                                                             fee=int(transaction['min_replace_fee'], 16),
                                                             api_url=self.node.getClient().url)
 
+        # 3. query transaction (A,B) status
+        #       A status : rejected  ; reason : RBFRejected
+        #       B status : pending   ;
         tx2_response = self.node.getClient().get_transaction(tx_hash2)
         tx3_response = self.node.getClient().get_transaction(tx_hash3)
         assert tx2_response['tx_status']['status'] == 'rejected'
@@ -222,18 +236,21 @@ class TestTxReplaceRule(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        # 1. send tx A, send tx successful
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
                                                               account["address"]["testnet"], 360000,
                                                               self.node.getClient().url, "2800")
         first_hash = tx_hash
         self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         tx_list = []
+        # 2. send A linked tx 100, send tx successful
         for i in range(100):
             tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
                                                                fee=1000,
                                                                api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
             self.Node.wait_get_transaction(self.node, tx_hash, "pending")
+        # 3. replace A tx, Error : PoolRejectedRBF
         first_tx = self.node.getClient().get_transaction(first_hash)
         with pytest.raises(Exception) as exc_info:
             self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1, account["address"]["testnet"],
@@ -243,10 +260,12 @@ class TestTxReplaceRule(CkbTest):
         assert expected_error_message in exc_info.value.args[0], \
             f"Expected substring '{expected_error_message}' " \
             f"not found in actual string '{exc_info.value.args[0]}'"
+        # 4. replace first linked tx, replace successful
         second_tx = self.node.getClient().get_transaction(tx_list[0])
         self.Tx.send_transfer_self_tx_with_input([first_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
                                                  fee=int(second_tx['min_replace_fee'], 16),
                                                  api_url=self.node.getClient().url)
+        # 5. query tx pool, pending tx = 2
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert len(tx_pool['pending'].keys()) == 2
 
@@ -266,18 +285,23 @@ class TestTxReplaceRule(CkbTest):
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
 
+        # 1. send transaction: A, return tx_hash_a
         tx_a = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"],
                                                            100,
                                                            self.node.getClient().url, "1500")
+        # 2. query transaction tx_hash_a
         tx_a_response = self.node.getClient().get_transaction(tx_a)
         assert tx_a_response['tx_status']['status'] == 'pending'
+        # 3. replace B=>A, return tx_hash_b
         tx_b = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.MINER_PRIVATE_1, account["address"]["testnet"],
                                                            200,
                                                            self.node.getClient().url, "12000")
 
+        # 4. query transaction tx_hash_b, tx_hash_b status: pending
         tx_b_response = self.node.getClient().get_transaction(tx_b)
         assert tx_b_response['tx_status']['status'] == 'pending'
 
+        # query transaction tx_hash_a, tx_hash_a status: rejected, reason:RBFRejected
         tx_a_response = self.node.getClient().get_transaction(tx_a)
         assert tx_a_response['tx_status']['status'] == 'rejected'
         assert "RBFRejected" in tx_a_response['tx_status']['reason']
@@ -298,6 +322,7 @@ class TestTxReplaceRule(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
+        # 1. Send a transaction and submit it to the proposal. Query the transaction status as 'proposal.'
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_2,
                                                               account["address"]["testnet"], 360000,
                                                               api_url=self.node.getClient().url, fee_rate="1000")
@@ -326,6 +351,7 @@ class TestTxReplaceRule(CkbTest):
             tx_response = self.node.getClient().get_transaction(tx)
             assert tx_response['tx_status']['status'] == 'proposed'
         tx_response = self.node.getClient().get_transaction(proposal_txs[0])
+        # 2. Replace the transaction for that proposal. successful
         replace_proposal_hash = self.Tx.send_transfer_self_tx_with_input(
             [tx_response['transaction']['inputs'][0]['previous_output']['tx_hash']], ['0x0'],
             self.Config.ACCOUNT_PRIVATE_2,
@@ -334,11 +360,14 @@ class TestTxReplaceRule(CkbTest):
             api_url=self.node.getClient().url)
 
         time.sleep(5)
+        # 3. get_block_template, contains proposal that is not removed
         block_template = self.node.getClient().get_block_template()
         print(block_template)
         tx_response = self.node.getClient().get_transaction(proposal_txs[0])
         assert "RBFRejected" in tx_response['tx_status']['reason']
+        # 4. generate empty block, successful
         self.node.getClient().generate_block()
+        # 5. get_block_template, cant contains proposal that is removed
         block_template = self.node.getClient().get_block_template()
         assert not proposal_txs[0] in json.dumps(block_template)
 
@@ -356,6 +385,7 @@ class TestTxReplaceRule(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        # 1. send a->b ,b->c, c->d, successful
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
                                                               account["address"]["testnet"], 360000,
                                                               api_url=self.node.getClient().url, fee_rate="1000")
@@ -374,6 +404,7 @@ class TestTxReplaceRule(CkbTest):
                                                                api_url=self.node.getClient().url)
             tx_list.append(tx_hash)
 
+        # 2. Replace a->b, a->d, successful
         replace_tx = self.node.getClient().get_transaction(tx_list[1])
         replace_tx_hash = self.Tx.send_transfer_self_tx_with_input([first_tx_hash], ["0x0"],
                                                                    self.Config.ACCOUNT_PRIVATE_1,
@@ -381,10 +412,12 @@ class TestTxReplaceRule(CkbTest):
                                                                    fee=int(replace_tx['min_replace_fee'], 16),
                                                                    api_url=self.node.getClient().url)
 
+        # 3. query get_tx_pool, return replace tx: a->d
         tx_pool = self.node.getClient().get_raw_tx_pool(True)
         assert len(tx_pool['pending']) == 1
         assert replace_tx_hash in list(tx_pool['pending'])
         for tx in tx_list[1:]:
+            # 4. query old txs status, status : rejected ,reason:RBFRejected
             tx_response = self.node.getClient().get_transaction(tx)
             assert tx_response['tx_status']['status'] == "rejected"
             assert "RBFRejected" in tx_response['tx_status']['reason']
@@ -408,6 +441,7 @@ class TestTxReplaceRule(CkbTest):
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
+        # 1. Send transaction A. successful
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(self.Config.ACCOUNT_PRIVATE_1,
                                                               account["address"]["testnet"], 360000,
                                                               self.node.getClient().url, "2800")
@@ -416,11 +450,15 @@ class TestTxReplaceRule(CkbTest):
         tx_list = []
         tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                                             api_url=self.node.getClient().url)
+        # 2. Query the 'min_replace_fee' of transaction A.
         transaction1 = self.node.getClient().get_transaction(tx_hash1)
+        # 3. Send a child transaction of transaction A. successful
         self.Tx.send_transfer_self_tx_with_input([tx_hash1], ["0x0"], self.Config.ACCOUNT_PRIVATE_1, fee=1000,
                                                  api_url=self.node.getClient().url)
+        # 4. Query the updated 'min_replace_fee' of transaction A. min_replace_fee changed
         after_transaction1 = self.node.getClient().get_transaction(tx_hash1)
         assert after_transaction1['min_replace_fee'] != transaction1['min_replace_fee']
+        # 5. Send B to replace A. replace successful
         replace_tx_hash = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
                                                                    fee=int(after_transaction1['min_replace_fee'], 16),
                                                                    api_url=self.node.getClient().url)
@@ -442,8 +480,10 @@ class TestTxReplaceRule(CkbTest):
         first_hash = tx_hash
         self.Node.wait_get_transaction(self.node, tx_hash, "pending")
         tx_list = []
+        # 1. send tx(fee=0.9999ckb)
         tx_hash1 = self.Tx.send_transfer_self_tx_with_input([tx_hash], ["0x0"], self.Config.ACCOUNT_PRIVATE_1,
                                                             fee=99999999,
                                                             api_url=self.node.getClient().url)
+        # 2. query transaction, tx.min_replace_fee > 1CKB
         transaction = self.node.getClient().get_transaction(tx_hash1)
         assert int(transaction['min_replace_fee'], 16) > 99999999

@@ -25,6 +25,11 @@ class TestCluster(CkbTest):
         cls.cluster.clean_all_nodes()
 
     def test_01_link_node(self):
+        """
+        1. Connect node1 and node2 via `add_node`
+        2. Start the miner on node1
+        3. Wait for node1 and node2 to produce blocks
+        """
         self.cluster.connected_node(0, 1)
         self.cluster.ckb_nodes[0].start_miner()
         self.Node.wait_node_height(self.cluster.ckb_nodes[1], 10, 100)

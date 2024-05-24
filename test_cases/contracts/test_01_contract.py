@@ -64,12 +64,22 @@ class TestHelperContract(CkbTest):
     @parameterized.expand(success_files)
     # @pytest.mark.skip
     def test_01_deploy_and_invoke_demo(self, path):
+        """
+        1. Retrieve the paths of successful files from `project_root/source/contract/test_cases` by excluding the files specified in `files_list`.
+        2. deploy and invoke contract
+        """
         return self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
 
     @parameterized.expand( failed_files)
     def test_02_deploy_and_invoke_demo_failed(self, path):
+        """
+        1. Retrieve the paths of failed files from `project_root/source/contract/test_cases` by including only the files specified in `files_list`.
+        2. deploy and invoke contract
+        Note: If no exception is thrown, the test will fail.
+        """
         try:
             self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
+            self.fail("Did not raise an exception as expected!")
         except Exception as e:
             print(e)
 

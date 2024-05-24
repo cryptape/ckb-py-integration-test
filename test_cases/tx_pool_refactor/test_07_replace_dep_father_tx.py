@@ -30,28 +30,28 @@ class TestDepTx(CkbTest):
 
     def test_01_send_sub_transaction_replace_dep_fail(self):
         """
-        发送一笔子交易，dep 的cell 为会被替换的子交易，替换失败
-        1. 发送一笔父交易
-        2. 发送一笔子交易
-        3. 发送另外一笔子交易，dep 为会被替换的子交易
-            发送失败
+        Send a child transaction with a `dep` cell that is supposed to be replaced, but the replacement fails.
+        1. Send a parent transaction
+        2. Send a child transaction
+        3. Send another child transaction with a `dep` that is supposed to be the child transaction to be replaced
+            Send failed
             Exception: Send transaction error: jsonrpc error: `Server error: PoolRejectedRBF: RBF rejected: new Tx contains cell deps from conflicts`
 
         """
-        # 发送一笔交易
+        # 1. Send a parent transaction
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
         account_private = self.Config.ACCOUNT_PRIVATE_1
         tx1_hash = self.Ckb_cli.wallet_transfer_by_private_key(account_private,
                                                                account["address"]["testnet"], 1000000,
                                                                self.node1.getClient().url, "1500000")
 
-        # 发送一笔子交易
+        # 2. Send a child transaction
         tx_hash = self.Tx.send_transfer_self_tx_with_input([tx1_hash], ["0x0"], account_private,
                                                            output_count=2,
                                                            fee=1090,
                                                            api_url=self.node1.getClient().url)
 
-        # 发送另外一笔子交易，dep 为会被替换的子交易
+        # 3. Send another child transaction with a `dep` that is supposed to be the child transaction to be replaced
         with pytest.raises(Exception) as exc_info:
             self.Tx.send_transfer_self_tx_with_input([tx1_hash], ["0x0"], account_private,
                                                      output_count=2,
