@@ -28,31 +28,32 @@ class CKBLightRPCClient:
     def get_transactions(self, search_key, order, limit, after):
         return self.call("get_transactions", [search_key, order, limit, after])
 
-    def send_transaction(self,tx):
-        return self.call("send_transaction",[tx])
+    def send_transaction(self, tx):
+        return self.call("send_transaction", [tx])
 
-    def fetch_transaction(self,tx_hash):
-        return self.call("fetch_transaction",[tx_hash])
+    def fetch_transaction(self, tx_hash):
+        return self.call("fetch_transaction", [tx_hash])
 
     def call(self, method, params):
 
-        headers = {'content-type': 'application/json'}
-        data = {
-            "id": 42,
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params
-        }
-        print("request:url:{url},data:\n{data}".format(url=self.url, data=json.dumps(data)))
+        headers = {"content-type": "application/json"}
+        data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}
+        print(
+            "request:url:{url},data:\n{data}".format(
+                url=self.url, data=json.dumps(data)
+            )
+        )
         for i in range(100):
             try:
-                response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
+                response = requests.post(
+                    self.url, data=json.dumps(data), headers=headers
+                ).json()
                 print("response:\n{response}".format(response=json.dumps(response)))
-                if 'error' in response.keys():
-                    error_message = response['error'].get('message', 'Unknown error')
+                if "error" in response.keys():
+                    error_message = response["error"].get("message", "Unknown error")
                     raise Exception(f"Error: {error_message}")
 
-                return response.get('result', None)
+                return response.get("result", None)
             except requests.exceptions.ConnectionError as e:
                 print(e)
                 print("request too quickly, wait 2s")
@@ -62,23 +63,24 @@ class CKBLightRPCClient:
 
     def call2(self, method, params):
 
-        headers = {'content-type': 'application/json'}
-        data = {
-            "id": 42,
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params
-        }
-        print("request:url:{url},data:\n{data}".format(url=self.url, data=json.dumps(data)))
+        headers = {"content-type": "application/json"}
+        data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}
+        print(
+            "request:url:{url},data:\n{data}".format(
+                url=self.url, data=json.dumps(data)
+            )
+        )
         for i in range(100):
             try:
-                response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
+                response = requests.post(
+                    self.url, data=json.dumps(data), headers=headers
+                ).json()
                 # print("response:\n{response}".format(response=json.dumps(response)))
-                if 'error' in response.keys():
-                    error_message = response['error'].get('message', 'Unknown error')
+                if "error" in response.keys():
+                    error_message = response["error"].get("message", "Unknown error")
                     raise Exception(f"Error: {error_message}")
 
-                return response.get('result', None)
+                return response.get("result", None)
             except requests.exceptions.ConnectionError as e:
                 print(e)
                 print("request too quickly, wait 2s")

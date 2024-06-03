@@ -40,7 +40,7 @@ def exception_use_old_ckb():
 
 
 @exception_use_old_ckb()
-def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
+def wallet_get_capacity(ckb_address, api_url="http://127.0.0.1:8114"):
     """
     MacBook-Pro-4 0.111.0 % ./ckb-cli  wallet get-capacity
     --address ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqw6vjzy9kahx3lyvlgap8dp8ewd8g80pcgcexzrj
@@ -50,10 +50,12 @@ def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
     :param api_url:
     :return:
     """
-    cmd = "export API_URL={api_url} && {ckb_cli} wallet get-capacity " \
-          "--address {ckb_address}".format(api_url=api_url,
-                                           ckb_cli=cli_path,
-                                           ckb_address=ckb_address)
+    cmd = (
+        "export API_URL={api_url} && {ckb_cli} wallet get-capacity "
+        "--address {ckb_address}".format(
+            api_url=api_url, ckb_cli=cli_path, ckb_address=ckb_address
+        )
+    )
     capacity_response = run_command(cmd)
     pattern = r"\d+(\.\d+)?"
     match = re.search(pattern, capacity_response)
@@ -66,7 +68,7 @@ def wallet_get_capacity(ckb_address, api_url='http://127.0.0.1:8114'):
 
 
 @exception_use_old_ckb()
-def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
+def wallet_get_live_cells(ckb_address, api_url="http://127.0.0.1:8114"):
     """
     ./ckb-cli wallet get-live-cells --address
     ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqwgx292hnvmn68xf779vmzrshpmm6epn4c0cgwga
@@ -131,8 +133,13 @@ def wallet_get_live_cells(ckb_address, api_url='http://127.0.0.1:8114'):
 
 
 @exception_use_old_ckb()
-def wallet_transfer_by_private_key(private_key, to_ckb_address, capacity, api_url="http://127.0.0.1:8114",
-                                   fee_rate="1000"):
+def wallet_transfer_by_private_key(
+    private_key,
+    to_ckb_address,
+    capacity,
+    api_url="http://127.0.0.1:8114",
+    fee_rate="1000",
+):
     """
     MacBook-Pro-4 0.111.0 % MacBook-Pro-4 0.111.0 % export API_URL=http://127.0.0.1:8115 &&  echo
     0xd00c06bfd800d27397002dca6fb0993d5ba6399b4238b2f29ee9deb97593d2bc > /tmp/tmp.data && ./ckb-cli wallet transfer --
@@ -151,10 +158,12 @@ def wallet_transfer_by_private_key(private_key, to_ckb_address, capacity, api_ur
         api_url: default ckb rpc url
         fee_rate: default tx fee
     """
-    cmd = f"export API_URL={api_url} &&  echo {private_key} > /tmp/tmp.data && {cli_path} wallet transfer " \
-          f"--privkey-path /tmp/tmp.data --to-address  {to_ckb_address}  --capacity {capacity}  --fee-rate {fee_rate} --skip-check-to-address " \
-          f" && rm /tmp/tmp.data"
-    return run_command(cmd).replace('\n', '')
+    cmd = (
+        f"export API_URL={api_url} &&  echo {private_key} > /tmp/tmp.data && {cli_path} wallet transfer "
+        f"--privkey-path /tmp/tmp.data --to-address  {to_ckb_address}  --capacity {capacity}  --fee-rate {fee_rate} --skip-check-to-address "
+        f" && rm /tmp/tmp.data"
+    )
+    return run_command(cmd).replace("\n", "")
 
 
 def version():
@@ -168,7 +177,9 @@ def version():
     return run_command(cmd)
 
 
-def deploy_gen_txs(from_address, deployment_config_path, tx_info_path, api_url="http://127.0.0.1:8114"):
+def deploy_gen_txs(
+    from_address, deployment_config_path, tx_info_path, api_url="http://127.0.0.1:8114"
+):
     """
     ./ckb-cli deploy gen-txs \
     --deployment-config ./deployment.toml \
@@ -196,14 +207,16 @@ def deploy_gen_txs(from_address, deployment_config_path, tx_info_path, api_url="
     Returns:
 
     """
-    cmd = f"export API_URL={api_url} && " \
-          f" rm -rf /tmp/migrations && " \
-          f"mkdir /tmp/migrations && " \
-          f"{cli_path} deploy gen-txs \
+    cmd = (
+        f"export API_URL={api_url} && "
+        f" rm -rf /tmp/migrations && "
+        f"mkdir /tmp/migrations && "
+        f"{cli_path} deploy gen-txs \
     --deployment-config {deployment_config_path} \
     --migration-dir /tmp/migrations \
     --from-address {from_address} \
     --info-file {tx_info_path}"
+    )
     return run_command(cmd)
 
 
@@ -222,9 +235,11 @@ def deploy_sign_txs(account_private, tx_info_path, api_url="http://127.0.0.1:811
     Returns:
 
     """
-    cmd = f"export API_URL={api_url} && " \
-          f"echo {account_private} > /tmp/account.private &&" \
-          f" {cli_path} deploy sign-txs --privkey-path /tmp/account.private --add-signatures --info-file {tx_info_path}"
+    cmd = (
+        f"export API_URL={api_url} && "
+        f"echo {account_private} > /tmp/account.private &&"
+        f" {cli_path} deploy sign-txs --privkey-path /tmp/account.private --add-signatures --info-file {tx_info_path}"
+    )
     return run_command(cmd)
 
 
@@ -242,11 +257,13 @@ def deploy_apply_txs(tx_info_path, api_url="http://127.0.0.1:8114"):
     Returns:
 
     """
-    cmd = f"export API_URL={api_url} && " \
-          f"rm -rf /tmp/migrations && " \
-          f"mkdir /tmp/migrations && " \
-          f"{cli_path} deploy apply-txs --migration-dir /tmp/migrations --info-file {tx_info_path}" \
-          f" --output-format json | grep -v transaction"
+    cmd = (
+        f"export API_URL={api_url} && "
+        f"rm -rf /tmp/migrations && "
+        f"mkdir /tmp/migrations && "
+        f"{cli_path} deploy apply-txs --migration-dir /tmp/migrations --info-file {tx_info_path}"
+        f" --output-format json | grep -v transaction"
+    )
     return json.loads(run_command(cmd))
 
 
@@ -282,8 +299,10 @@ def util_key_info_by_private_key(account_private):
     """
     # echo 0xd00c06bfd800d27397002dca6fb0993d5ba6399b4238b2f29ee9deb97593d2bc > tmp.data && ./ckb-cli util key-info
     # --privkey-path tmp.data --output-format json && rm tmp.data
-    cmd = f"echo {account_private} > /tmp/tmp.data && {cli_path} util key-info --privkey-path /tmp/tmp.data " \
-          f"--output-format json"
+    cmd = (
+        f"echo {account_private} > /tmp/tmp.data && {cli_path} util key-info --privkey-path /tmp/tmp.data "
+        f"--output-format json"
+    )
     return json.loads(run_command(cmd))
 
 
@@ -328,14 +347,18 @@ def tx_sign_inputs(account_private, tx_file, api_url="http://127.0.0.1:8114"):
         signature: 0x0c44c12638277ffa6eafeac55cd918932f1cdbcfd4df413c11e8fb5
         b48f41ba22f738bad494e63d78c2bf2a4e0f4676db1d48d37f3d872d28bac70b2ef5a567a01
     """
-    cmd = f"export API_URL={api_url} && echo {account_private} > /tmp/account.demo && {cli_path} tx sign-inputs " \
-          f"--privkey-path /tmp/account.demo --tx-file {tx_file} --output-format json && rm /tmp/account.demo"
+    cmd = (
+        f"export API_URL={api_url} && echo {account_private} > /tmp/account.demo && {cli_path} tx sign-inputs "
+        f"--privkey-path /tmp/account.demo --tx-file {tx_file} --output-format json && rm /tmp/account.demo"
+    )
     return json.loads(run_command(cmd))
 
 
 def tx_add_signature(lock_arg, signature, tx_file, api_url="http://127.0.0.1:8114"):
-    cmd = f"export API_URL={api_url} && {cli_path} tx add-signature --lock-arg {lock_arg} --signature {signature} " \
-          f"--tx-file {tx_file}"
+    cmd = (
+        f"export API_URL={api_url} && {cli_path} tx add-signature --lock-arg {lock_arg} --signature {signature} "
+        f"--tx-file {tx_file}"
+    )
     return run_command(cmd)
 
 
@@ -393,8 +416,10 @@ def tx_add_multisig_config(ckb_address, tx_file, api_url="http://127.0.0.1:8114"
         Returns:
 
     """
-    cmd = f"export API_URL={api_url} && {cli_path} tx add-multisig-config --sighash-address  {ckb_address} " \
-          f"--tx-file {tx_file}"
+    cmd = (
+        f"export API_URL={api_url} && {cli_path} tx add-multisig-config --sighash-address  {ckb_address} "
+        f"--tx-file {tx_file}"
+    )
     return run_command(cmd)
 
 
@@ -403,35 +428,41 @@ def tx_info(tx_file_path, api_url="http://127.0.0.1:8114"):
     return run_command(cmd)
 
 
-def tx_add_type_out_put(code_hash, hash_type, arg, capacity_hex, out_put_data, tx_file, with_type=True):
+def tx_add_type_out_put(
+    code_hash, hash_type, arg, capacity_hex, out_put_data, tx_file, with_type=True
+):
     with open(tx_file, "r") as file:
         tx_info_str = file.read()
 
     with open(tx_file, "w") as f:
         tx = json.loads(tx_info_str)
         if with_type:
-            tx["transaction"]["outputs"].append({
-                "capacity": capacity_hex,
-                "lock": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": "0xc8328aabcd9b9e8e64fbc566c4385c3bdeb219d5"
-                },
-                "type": {
-                    "code_hash": code_hash,
-                    "hash_type": hash_type,
-                    "args": arg
+            tx["transaction"]["outputs"].append(
+                {
+                    "capacity": capacity_hex,
+                    "lock": {
+                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "type",
+                        "args": "0xc8328aabcd9b9e8e64fbc566c4385c3bdeb219d5",
+                    },
+                    "type": {
+                        "code_hash": code_hash,
+                        "hash_type": hash_type,
+                        "args": arg,
+                    },
                 }
-            })
+            )
         if not with_type:
-            tx["transaction"]["outputs"].append({
-                "capacity": capacity_hex,
-                "lock": {
-                    "code_hash": code_hash,
-                    "hash_type": hash_type,
-                    "args": arg
+            tx["transaction"]["outputs"].append(
+                {
+                    "capacity": capacity_hex,
+                    "lock": {
+                        "code_hash": code_hash,
+                        "hash_type": hash_type,
+                        "args": arg,
+                    },
                 }
-            })
+            )
         tx["transaction"]["outputs_data"].append(out_put_data)
 
         tx_info_str = json.dumps(tx, indent=4)
@@ -444,15 +475,10 @@ def tx_add_cell_dep(tx_hash, index_hex, tx_file):
 
     with open(tx_file, "w") as f:
         tx = json.loads(tx_info_str)
-        tx["transaction"]["cell_deps"].insert(0,
-                                              {
-                                                  "out_point": {
-                                                      "tx_hash": tx_hash,
-                                                      "index": index_hex
-                                                  },
-                                                  "dep_type": "code"
-                                              }
-                                              )
+        tx["transaction"]["cell_deps"].insert(
+            0,
+            {"out_point": {"tx_hash": tx_hash, "index": index_hex}, "dep_type": "code"},
+        )
         tx_info_str = json.dumps(tx, indent=4)
         f.write(tx_info_str)
 
@@ -463,11 +489,13 @@ def tx_add_input_cell_without_check(tx_hash, index, tx_file):
 
     with open(tx_file, "w") as f:
         tx = json.loads(tx_info_str)
-        tx["transaction"]["inputs"].insert(0, {"previous_output":
-                                                   {"index": hex(index),
-                                                    "tx_hash": tx_hash},
-                                               "since": "0x0"}
-                                           )
+        tx["transaction"]["inputs"].insert(
+            0,
+            {
+                "previous_output": {"index": hex(index), "tx_hash": tx_hash},
+                "since": "0x0",
+            },
+        )
         tx_info_str = json.dumps(tx, indent=4)
         f.write(tx_info_str)
 
@@ -504,8 +532,15 @@ hash_type = "type"
     """
 
 
-def estimate_cycles(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
-                    output_format='yaml', api_url="http://127.0.0.1:8114"):
+def estimate_cycles(
+    json_path: str,
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc estimate_cycles --json-path /tmp/tmp.json --output-format yaml
     cycles: 0
@@ -519,17 +554,17 @@ def estimate_cycles(json_path: str, raw_data=False, no_color=False, debug=False,
     :return:
     """
     # Build the ckb-cli estimate_cycles command
-    cmd = 'rpc estimate_cycles'
+    cmd = "rpc estimate_cycles"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --json-path {json_path}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --json-path {json_path}"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
@@ -538,9 +573,16 @@ def estimate_cycles(json_path: str, raw_data=False, no_color=False, debug=False,
     return int(parts[1])
 
 
-def get_transaction_and_witness_proof(raw_data=False, no_color=False, debug=False, local_only=False,
-                                      tx_hashes=None, block_hash=None, output_format='yaml',
-                                      api_url="http://127.0.0.1:8114"):
+def get_transaction_and_witness_proof(
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    tx_hashes=None,
+    block_hash=None,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_transaction_and_witness_proof --tx-hash 0x3c82a3a6d55849102debac84299e0dc53162f5108ec629f8a338df9efd45d6dc --output-format yaml
     result:block_hash: 0x4c8bc2d0fd4367db1d000417bf64ba06b60daa2ad5f4c7879af0a0804bdc1233
@@ -562,32 +604,43 @@ def get_transaction_and_witness_proof(raw_data=False, no_color=False, debug=Fals
     :return:
     """
     # Build the ckb-cli get_transaction_and_witness_proof command
-    cmd = 'rpc get_transaction_and_witness_proof'
+    cmd = "rpc get_transaction_and_witness_proof"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
+        cmd += " --local-only"
     if tx_hashes:
-        cmd += ' --tx-hash ' + ''.join(tx_hashes)
+        cmd += " --tx-hash " + "".join(tx_hashes)
     if block_hash:
-        cmd += f' --block-hash {block_hash}'
-    cmd += f' --output-format {output_format}'
+        cmd += f" --block-hash {block_hash}"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
-    result = {k.strip(): v.strip() for k, v in [line.split(':')
-                                                for line in run_command(cmd).split('\n') if ':' in line] if
-              k.strip() != ''}
+    result = {
+        k.strip(): v.strip()
+        for k, v in [
+            line.split(":") for line in run_command(cmd).split("\n") if ":" in line
+        ]
+        if k.strip() != ""
+    }
 
     return result
 
 
-def verify_transaction_and_witness_proof(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
-                                         output_format='yaml', api_url="http://127.0.0.1:8114"):
+def verify_transaction_and_witness_proof(
+    json_path: str,
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc verify_transaction_and_witness_proof --raw-data --json-path /tmp/tmp.json --output-format yaml
     result:tx_hashes:0x3c82a3a6d55849102debac84299e0dc53162f5108ec629f8a338df9efd45d6dc
@@ -601,27 +654,35 @@ def verify_transaction_and_witness_proof(json_path: str, raw_data=False, no_colo
     :return:
     """
     # Build the ckb-cli estimate_cycles command
-    cmd = 'rpc verify_transaction_and_witness_proof'
+    cmd = "rpc verify_transaction_and_witness_proof"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --json-path {json_path}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --json-path {json_path}"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     result = run_command(cmd)
-    return result.split(" ")[1].rstrip('\n')
+    return result.split(" ")[1].rstrip("\n")
 
 
-def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False,
-              local_only=False, output_format='yaml',
-              api_url="http://127.0.0.1:8114"):
+def get_block(
+    hash_value,
+    raw_data=False,
+    with_cycles=False,
+    no_color=False,
+    packed=False,
+    debug=False,
+    local_only=False,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_block --with-cycles --hash 0x4c8bc2d0fd4367db1d000417bf64ba06b60daa2ad5f4c7879af0a0804bdc1233 --output-format yaml
     cycles: []
@@ -637,21 +698,21 @@ def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, pac
     :return:
     """
     # Build the ckb-cli get_block command
-    cmd = 'rpc get_block'
+    cmd = "rpc get_block"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if with_cycles:
-        cmd += ' --with-cycles'
+        cmd += " --with-cycles"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if packed:
-        cmd += ' --packed'
+        cmd += " --packed"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --hash {hash_value}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --hash {hash_value}"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
@@ -660,9 +721,17 @@ def get_block(hash_value, raw_data=False, with_cycles=False, no_color=False, pac
     return parts[-1]
 
 
-def get_block_by_number(block_number, raw_data=False, with_cycles=False, no_color=False, packed=False, debug=False,
-                        local_only=False, output_format='yaml',
-                        api_url="http://127.0.0.1:8114"):
+def get_block_by_number(
+    block_number,
+    raw_data=False,
+    with_cycles=False,
+    no_color=False,
+    packed=False,
+    debug=False,
+    local_only=False,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_block_by_number --with-cycles --number 20 --output-format yaml
     cycles: []
@@ -678,21 +747,21 @@ def get_block_by_number(block_number, raw_data=False, with_cycles=False, no_colo
     :return:
     """
     # Build the ckb-cli get_block_by_number command
-    cmd = 'rpc get_block_by_number'
+    cmd = "rpc get_block_by_number"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if with_cycles:
-        cmd += ' --with-cycles'
+        cmd += " --with-cycles"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if packed:
-        cmd += ' --packed'
+        cmd += " --packed"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --number {block_number}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --number {block_number}"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
@@ -701,8 +770,14 @@ def get_block_by_number(block_number, raw_data=False, with_cycles=False, no_colo
     return parts[-1]
 
 
-def get_consensus(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
-                  api_url="http://127.0.0.1:8114"):
+def get_consensus(
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_consensus --output-format yaml
     hardfork_features:
@@ -733,33 +808,43 @@ def get_consensus(raw_data=False, no_color=False, debug=False, local_only=False,
     :return:
     """
     # Build the ckb-cli get_consensus command
-    cmd = 'rpc get_consensus'
+    cmd = "rpc get_consensus"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     # 预处理修复格式问题
-    fixed_data = run_command(cmd).replace('epoch_number:', '- epoch_number:').replace('rfc:', '  rfc:')
+    fixed_data = (
+        run_command(cmd)
+        .replace("epoch_number:", "- epoch_number:")
+        .replace("rfc:", "  rfc:")
+    )
 
     # 解析修复后的 YAML 数据
     parsed_data = yaml.safe_load(fixed_data)
-    return parsed_data['hardfork_features']
+    return parsed_data["hardfork_features"]
 
 
 def deposit():
     pass
 
 
-def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only=False, output_format='yaml',
-                         api_url="http://127.0.0.1:8114"):
+def get_deployments_info(
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="yaml",
+    api_url="http://127.0.0.1:8114",
+):
     """
     cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc get_deployments_info --output-format yaml
     light_client:
@@ -782,16 +867,16 @@ def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only
     :return:
     """
     # Build the ckb-cli get_deployments_info command
-    cmd = 'rpc get_deployments_info'
+    cmd = "rpc get_deployments_info"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --output-format {output_format}"
 
     # Run the ckb-cli command
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
@@ -800,18 +885,23 @@ def get_deployments_info(raw_data=False, no_color=False, debug=False, local_only
     return parsed_data["deployments"]
 
 
-def get_indexer_tip(raw_data=False, no_color=False, debug=False, local_only=False,
-                    api_url="http://127.0.0.1:8114"):
-    cmd = 'rpc get_indexer_tip'
+def get_indexer_tip(
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc get_indexer_tip"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --output-format yaml'
+        cmd += " --local-only"
+    cmd += f" --output-format yaml"
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     yaml_data = yaml.safe_dump(yaml.safe_load(run_command(cmd)))
@@ -819,63 +909,84 @@ def get_indexer_tip(raw_data=False, no_color=False, debug=False, local_only=Fals
     return parsed_data["block_number"]
 
 
-def get_cells(json_path: str, order="desc", limit=1, raw_data=False, no_color=False, debug=False, local_only=False,
-              output_format='json',
-              api_url="http://127.0.0.1:8114"):
-    cmd = 'rpc get_cells'
+def get_cells(
+    json_path: str,
+    order="desc",
+    limit=1,
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="json",
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc get_cells"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --json-path {json_path}'
-    cmd += f' --order {order}'
-    cmd += f' --limit {limit}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --json-path {json_path}"
+    cmd += f" --order {order}"
+    cmd += f" --limit {limit}"
+    cmd += f" --output-format {output_format}"
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     return json.loads(run_command(cmd))
 
 
-def get_transactions(json_path: str, order="desc", limit=1, raw_data=False, no_color=False, debug=False,
-                     local_only=False,
-                     output_format='json',
-                     api_url="http://127.0.0.1:8114"):
-    cmd = 'rpc get_transactions'
+def get_transactions(
+    json_path: str,
+    order="desc",
+    limit=1,
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="json",
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc get_transactions"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --json-path {json_path}'
-    cmd += f' --order {order}'
-    cmd += f' --limit {limit}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --json-path {json_path}"
+    cmd += f" --order {order}"
+    cmd += f" --limit {limit}"
+    cmd += f" --output-format {output_format}"
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     return json.loads(run_command(cmd))
 
 
-def get_cells_capacity(json_path: str, raw_data=False, no_color=False, debug=False, local_only=False,
-                       output_format='json',
-                       api_url="http://127.0.0.1:8114"):
-    cmd = 'rpc get_cells_capacity'
+def get_cells_capacity(
+    json_path: str,
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="json",
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc get_cells_capacity"
     if raw_data:
-        cmd += ' --raw-data'
+        cmd += " --raw-data"
     if no_color:
-        cmd += ' --no-color'
+        cmd += " --no-color"
     if debug:
-        cmd += ' --debug'
+        cmd += " --debug"
     if local_only:
-        cmd += ' --local-only'
-    cmd += f' --json-path {json_path}'
-    cmd += f' --output-format {output_format}'
+        cmd += " --local-only"
+    cmd += f" --json-path {json_path}"
+    cmd += f" --output-format {output_format}"
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     return json.loads(run_command(cmd))

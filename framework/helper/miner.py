@@ -24,21 +24,31 @@ def make_tip_height_number(node, number):
 def miner_until_tx_committed(node, tx_hash, with_unknown=False):
     for i in range(100):
         tx_response = node.getClient().get_transaction(tx_hash)
-        if tx_response['tx_status']['status'] == "committed":
+        if tx_response["tx_status"]["status"] == "committed":
             return tx_response
-        if tx_response['tx_status']['status'] == "pending" or tx_response['tx_status']['status'] == "proposed":
+        if (
+            tx_response["tx_status"]["status"] == "pending"
+            or tx_response["tx_status"]["status"] == "proposed"
+        ):
             miner_with_version(node, "0x0")
             time.sleep(1)
             continue
-        if with_unknown and tx_response['tx_status']['status'] == "unknown":
+        if with_unknown and tx_response["tx_status"]["status"] == "unknown":
             miner_with_version(node, "0x0")
             time.sleep(1)
             continue
 
-        if tx_response['tx_status']['status'] == "rejected" or tx_response['tx_status']['status'] == "unknown":
-            raise Exception(f"status:{tx_response['tx_status']['status']},reason:{tx_response['tx_status']['reason']}")
+        if (
+            tx_response["tx_status"]["status"] == "rejected"
+            or tx_response["tx_status"]["status"] == "unknown"
+        ):
+            raise Exception(
+                f"status:{tx_response['tx_status']['status']},reason:{tx_response['tx_status']['reason']}"
+            )
 
-    raise Exception(f"miner 100 block ,but tx_response always pending:{tx_hash}，tx_response:{tx_response}")
+    raise Exception(
+        f"miner 100 block ,but tx_response always pending:{tx_hash}，tx_response:{tx_response}"
+    )
 
 
 # https://github.com/nervosnetwork/rfcs/pull/416
@@ -46,13 +56,22 @@ def miner_until_tx_committed(node, tx_hash, with_unknown=False):
 def miner_with_version(node, version):
     # get_block_template
     block = node.getClient().get_block_template()
-    node.getClient().submit_block(block["work_id"], block_template_transfer_to_submit_block(block, version))
+    node.getClient().submit_block(
+        block["work_id"], block_template_transfer_to_submit_block(block, version)
+    )
     pool = node.getClient().tx_pool_info()
     header = node.getClient().get_tip_header()
-    print("miner block num:{number}".format(number=int(block['number'].replace("0x", ""), 16)))
-    print("pool num:{pool_number}, header num:{header_number}".format(
-        pool_number=int(pool["tip_number"].replace("0x", ""), 16),
-        header_number=int(header["number"].replace("0x", ""), 16)))
+    print(
+        "miner block num:{number}".format(
+            number=int(block["number"].replace("0x", ""), 16)
+        )
+    )
+    print(
+        "pool num:{pool_number}, header num:{header_number}".format(
+            pool_number=int(pool["tip_number"].replace("0x", ""), 16),
+            header_number=int(header["number"].replace("0x", ""), 16),
+        )
+    )
     for i in range(100):
         pool_info = node.getClient().tx_pool_info()
         tip_number = node.getClient().get_tip_block_number()
@@ -63,8 +82,8 @@ def miner_with_version(node, version):
 
 
 def block_template_transfer_to_submit_block(block, version="0x0"):
-    block['transactions'].insert(0, block['cellbase'])
-    block['transactions'] = [x['data'] for x in block['transactions']]
+    block["transactions"].insert(0, block["cellbase"])
+    block["transactions"] = [x["data"] for x in block["transactions"]]
     ret = {
         "header": {
             "compact_target": block["compact_target"],
@@ -81,8 +100,8 @@ def block_template_transfer_to_submit_block(block, version="0x0"):
         },
         "extension": block["extension"],
         "uncles": [],
-        "transactions": block['transactions'],
-        "proposals": block['proposals'],
+        "transactions": block["transactions"],
+        "proposals": block["proposals"],
     }
     return ret
 
@@ -93,26 +112,27 @@ def get_hex_timestamp():
     return hex_timestamp
 
 
-
-
 def compact_to_target(compact):
     exponent = compact >> 24
-    mantissa = compact & 0x00ffffff
+    mantissa = compact & 0x00FFFFFF
     rtn = 0
-    if (exponent <= 3):
-        mantissa >>= (8 * (3 - exponent))
+    if exponent <= 3:
+        mantissa >>= 8 * (3 - exponent)
         rtn = mantissa
     else:
         rtn = mantissa
-        rtn <<= (8 * (exponent - 3))
+        rtn <<= 8 * (exponent - 3)
     overflow = mantissa != 0 and (exponent > 32)
     return rtn, overflow
 
 
 def target_to_compact(target):
     bits = (target).bit_length()
-    exponent = ((bits + 7) // 8)
-    compact = target << (
-        8 * (3 - exponent)) if exponent <= 3 else (target >> (8 * (exponent - 3)))
-    compact = (compact | (exponent << 24))
+    exponent = (bits + 7) // 8
+    compact = (
+        target << (8 * (3 - exponent))
+        if exponent <= 3
+        else (target >> (8 * (exponent - 3)))
+    )
+    compact = compact | (exponent << 24)
     return compact

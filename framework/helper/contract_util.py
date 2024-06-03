@@ -3,7 +3,8 @@ from framework.helper.spawn_contract import SpawnContract
 from framework.helper.contract import CkbContract
 from framework.helper.miner import miner_with_version
 
-#-> dict[str, CkbContract]
+
+# -> dict[str, CkbContract]
 def deploy_contracts(account_private, node: CkbNode):
     # if tip number < 10
     # miner to 10 block
@@ -13,6 +14,4 @@ def deploy_contracts(account_private, node: CkbNode):
     # deploy contract
     spawn = SpawnContract()
     spawn.deploy(account_private, node)
-    return {
-        "SpawnContract": spawn
-    }
+    return {"SpawnContract": spawn}

@@ -24,5 +24,11 @@ class TestGeConsensus:
         """
         cluster = get_cluster
         consensus = cluster.ckb_nodes[0].getClient().get_consensus()
-        assert "0x" in consensus['softforks']['light_client']['rfc0043']['threshold']['denom']
-        assert "0x" in consensus['softforks']['light_client']['rfc0043']['threshold']['numer']
+        assert (
+            "0x"
+            in consensus["softforks"]["light_client"]["rfc0043"]["threshold"]["denom"]
+        )
+        assert (
+            "0x"
+            in consensus["softforks"]["light_client"]["rfc0043"]["threshold"]["numer"]
+        )

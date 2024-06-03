@@ -12,14 +12,14 @@ class SpawnContract(CkbContract):
         if contract_hash is None:
             self.deployed = False
         self.contract_path = SPAWN_CONTRACT_PATH
-        self.method = {
-            "demo": {"args": "0x", "data": "0x"}
-        }
+        self.method = {"demo": {"args": "0x", "data": "0x"}}
 
     def deploy(self, account_private, node: CkbNode):
         if self.deployed:
             return
-        self.contract_path = deploy_ckb_contract(account_private, self.contract_path, api_url=node.getClient().url)
+        self.contract_path = deploy_ckb_contract(
+            account_private, self.contract_path, api_url=node.getClient().url
+        )
         self.contract_tx_index = 0
         miner_until_tx_committed(node, self.contract_path)
         self.deployed = True

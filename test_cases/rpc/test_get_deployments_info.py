@@ -24,5 +24,11 @@ class TestGetDeploymentsInfo:
         """
         cluster = get_cluster
         deployments_info = cluster.ckb_nodes[0].getClient().get_deployments_info()
-        assert "0x" in deployments_info['deployments']['light_client']['threshold']['denom']
-        assert "0x" in deployments_info['deployments']['light_client']['threshold']['numer']
+        assert (
+            "0x"
+            in deployments_info["deployments"]["light_client"]["threshold"]["denom"]
+        )
+        assert (
+            "0x"
+            in deployments_info["deployments"]["light_client"]["threshold"]["numer"]
+        )

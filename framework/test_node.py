@@ -1,6 +1,11 @@
 import time
 from enum import Enum
-from framework.util import create_config_file, get_project_root, run_command, get_ckb_configs
+from framework.util import (
+    create_config_file,
+    get_project_root,
+    run_command,
+    get_ckb_configs,
+)
 from framework.config import get_tmp_path, CKB_DEFAULT_CONFIG, CKB_MINER_CONFIG
 from framework.rpc import RPCClient
 import shutil
@@ -14,89 +19,101 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v116/ckb.toml.j2",
         "source/template/ckb/v116/ckb-miner.toml.j2",
         "source/template/ckb/v116/specs/dev.toml",
-        "download/0.116.1"
+        "download/0.116.1",
     )
 
-    CURRENT_MAIN = ("source/template/ckb/v116/ckb.toml.j2",
+    CURRENT_MAIN = (
+        "source/template/ckb/v116/ckb.toml.j2",
         "source/template/ckb/v116/ckb-miner.toml.j2",
-                    "source/template/specs/mainnet.toml.j2",
-                    "download/0.116.1")
+        "source/template/specs/mainnet.toml.j2",
+        "download/0.116.1",
+    )
 
-    v116 = ( "source/template/ckb/v116/ckb.toml.j2",
+    v116 = (
+        "source/template/ckb/v116/ckb.toml.j2",
         "source/template/ckb/v116/ckb-miner.toml.j2",
         "source/template/ckb/v116/specs/dev.toml",
-        "download/0.116.1"
+        "download/0.116.1",
     )
     v115 = (
         "source/template/ckb/v115/ckb.toml.j2",
         "source/template/ckb/v115/ckb-miner.toml.j2",
         "source/template/ckb/v115/specs/dev.toml",
-        "download/0.115.0"
+        "download/0.115.0",
     )
     v114 = (
         "source/template/ckb/v114/ckb.toml.j2",
         "source/template/ckb/v114/ckb-miner.toml.j2",
         "source/template/ckb/v114/specs/dev.toml",
-        "download/0.114.0"
+        "download/0.114.0",
     )
-    
 
     V113 = (
         "source/template/ckb/v113/ckb.toml.j2",
         "source/template/ckb/v113/ckb-miner.toml.j2",
         "source/template/ckb/v113/specs/dev.toml",
-        "download/0.113.1"
+        "download/0.113.1",
     )
 
     V112 = (
         "source/template/ckb/v112/ckb.toml.j2",
         "source/template/ckb/v112/ckb-miner.toml.j2",
         "source/template/ckb/v112/specs/dev.toml",
-        "download/0.112.1"
+        "download/0.112.1",
     )
 
     V112_MAIN = (
         "source/template/ckb/v112/ckb.toml.j2",
         "source/template/ckb/v112/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.112.1"
+        "download/0.112.1",
     )
 
     V111 = (
         "source/template/ckb/v111/ckb.toml.j2",
         "source/template/ckb/v111/ckb-miner.toml.j2",
         "source/template/ckb/v111/specs/dev.toml",
-        "download/0.111.0"
+        "download/0.111.0",
     )
     V110 = (
         "source/template/ckb/v110/ckb.toml.j2",
         "source/template/ckb/v110/ckb-miner.toml.j2",
         "source/template/ckb/v110/specs/dev.toml",
-        "download/0.110.2"
+        "download/0.110.2",
     )
 
     V110_MAIN = (
         "source/template/ckb/v110/ckb.toml.j2",
         "source/template/ckb/v110/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.110.2"
+        "download/0.110.2",
     )
     V110_TEST = (
         "source/template/ckb/v110/ckb.toml.j2",
         "source/template/ckb/v110/ckb-miner.toml.j2",
         "source/template/specs/testnet.toml.j2",
-        "download/0.110.2"
+        "download/0.110.2",
     )
 
-    V109 = ("source/template/ckb/v109/ckb.toml.j2", "source/template/ckb/v109/ckb-miner.toml.j2",
-            "source/template/ckb/v109/specs/dev.toml", "download/0.109.0")
+    V109 = (
+        "source/template/ckb/v109/ckb.toml.j2",
+        "source/template/ckb/v109/ckb-miner.toml.j2",
+        "source/template/ckb/v109/specs/dev.toml",
+        "download/0.109.0",
+    )
 
-    V109_MAIN = ("source/template/ckb/v109/ckb.toml.j2", "source/template/ckb/v109/ckb-miner.toml.j2",
-                 "source/template/specs/mainnet.toml.j2", "download/0.109.0")
+    V109_MAIN = (
+        "source/template/ckb/v109/ckb.toml.j2",
+        "source/template/ckb/v109/ckb-miner.toml.j2",
+        "source/template/specs/mainnet.toml.j2",
+        "download/0.109.0",
+    )
 
     v108 = ("", "", "", "")
 
-    def __init__(self, ckb_config_path, ckb_miner_config_path, ckb_spec_path, ckb_bin_path):
+    def __init__(
+        self, ckb_config_path, ckb_miner_config_path, ckb_spec_path, ckb_bin_path
+    ):
         self.ckb_config_path = ckb_config_path
         self.ckb_miner_config_path = ckb_miner_config_path
         self.ckb_spec_path = ckb_spec_path
@@ -109,16 +126,24 @@ class CkbNodeConfigPath(Enum):
 class CkbNode:
 
     @classmethod
-    def init_dev_by_port(cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port):
-        ckb_config, ckb_miner_config, ckb_specs_config = get_ckb_configs(p2p_port, rpc_port)
-        return CkbNode(ckb_node_path_enum, dec_dir, ckb_config, ckb_miner_config, ckb_specs_config)
+    def init_dev_by_port(
+        cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port
+    ):
+        ckb_config, ckb_miner_config, ckb_specs_config = get_ckb_configs(
+            p2p_port, rpc_port
+        )
+        return CkbNode(
+            ckb_node_path_enum, dec_dir, ckb_config, ckb_miner_config, ckb_specs_config
+        )
 
-    def __init__(self, ckb_node_path_enum: CkbNodeConfigPath,
-                 dec_dir,
-                 ckb_config=CKB_DEFAULT_CONFIG,
-                 ckb_miner_config=CKB_MINER_CONFIG,
-                 ckb_specs_config={},
-                 ):
+    def __init__(
+        self,
+        ckb_node_path_enum: CkbNodeConfigPath,
+        dec_dir,
+        ckb_config=CKB_DEFAULT_CONFIG,
+        ckb_miner_config=CKB_MINER_CONFIG,
+        ckb_specs_config={},
+    ):
         self.ckb_config_path = ckb_node_path_enum
         self.dec_path = ckb_config
         self.ckb_config = ckb_config.copy()
@@ -131,7 +156,9 @@ class CkbNode:
         self.ckb_specs_config_path = f"{self.ckb_dir}/dev.toml"
         self.ckb_pid = -1
         self.ckb_miner_pid = -1
-        self.rpcUrl = "http://{url}".format(url=self.ckb_config.get("ckb_rpc_listen_address", "127.0.0.1:8114"))
+        self.rpcUrl = "http://{url}".format(
+            url=self.ckb_config.get("ckb_rpc_listen_address", "127.0.0.1:8114")
+        )
         self.client = RPCClient(self.rpcUrl)
 
     def __str__(self):
@@ -142,7 +169,7 @@ class CkbNode:
 
     def get_peer_address(self):
         info = self.client.local_node_info()
-        return info["addresses"][0]['address'].replace("0.0.0.0", "127.0.0.1")
+        return info["addresses"][0]["address"].replace("0.0.0.0", "127.0.0.1")
 
     def get_connected_count(self):
         return int(self.getClient().local_node_info()["connections"], 16)
@@ -173,7 +200,10 @@ class CkbNode:
 
     def start(self):
         self.ckb_pid = run_command(
-            "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(ckb_dir=self.ckb_dir))
+            "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(
+                ckb_dir=self.ckb_dir
+            )
+        )
         # //todo replace by rpc
         time.sleep(3)
 
@@ -185,7 +215,9 @@ class CkbNode:
         """
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --rich-indexer  --skip-spec-check > node.log 2>&1 &".format(
-                ckb_dir=self.ckb_dir))
+                ckb_dir=self.ckb_dir
+            )
+        )
         time.sleep(3)
 
     def stop(self):
@@ -198,31 +230,63 @@ class CkbNode:
         self.ckb_pid = -1
         time.sleep(3)
 
-    def prepare(self, other_ckb_config={}, other_ckb_miner_config={}, other_ckb_spec_config={}, check_file=False):
+    def prepare(
+        self,
+        other_ckb_config={},
+        other_ckb_miner_config={},
+        other_ckb_spec_config={},
+        check_file=False,
+    ):
         self.ckb_config.update(other_ckb_config)
         self.ckb_miner_config.update(other_ckb_miner_config)
         self.ckb_specs_config.update(other_ckb_spec_config)
         # check file exist
-        create_config_file(self.ckb_config, self.ckb_config_path.ckb_config_path,
-                           self.ckb_toml_path)
+        create_config_file(
+            self.ckb_config, self.ckb_config_path.ckb_config_path, self.ckb_toml_path
+        )
 
-        create_config_file(self.ckb_miner_config, self.ckb_config_path.ckb_miner_config_path, self.ckb_miner_toml_path)
+        create_config_file(
+            self.ckb_miner_config,
+            self.ckb_config_path.ckb_miner_config_path,
+            self.ckb_miner_toml_path,
+        )
         if ".j2" in self.ckb_config_path.ckb_spec_path:
-            create_config_file(self.ckb_specs_config, self.ckb_config_path.ckb_spec_path, self.ckb_specs_config_path)
+            create_config_file(
+                self.ckb_specs_config,
+                self.ckb_config_path.ckb_spec_path,
+                self.ckb_specs_config_path,
+            )
         else:
-            shutil.copy("{root_path}/{spec_path}".format(root_path=get_project_root(),
-                                                         spec_path=self.ckb_config_path.ckb_spec_path), self.ckb_dir)
+            shutil.copy(
+                "{root_path}/{spec_path}".format(
+                    root_path=get_project_root(),
+                    spec_path=self.ckb_config_path.ckb_spec_path,
+                ),
+                self.ckb_dir,
+            )
 
-        shutil.copy("{root_path}/{ckb_bin_path}/ckb".format(root_path=get_project_root(),
-                                                            ckb_bin_path=self.ckb_config_path.ckb_bin_path),
-                    self.ckb_dir)
+        shutil.copy(
+            "{root_path}/{ckb_bin_path}/ckb".format(
+                root_path=get_project_root(),
+                ckb_bin_path=self.ckb_config_path.ckb_bin_path,
+            ),
+            self.ckb_dir,
+        )
 
-        shutil.copy("{root_path}/{ckb_bin_path}/ckb-cli".format(root_path=get_project_root(),
-                                                                ckb_bin_path=self.ckb_config_path.ckb_bin_path),
-                    self.ckb_dir)
+        shutil.copy(
+            "{root_path}/{ckb_bin_path}/ckb-cli".format(
+                root_path=get_project_root(),
+                ckb_bin_path=self.ckb_config_path.ckb_bin_path,
+            ),
+            self.ckb_dir,
+        )
 
-        shutil.copy("{root_path}/source/template/ckb/default.db-options".format(root_path=get_project_root()),
-                    self.ckb_dir)
+        shutil.copy(
+            "{root_path}/source/template/ckb/default.db-options".format(
+                root_path=get_project_root()
+            ),
+            self.ckb_dir,
+        )
 
     def clean(self):
         run_command("rm -rf {ckb_dir}".format(ckb_dir=self.ckb_dir))
@@ -231,7 +295,10 @@ class CkbNode:
         if self.ckb_miner_pid != -1:
             return
         self.ckb_miner_pid = run_command(
-            "cd {ckb_dir} && ./ckb miner > ckb.miner.log 2>&1  &".format(ckb_dir=self.ckb_dir))
+            "cd {ckb_dir} && ./ckb miner > ckb.miner.log 2>&1  &".format(
+                ckb_dir=self.ckb_dir
+            )
+        )
         # replace check height upper
         time.sleep(3)
 
@@ -251,7 +318,7 @@ class CkbNode:
         # new_tip_header | new_tip_block | new_transaction | proposed_transaction | rejected_transaction
         if "ckb_tcp_listen_address" not in self.ckb_config.keys():
             raise Exception("not set ckb_ws_listen_address")
-        ckb_tcp_listen_address = self.ckb_config['ckb_tcp_listen_address']
+        ckb_tcp_listen_address = self.ckb_config["ckb_tcp_listen_address"]
         if other_url is not None:
             ckb_tcp_listen_address = other_url
         # get host
@@ -261,14 +328,17 @@ class CkbNode:
         #  new telnet
         tn = telnetlib.Telnet(host, int(port))
         print("----")
-        topic_str = '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["' + topic + '"]}'
-        tn.write(topic_str.encode('utf-8') + b"\n")
-        data = tn.read_until(b'}\n')
+        topic_str = (
+            '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
+            + topic
+            + '"]}'
+        )
+        tn.write(topic_str.encode("utf-8") + b"\n")
+        data = tn.read_until(b"}\n")
         if data:
-            output = data.decode('utf-8')
+            output = data.decode("utf-8")
             print("telnet read:", output)
         return tn
-
 
     def subscribe_websocket(self, topic, other_url=None) -> WebSocket:
         if other_url is None and "ckb_ws_listen_address" not in self.ckb_config.keys():
@@ -277,10 +347,14 @@ class CkbNode:
         if other_url is not None:
             ckb_ws_listen_address = other_url
         else:
-            ckb_ws_listen_address = self.ckb_config['ckb_ws_listen_address']
+            ckb_ws_listen_address = self.ckb_config["ckb_ws_listen_address"]
         print(ckb_ws_listen_address)
         ws = create_connection(f"ws://{ckb_ws_listen_address}")
-        topic_str = '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["' + topic + '"]}'
+        topic_str = (
+            '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
+            + topic
+            + '"]}'
+        )
         ws.send(topic_str)
         print("Sent")
         print("Receiving...")

@@ -9,8 +9,6 @@ DATA_ERROR_TAT = f"{get_project_root()}/source/data/data.err.tar.gz"
 
 class TestSyncDaoLockSizeMismatch(CkbTest):
 
-
-
     def teardown_method(self, method):
         super().teardown_method(method)
         print("\nTearing down method", method.__name__)
@@ -29,25 +27,40 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
         6000 block contains DaoLockSizeMismatch tx
         5495 block contains dao deposit tx
         8669 block contains DaoLockSizeMismatch tx use 5495 dao deposit tx
-        1. can sync 6000 block
+        1. start with config starting_block_limiting_dao_withdrawing_lock:5495
+        2. can sync 6000 block
             tip block num > 6000
-        2. can't sync 8669 block
-            tip block == 8668
+        3. can sync 8669 block
+            tip block > 8668
         Returns:
         """
 
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+        # 1. start with config starting_block_limiting_dao_withdrawing_lock:5495
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
         self.node1 = node1
         self.node2 = node2
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5495"})
+        node1.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5495"
+            }
+        )
+        node2.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5495"
+            }
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
         node1.start_miner()
         node1.connected(node2)
-
+        # 2. can sync 6000 block
+        # 3. can sync 8669 block
         self.Node.wait_node_height(self.node2, 8669, 120)
 
     def test_02_sync_dao_in_starting_block_limiting_dao_withdrawing_lock(self):
@@ -56,30 +69,49 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
         - after softFork active
         - starting_block_limiting_dao_withdrawing_lock <= dao deposit tx block number
 
+        5495 block contains dao deposit tx
         6000 block contains DaoLockSizeMismatch tx
         8669 block contains DaoLockSizeMismatch tx
-        1. can sync 6000 block
+        1. start with config starting_block_limiting_dao_withdrawing_lock:5494
+        2. can sync 6000 block
             tip block num > 6000
-        2. can't sync 8669 block
+        3. can't sync 8669 block
             tip block == 8668
         Returns:
         """
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+
+        # 1. start with config starting_block_limiting_dao_withdrawing_lock:5494
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
         self.node1 = node1
         self.node2 = node2
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "5494"})
+        node1.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
+        node2.prepare(
+            other_ckb_spec_config={
+                "starting_block_limiting_dao_withdrawing_lock": "5494"
+            }
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
         node1.start_miner()
         node1.connected(node2)
 
+        # 2. can sync 6000 block
         self.Node.wait_node_height(self.node2, 8668, 120)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
         time.sleep(10)
+
+        # 3. can't sync 8669 block
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
 
@@ -94,12 +126,22 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
             tip block == 8668
         Returns:
         """
-        node1 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227)
-        node2 = self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228)
+
+        # 1. can sync 6000 block
+        node1 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.V110_MAIN, "tx_pool_test/node1", 8114, 8227
+        )
+        node2 = self.CkbNode.init_dev_by_port(
+            self.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_test/node2", 8112, 8228
+        )
         self.node1 = node1
         self.node2 = node2
-        node1.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
-        node2.prepare(other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"})
+        node1.prepare(
+            other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"}
+        )
+        node2.prepare(
+            other_ckb_spec_config={"starting_block_limiting_dao_withdrawing_lock": "10"}
+        )
         tar_file(DATA_ERROR_TAT, node1.ckb_dir)
         node1.start()
         node2.start()
@@ -110,6 +152,8 @@ class TestSyncDaoLockSizeMismatch(CkbTest):
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
         time.sleep(10)
+
+        #  2. can't sync 8669 block(DaoLockSizeMismatch tx)
         block_num = self.node2.getClient().get_tip_block_number()
         assert block_num == 8668
 

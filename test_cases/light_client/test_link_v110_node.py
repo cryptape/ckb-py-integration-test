@@ -4,6 +4,17 @@ from framework.basic import CkbTest
 class CKbLightClientLinkV110Node(CkbTest):
 
     def teardown_method(self, method):
+        """
+        1. stop ckb node
+        2. clean ckb node  tmp dir
+        3. stop ckb light client node
+        4. clean ckb light client node tmp dir
+        Args:
+            method:
+
+        Returns:
+
+        """
         super().teardown_method(method)
         self.cluster.stop_all_nodes()
         self.cluster.clean_all_nodes()
@@ -29,11 +40,13 @@ class CKbLightClientLinkV110Node(CkbTest):
 
         """
         nodes = [
-            self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_MAIN, "cluster/hardfork/node{i}".format(i=i),
-                                          8124 + i,
-                                          8225 + i)
-            for
-            i in range(1, 5)
+            self.CkbNode.init_dev_by_port(
+                self.CkbNodeConfigPath.V110_MAIN,
+                "cluster/hardfork/node{i}".format(i=i),
+                8124 + i,
+                8225 + i,
+            )
+            for i in range(1, 5)
         ]
         self.cluster = self.Cluster(nodes)
         self.cluster.prepare_all_nodes()
@@ -43,15 +56,28 @@ class CKbLightClientLinkV110Node(CkbTest):
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 2000)
         self.Node.wait_cluster_height(self.cluster, 2000, 100)
 
-        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
-                                                                          self.cluster.ckb_nodes,
-                                                                          "tx_pool_light/node1", 8001)
+        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(
+            self.CkbLightClientConfigPath.CURRENT_TEST,
+            self.cluster.ckb_nodes,
+            "tx_pool_light/node1",
+            8001,
+        )
         self.ckb_light_node.prepare()
         self.ckb_light_node.start()
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
-        self.ckb_light_node.getClient().set_scripts([{"script": {
-            "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type",
-            "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
+        self.ckb_light_node.getClient().set_scripts(
+            [
+                {
+                    "script": {
+                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "type",
+                        "args": account["lock_arg"],
+                    },
+                    "script_type": "lock",
+                    "block_number": "0x0",
+                }
+            ]
+        )
         self.Node.wait_light_sync_height(self.ckb_light_node, 2000, 200)
 
     def test_110_testnet_link_ckb_light_successful(self):
@@ -73,11 +99,13 @@ class CKbLightClientLinkV110Node(CkbTest):
 
         """
         nodes = [
-            self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110_TEST, "cluster/hardfork/node{i}".format(i=i),
-                                          8124 + i,
-                                          8225 + i)
-            for
-            i in range(1, 5)
+            self.CkbNode.init_dev_by_port(
+                self.CkbNodeConfigPath.V110_TEST,
+                "cluster/hardfork/node{i}".format(i=i),
+                8124 + i,
+                8225 + i,
+            )
+            for i in range(1, 5)
         ]
         self.cluster = self.Cluster(nodes)
         self.cluster.prepare_all_nodes()
@@ -87,15 +115,28 @@ class CKbLightClientLinkV110Node(CkbTest):
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 2000)
         self.Node.wait_cluster_height(self.cluster, 2000, 100)
 
-        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
-                                                                          self.cluster.ckb_nodes,
-                                                                          "tx_pool_light/node1", 8001)
+        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(
+            self.CkbLightClientConfigPath.CURRENT_TEST,
+            self.cluster.ckb_nodes,
+            "tx_pool_light/node1",
+            8001,
+        )
         self.ckb_light_node.prepare()
         self.ckb_light_node.start()
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
-        self.ckb_light_node.getClient().set_scripts([{"script": {
-            "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "data2",
-            "args": account['lock_arg']}, "script_type": "lock", "block_number": "0x0"}])
+        self.ckb_light_node.getClient().set_scripts(
+            [
+                {
+                    "script": {
+                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "data2",
+                        "args": account["lock_arg"],
+                    },
+                    "script_type": "lock",
+                    "block_number": "0x0",
+                }
+            ]
+        )
         self.Node.wait_light_sync_height(self.ckb_light_node, 2000, 200)
 
     def test_110_devnet_link_ckb_light_failed(self):
@@ -116,11 +157,13 @@ class CKbLightClientLinkV110Node(CkbTest):
 
         """
         nodes = [
-            self.CkbNode.init_dev_by_port(self.CkbNodeConfigPath.V110, "cluster/hardfork/node{i}".format(i=i),
-                                          8114 + i,
-                                          8225 + i)
-            for
-            i in range(1, 5)
+            self.CkbNode.init_dev_by_port(
+                self.CkbNodeConfigPath.V110,
+                "cluster/hardfork/node{i}".format(i=i),
+                8114 + i,
+                8225 + i,
+            )
+            for i in range(1, 5)
         ]
         self.cluster = self.Cluster(nodes)
         self.cluster.prepare_all_nodes()
@@ -130,9 +173,12 @@ class CKbLightClientLinkV110Node(CkbTest):
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 100)
         self.Node.wait_cluster_height(self.cluster, 100, 100)
 
-        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(self.CkbLightClientConfigPath.CURRENT_TEST,
-                                                                          self.cluster.ckb_nodes,
-                                                                          "tx_pool_light/node1", 8001)
+        self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(
+            self.CkbLightClientConfigPath.CURRENT_TEST,
+            self.cluster.ckb_nodes,
+            "tx_pool_light/node1",
+            8001,
+        )
         self.ckb_light_node.prepare()
         self.ckb_light_node.start()
         with open(f"{self.ckb_light_node.tmp_path}/node.log") as f:

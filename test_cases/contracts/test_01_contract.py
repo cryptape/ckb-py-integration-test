@@ -20,13 +20,14 @@ def get_all_files(directory):
 
 def get_successful_files():
     files = get_all_files(f"{get_project_root()}/source/contract/test_cases")
-    files_list = ["spawn_exceeded_max_content_length",
-                  "loop_contract",
-                  "spawn_exec_memory_limit_le_7",
-                  "spawn_argc_not_eq",
-                  "spawn_argc_is_u64_max",
-                  "spawn_out_of_memory"
-                  ]
+    files_list = [
+        "spawn_exceeded_max_content_length",
+        "loop_contract",
+        "spawn_exec_memory_limit_le_7",
+        "spawn_argc_not_eq",
+        "spawn_argc_is_u64_max",
+        "spawn_out_of_memory",
+    ]
     return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
 
 
@@ -34,13 +35,14 @@ def get_failed_files():
     project_root = get_project_root()
     files = get_all_files(f"{get_project_root()}/source/contract/test_cases")
 
-    files_list = ["spawn_exceeded_max_content_length",
-                  "loop_contract",
-                  "spawn_exec_memory_limit_le_7",
-                  "spawn_argc_not_eq",
-                  "spawn_argc_is_u64_max",
-                  "spawn_out_of_memory"
-                  ]
+    files_list = [
+        "spawn_exceeded_max_content_length",
+        "loop_contract",
+        "spawn_exec_memory_limit_le_7",
+        "spawn_argc_not_eq",
+        "spawn_argc_is_u64_max",
+        "spawn_out_of_memory",
+    ]
     # return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
     return [f"{project_root}/source/contract/test_cases/{x}" for x in files_list]
 
@@ -51,7 +53,9 @@ class TestHelperContract(CkbTest):
 
     @classmethod
     def setup_class(cls):
-        cls.node = cls.CkbNode.init_dev_by_port(cls.CkbNodeConfigPath.CURRENT_TEST, "contract/node", 8114, 8115)
+        cls.node = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.CURRENT_TEST, "contract/node", 8114, 8115
+        )
         cls.node.prepare()
         cls.node.start()
         cls.Miner.make_tip_height_number(cls.node, 2000)
@@ -64,12 +68,22 @@ class TestHelperContract(CkbTest):
     @parameterized.expand(success_files)
     # @pytest.mark.skip
     def test_01_deploy_and_invoke_demo(self, path):
+        """
+        1. Retrieve the paths of successful files from `project_root/source/contract/test_cases` by excluding the files specified in `files_list`.
+        2. deploy and invoke contract
+        """
         return self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
 
-    @parameterized.expand( failed_files)
+    @parameterized.expand(failed_files)
     def test_02_deploy_and_invoke_demo_failed(self, path):
+        """
+        1. Retrieve the paths of failed files from `project_root/source/contract/test_cases` by including only the files specified in `files_list`.
+        2. deploy and invoke contract
+        Note: If no exception is thrown, the test will fail.
+        """
         try:
             self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
+            self.fail("Did not raise an exception as expected!")
         except Exception as e:
             print(e)
 
@@ -79,9 +93,11 @@ class TestHelperContract(CkbTest):
         https://github.com/gpBlockchain/ckb-test-contracts/blob/main/rust/acceptance-contracts/contracts/spawn_demo/src/spawn_recursive.rs
         :return:
         """
-        self.deploy_and_invoke(self.Config.MINER_PRIVATE_1,
-                               f"{get_project_root()}/source/contract/test_cases/spawn_recursive",
-                               self.node)
+        self.deploy_and_invoke(
+            self.Config.MINER_PRIVATE_1,
+            f"{get_project_root()}/source/contract/test_cases/spawn_recursive",
+            self.node,
+        )
 
     # @pytest.mark.skip
     def test_04_estimate_cycles_bug(self):
@@ -97,33 +113,39 @@ class TestHelperContract(CkbTest):
             if return cycles > 1045122714,is bug
         :return:
         """
-        deploy_hash = self.Contract.deploy_ckb_contract(self.Config.MINER_PRIVATE_1,
-                                                        f"{get_project_root()}/source/contract/test_cases/spawn_times",
-                                                        enable_type_id=True,
-                                                        api_url=self.node.getClient().url)
+        deploy_hash = self.Contract.deploy_ckb_contract(
+            self.Config.MINER_PRIVATE_1,
+            f"{get_project_root()}/source/contract/test_cases/spawn_times",
+            enable_type_id=True,
+            api_url=self.node.getClient().url,
+        )
         self.Miner.miner_until_tx_committed(self.node, deploy_hash)
         for i in range(1, 10):
-            invoke_hash = self.Contract.invoke_ckb_contract(account_private=self.Config.MINER_PRIVATE_1,
-                                                            contract_out_point_tx_hash=deploy_hash,
-                                                            contract_out_point_tx_index=0,
-                                                            type_script_arg="0x02", data=f"0x{i:02x}",
-                                                            hash_type="type",
-                                                            api_url=self.node.getClient().url)
+            invoke_hash = self.Contract.invoke_ckb_contract(
+                account_private=self.Config.MINER_PRIVATE_1,
+                contract_out_point_tx_hash=deploy_hash,
+                contract_out_point_tx_index=0,
+                type_script_arg="0x02",
+                data=f"0x{i:02x}",
+                hash_type="type",
+                api_url=self.node.getClient().url,
+            )
             time.sleep(5)
             transaction = self.node.getClient().get_transaction(invoke_hash)
             # if transaction["tx_status"]['status'] == ""
-            if transaction["tx_status"]['status'] == "rejected":
+            if transaction["tx_status"]["status"] == "rejected":
                 continue
-            if transaction["tx_status"]['status'] == "pending":
+            if transaction["tx_status"]["status"] == "pending":
                 # bug
                 # es cycle
-                del transaction['transaction']['hash']
-                with open("./tmp.json", 'w') as tmp_file:
-                    tmp_file.write(json.dumps(transaction['transaction']))
+                del transaction["transaction"]["hash"]
+                with open("./tmp.json", "w") as tmp_file:
+                    tmp_file.write(json.dumps(transaction["transaction"]))
                 for i in range(5):
                     try:
-                        result = self.Ckb_cli.estimate_cycles("./tmp.json",
-                                                              api_url=self.node.getClient().url)
+                        result = self.Ckb_cli.estimate_cycles(
+                            "./tmp.json", api_url=self.node.getClient().url
+                        )
                         print(f"estimate_cycles:{result}")
                     except Exception:
                         pass
@@ -132,18 +154,20 @@ class TestHelperContract(CkbTest):
         if try_count < 0:
             raise Exception("try out of times")
         try:
-            deploy_hash = self.Contract.deploy_ckb_contract(account,
-                                                            path,
-                                                            enable_type_id=True,
-                                                            api_url=node.getClient().url)
+            deploy_hash = self.Contract.deploy_ckb_contract(
+                account, path, enable_type_id=True, api_url=node.getClient().url
+            )
             self.Miner.miner_until_tx_committed(node, deploy_hash)
             time.sleep(1)
-            invoke_hash = self.Contract.invoke_ckb_contract(account_private=account,
-                                                            contract_out_point_tx_hash=deploy_hash,
-                                                            contract_out_point_tx_index=0,
-                                                            type_script_arg="0x02", data="0x1234",
-                                                            hash_type="type",
-                                                            api_url=node.getClient().url)
+            invoke_hash = self.Contract.invoke_ckb_contract(
+                account_private=account,
+                contract_out_point_tx_hash=deploy_hash,
+                contract_out_point_tx_index=0,
+                type_script_arg="0x02",
+                data="0x1234",
+                hash_type="type",
+                api_url=node.getClient().url,
+            )
             return invoke_hash
         except Exception as e:
             print(e)

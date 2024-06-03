@@ -105,16 +105,24 @@ class RPCClient:
     def get_deployments_info(self):
         return self.call("get_deployments_info", [])
 
+    def get_pool_tx_detail_info(self, tx_hash):
+        return self.call("get_pool_tx_detail_info", [tx_hash])
+
     def get_blockchain_info(self):
         return self.call("get_blockchain_info", [])
 
     def get_cells(self, search_key, order, limit, after):
         return self.call("get_cells", [search_key, order, limit, after])
 
-    def get_block_template(self, bytes_limit=None, proposals_limit=None, max_version=None):
-        return self.call("get_block_template", [
-            # bytes_limit, proposals_limit, max_version
-        ])
+    def get_block_template(
+        self, bytes_limit=None, proposals_limit=None, max_version=None
+    ):
+        return self.call(
+            "get_block_template",
+            [
+                # bytes_limit, proposals_limit, max_version
+            ],
+        )
 
     def calculate_dao_field(self, block_template):
         return self.call("calculate_dao_field", [block_template])
@@ -178,7 +186,9 @@ class RPCClient:
     def remove_transaction(self, tx_hash):
         return self.call("remove_transaction", [tx_hash])
 
-    def get_live_cell_with_include_tx_pool(self, index, tx_hash, with_data=True, include_tx_pool: Union[bool, None] = None):
+    def get_live_cell_with_include_tx_pool(
+        self, index, tx_hash, with_data=True, include_tx_pool: Union[bool, None] = None
+    ):
         """
         over ckb v116.1 version
         https://github.com/nervosnetwork/ckb/blob/bb677558efdc3e5f0759556720b62169469b555d/rpc/README.md#chain-get_live_cell
@@ -191,7 +201,10 @@ class RPCClient:
         Returns:CellWithStatus
 
         """
-        return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data, include_tx_pool])
+        return self.call(
+            "get_live_cell",
+            [{"index": index, "tx_hash": tx_hash}, with_data, include_tx_pool],
+        )
 
     def get_live_cell(self, index, tx_hash, with_data=True):
         """
@@ -205,7 +218,9 @@ class RPCClient:
         Returns:CellWithStatus
 
         """
-        return self.call("get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data])
+        return self.call(
+            "get_live_cell", [{"index": index, "tx_hash": tx_hash}, with_data]
+        )
 
     def submit_block(self, work_id, block):
         return self.call("submit_block", [work_id, block])
@@ -219,28 +234,25 @@ class RPCClient:
     def get_current_epoch(self):
         return self.call("get_current_epoch", [])
 
-    def test_tx_pool_accept(self,tx, outputs_validator):
-        return self.call("test_tx_pool_accept",[tx, outputs_validator])
+    def test_tx_pool_accept(self, tx, outputs_validator):
+        return self.call("test_tx_pool_accept", [tx, outputs_validator])
 
     def call(self, method, params, try_count=15):
 
-        headers = {'content-type': 'application/json'}
-        data = {
-            "id": 42,
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params
-        }
+        headers = {"content-type": "application/json"}
+        data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}
         print(f"request:url:{self.url},data:\n{json.dumps(data)}")
         for i in range(try_count):
             try:
-                response = requests.post(self.url, data=json.dumps(data), headers=headers).json()
+                response = requests.post(
+                    self.url, data=json.dumps(data), headers=headers
+                ).json()
                 print(f"response:\n{json.dumps(response)}")
-                if 'error' in response.keys():
-                    error_message = response['error'].get('message', 'Unknown error')
+                if "error" in response.keys():
+                    error_message = response["error"].get("message", "Unknown error")
                     raise Exception(f"Error: {error_message}")
 
-                return response.get('result', None)
+                return response.get("result", None)
             except requests.exceptions.ConnectionError as e:
                 print(e)
                 print("request too quickly, wait 2s")
@@ -252,7 +264,7 @@ class RPCClient:
         raise Exception("request time out")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     client = RPCClient("https://testnet.ckb.dev/")
     number = client.subscribe("new_tip_header")
     print(number)

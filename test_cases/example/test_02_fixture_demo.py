@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def setup_and_teardown():
     print("\nSetup")
     setup_data = {"key": "value"}
@@ -14,7 +14,7 @@ class TestClass1:
         print("Executing test_method1")
         print("Setup data is: ", setup_and_teardown)
         x = "this"
-        assert 'h' in x
+        assert "h" in x
 
     def test_method2(self, setup_and_teardown):
         print("Executing test_method2")

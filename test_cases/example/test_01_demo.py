@@ -16,7 +16,7 @@ class TestClass1:
     def test_method1(self):
         print("Executing test_method1")
         x = "this"
-        assert 'h' in x
+        assert "h" in x
 
     def test_method2(self):
         print("Executing test_method2")
