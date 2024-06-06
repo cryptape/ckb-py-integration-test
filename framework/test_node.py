@@ -14,7 +14,6 @@ from websocket import create_connection, WebSocket
 
 
 class CkbNodeConfigPath(Enum):
-
     CURRENT_TEST = (
         "source/template/ckb/v116/ckb.toml.j2",
         "source/template/ckb/v116/ckb-miner.toml.j2",
@@ -131,7 +130,6 @@ class CkbNodeConfigPath(Enum):
 
 
 class CkbNode:
-
     @classmethod
     def init_dev_by_port(
         cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port
