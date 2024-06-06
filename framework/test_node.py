@@ -19,14 +19,21 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v116/ckb.toml.j2",
         "source/template/ckb/v116/ckb-miner.toml.j2",
         "source/template/ckb/v116/specs/dev.toml",
-        "download/0.116.1",
+        "download/0.117.0",
     )
 
     CURRENT_MAIN = (
         "source/template/ckb/v116/ckb.toml.j2",
         "source/template/ckb/v116/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.116.1",
+        "download/0.117.0",
+    )
+
+    v117 = (
+        "source/template/ckb/v116/ckb.toml.j2",
+        "source/template/ckb/v116/ckb-miner.toml.j2",
+        "source/template/ckb/v116/specs/dev.toml",
+        "download/0.117.0",
     )
 
     v116 = (
