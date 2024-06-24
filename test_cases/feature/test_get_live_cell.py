@@ -32,7 +32,6 @@ class TestGetLiveCell(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
-    @pytest.mark.skip("wait v117.0 release")
     def test_get_live_cell_with_unspend(self):
         """
         1. get cells and tx is pending and with unspend
@@ -56,7 +55,6 @@ class TestGetLiveCell(CkbTest):
         )
         assert result["status"] == "live"
 
-    @pytest.mark.skip("wait v117.0 release")
     def test_get_live_cell_with_spend(self):
         """
         1. get live cells and cell is spend
