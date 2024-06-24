@@ -35,6 +35,7 @@ class TestIssue4363(CkbTest):
         """
         https://github.com/nervosnetwork/ckb/pull/4363/files
         When inserting a cellDep, if the chain is too long, excess transactions in the chain will be deleted.
+        DEFAULT_MAX_ANCESTORS_COUNT = 2000
         0. Generate 250 live cells and cell=a
         1. Send 200 transactions tx1(cellDep=a)
         2. Send tx2(input = low-fee tx1.output(1 || 2 || 3 || 4 || 5))
@@ -52,7 +53,7 @@ class TestIssue4363(CkbTest):
         tx1_hash = self.Ckb_cli.wallet_transfer_by_private_key(
             account_private,
             account["address"]["testnet"],
-            1000000,
+            10000000,
             self.node1.getClient().url,
             "15000000",
         )
@@ -60,7 +61,7 @@ class TestIssue4363(CkbTest):
             [tx1_hash],
             ["0x0"],
             account_private,
-            output_count=250,
+            output_count=2005,
             fee=1000090,
             api_url=self.node1.getClient().url,
         )
@@ -93,7 +94,7 @@ class TestIssue4363(CkbTest):
         self.Miner.miner_until_tx_committed(self.node1, tx_a_hash)
         # 1. Send 200 transactions tx1(cellDep=a)
         tx1_list = []
-        for i in range(200):
+        for i in range(2005):
             print("current i:", i)
             tx_hash = self.Tx.send_transfer_self_tx_with_input(
                 [tx_live_cell_hash],
@@ -166,8 +167,8 @@ class TestIssue4363(CkbTest):
                 pending_status += 1
             if response["tx_status"]["status"] == "rejected":
                 rejected_status += 1
-        assert pending_status == 124
-        assert rejected_status == 76
+        assert pending_status == 1999
+        assert rejected_status == 6
         # 6. Query tx2 reports PoolRejectedInvalidated
         print("---- tx2_hash------")
         for tx_hash in tx2_list:
