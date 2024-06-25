@@ -6,7 +6,6 @@ from framework.basic import CkbTest
 
 
 class TestIssue4363(CkbTest):
-
     @classmethod
     def setup_class(cls):
         cls.node1 = cls.CkbNode.init_dev_by_port(
@@ -33,9 +32,10 @@ class TestIssue4363(CkbTest):
 
     def test_01_4363(self):
         """
+        https://github.com/nervosnetwork/ckb/blob/develop/util/app-config/src/legacy/tx_pool.rs#L123
+        DEFAULT_MAX_ANCESTORS_COUNT = 2000
         https://github.com/nervosnetwork/ckb/pull/4363/files
         When inserting a cellDep, if the chain is too long, excess transactions in the chain will be deleted.
-        DEFAULT_MAX_ANCESTORS_COUNT = 2000
         0. Generate 250 live cells and cell=a
         1. Send 200 transactions tx1(cellDep=a)
         2. Send tx2(input = low-fee tx1.output(1 || 2 || 3 || 4 || 5))
@@ -94,7 +94,17 @@ class TestIssue4363(CkbTest):
         self.Miner.miner_until_tx_committed(self.node1, tx_a_hash)
         # 1. Send 200 transactions tx1(cellDep=a)
         tx1_list = []
-        for i in range(2005):
+        tx_hash = self.Tx.send_transfer_self_tx_with_input(
+            [tx_live_cell_hash],
+            [hex(0)],
+            account_private,
+            output_count=3,
+            fee=3090,
+            api_url=self.node1.getClient().url,
+            dep_cells=[{"tx_hash": tx_a_hash, "index_hex": "0x0"}],
+        )
+        tx1_list.append(tx_hash)
+        for i in range(1, 2005):
             print("current i:", i)
             tx_hash = self.Tx.send_transfer_self_tx_with_input(
                 [tx_live_cell_hash],
@@ -116,7 +126,7 @@ class TestIssue4363(CkbTest):
                 [hex(i)],
                 account_private,
                 output_count=2,
-                fee=100090 + i * 1000,
+                fee=3090 + i * 1000,
                 api_url=self.node1.getClient().url,
             )
             tx2_list.append(tx_hash)
@@ -125,7 +135,7 @@ class TestIssue4363(CkbTest):
                 [hex(1)],
                 account_private,
                 output_count=1,
-                fee=100090 + i * 1000,
+                fee=3090 + i * 1000,
                 api_url=self.node1.getClient().url,
             )
             tx22_list.append(tx_hash)
@@ -138,7 +148,7 @@ class TestIssue4363(CkbTest):
                 [hex(i)],
                 account_private,
                 output_count=2,
-                fee=100090 + i * 1000,
+                fee=3090 + i * 1000,
                 api_url=self.node1.getClient().url,
                 dep_cells=[{"tx_hash": tx1_list[1], "index_hex": "0x0"}],
             )
