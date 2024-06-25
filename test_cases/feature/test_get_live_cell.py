@@ -83,9 +83,7 @@ class TestGetLiveCell(CkbTest):
                 fee=1100090 + i * 1000,
                 api_url=self.node.getClient().url,
             )
-            self.node.getClient().test_tx_pool_accept(
-                tx, "passthrough"
-            )
+            self.node.getClient().test_tx_pool_accept(tx, "passthrough")
             self.node.getClient().send_transaction(tx)
             transaction = self.node.getClient().get_transaction(father_tx_hash)
             result = self.node.getClient().get_live_cell_with_include_tx_pool(
