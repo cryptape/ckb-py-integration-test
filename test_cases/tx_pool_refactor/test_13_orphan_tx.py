@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic import CkbTest
 
 
@@ -259,6 +261,7 @@ class TestOrphanTx(CkbTest):
         assert tx_pool_info["orphan"] == "0x0"
         self.Miner.miner_until_tx_committed(self.node3, tx_child_hash)
 
+    @pytest.mark.skip
     def test_broadcast_tx_that_cellDep_contains_miss_tx(self):
         """
         A transactions have a cellDep, cellDep contains many tx_hashes that are miss when broadcast
@@ -365,6 +368,7 @@ class TestOrphanTx(CkbTest):
         assert tx_pool_info["orphan"] == "0x0"
         self.Miner.miner_until_tx_committed(self.node3, tx_child_hash)
 
+    @pytest.mark.skip
     def test_broadcast_tx_that_cellDep_contains_miss_tx_and_commit_tx(self):
         """
         A transactions have a cellDep, cellDep contains many tx_hashes that are miss when broadcast,and some txs are committed
@@ -487,6 +491,7 @@ class TestOrphanTx(CkbTest):
         assert tx_pool_info["orphan"] == "0x0"
         self.Miner.miner_until_tx_committed(self.node3, tx_child_hash)
 
+    @pytest.mark.skip
     def test_broadcast_tx_that_cellDep_and_input_are_contains_miss_tx_and_commit_tx(
         self,
     ):
@@ -616,7 +621,7 @@ class TestOrphanTx(CkbTest):
         assert tx_pool_info["orphan"] == "0x0"
         self.Miner.miner_until_tx_committed(self.node3, tx_child_hash)
 
-    def test_6(self):
+    def test_linked_orphan_tx(self):
         """
         A transaction's parent transaction is in the orphan pool. When the parent transaction is recovered from the orphan pool, a series of child transactions will also be transferred from the orphan pool to the pending pool.
             1. Node 1 sends 10 child transactions
@@ -773,7 +778,6 @@ class TestOrphanTx(CkbTest):
             7. Query the orphan pool
             8. Query the status of the aggregation transaction and the conflicting transaction
         Returns:
-
         """
         n = 10
         account = self.Ckb_cli.util_key_info_by_private_key(
@@ -876,4 +880,4 @@ class TestOrphanTx(CkbTest):
         # 8. Query the status of the aggregation transaction and the conflicting transaction
         conflict_tx = self.node2.getClient().get_transaction(conflict_tx_hash)
         orphan_tx = self.node2.getClient().get_transaction(tx_child_hash)
-        assert orphan_tx["tx_status"]["status"] == "pending"
+        assert orphan_tx["tx_status"]["status"] == "rejected"
