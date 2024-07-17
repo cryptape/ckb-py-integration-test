@@ -18,7 +18,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
         :param method:
         :return:
         """
-        # self.node.getClient().clear_tx_pool()
+        self.node.getClient().clear_tx_pool()
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
         pool = self.node.getClient().tx_pool_info()
@@ -80,16 +80,16 @@ class TestSendTxWhenPoolLimit(CkbTest):
             )
             tx_list.append(tx_hash1)
         response = self.node.getClient().get_transaction(tx_hash_2)
-        assert response["tx_status"]["status"] != "unknown"
+        assert response["tx_status"]["status"] != "rejected"
         response = self.node.getClient().get_transaction(father_tx_hash)
-        assert response["tx_status"]["status"] != "unknown"
-        unknown = 0
+        assert response["tx_status"]["status"] != "rejected"
+        rejected = 0
         for tx_hash in tx_list:
             response = self.node.getClient().get_transaction(tx_hash)
             print(response)
-            if response["tx_status"]["status"] == "unknown":
-                unknown += 1
-        assert unknown == 11
+            if response["tx_status"]["status"] == "rejected":
+                rejected += 1
+        assert rejected == 11
 
     def test_replace_normal_tx_when_tx_pool_full(self):
         """
@@ -98,7 +98,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
         1. send 10 normal tx
         2. send 12 tx that  fee > 10 normal tx
         3. 12 tx status == pending
-        4. 8 normal tx status == unknown
+        4. 8 normal tx status == rejected
         """
         account = self.Ckb_cli.util_key_info_by_private_key(
             self.Config.ACCOUNT_PRIVATE_1
@@ -147,16 +147,16 @@ class TestSendTxWhenPoolLimit(CkbTest):
                 api_url=self.node.getClient().url,
             )
             tx_hash_a_list.append(tx_hash_a)
-        # 4. 8 normal tx status == unknown
-        unknown_status_size = 0
+        # 4. 8 normal tx status == rejected
+        rejected_status_size = 0
         for tx_hash in tx_list:
             tx = self.node.getClient().get_transaction(tx_hash)
-            if tx["tx_status"]["status"] == "unknown":
-                unknown_status_size += 1
+            if tx["tx_status"]["status"] == "rejected":
+                rejected_status_size += 1
         for tx_hash_a in tx_hash_a_list:
             tx = self.node.getClient().get_transaction(tx_hash_a)
-            assert tx["tx_status"]["status"] != "unknown"
-        assert unknown_status_size == 8
+            assert tx["tx_status"]["status"] != "rejected"
+        assert rejected_status_size == 9
 
     def test_replace_link_tx_when_ckb_tx_pool_full(self):
         """
@@ -222,7 +222,7 @@ class TestSendTxWhenPoolLimit(CkbTest):
             tx_hash_b_list.append(tx_hash_b)
         for tx_hash_a in tx_hash_a_list:
             tx = self.node.getClient().get_transaction(tx_hash_a)
-            assert tx["tx_status"]["status"] == "unknown"
+            assert tx["tx_status"]["status"] == "rejected"
         for tx_hash_b in tx_hash_b_list:
             self.node.getClient().get_transaction(tx_hash_b)
 
