@@ -920,6 +920,38 @@ def get_cells(
     output_format="json",
     api_url="http://127.0.0.1:8114",
 ):
+    """
+    cmd:export API_URL=http://127.0.0.1:8314 && cd /Users/xueyanli/PycharmProjects/ckb-py-integration-test/source && ./ckb-cli rpc sync_state --output-format json
+    result:{
+      "assume_valid_target": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "assume_valid_target_reached": true,
+      "best_known_block_number": 0,
+      "best_known_block_timestamp": "0 (1970-01-01 08:00:00 +08:00)",
+      "fast_time": 1000,
+      "ibd": false,
+      "inflight_blocks_count": 0,
+      "low_time": 1500,
+      "min_chain_work": "0x0",
+      "min_chain_work_reached": true,
+      "normal_time": 1250,
+      "orphan_blocks_count": 0,
+      "orphan_blocks_size": 0
+    }
+
+    Args:
+        json_path:
+        order:
+        limit:
+        raw_data:
+        no_color:
+        debug:
+        local_only:
+        output_format:
+        api_url:
+
+    Returns:
+
+    """
     cmd = "rpc get_cells"
     if raw_data:
         cmd += " --raw-data"
@@ -986,6 +1018,29 @@ def get_cells_capacity(
     if local_only:
         cmd += " --local-only"
     cmd += f" --json-path {json_path}"
+    cmd += f" --output-format {output_format}"
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    return json.loads(run_command(cmd))
+
+
+def sync_state(
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="json",
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc sync_state"
+    if raw_data:
+        cmd += " --raw-data"
+    if no_color:
+        cmd += " --no-color"
+    if debug:
+        cmd += " --debug"
+    if local_only:
+        cmd += " --local-only"
     cmd += f" --output-format {output_format}"
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
