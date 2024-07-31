@@ -43,12 +43,14 @@ class TestCkbCliRpc117(CkbTest):
         """
         self.Ckb_cli.version()
         sync_state = self.Ckb_cli.sync_state(api_url=self.node.getClient().url)
-        #1.The assume_valid_target specified by ckb, if no assume_valid_target, this will be all zero.
-        assert sync_state["assume_valid_target"] == "0x0000000000000000000000000000000000000000000000000000000000000000"
-        #2.If no assume_valid_target, this will be true.
+        # 1.The assume_valid_target specified by ckb, if no assume_valid_target, this will be all zero.
+        assert (
+            sync_state["assume_valid_target"]
+            == "0x0000000000000000000000000000000000000000000000000000000000000000"
+        )
+        # 2.If no assume_valid_target, this will be true.
         assert sync_state["assume_valid_target_reached"] is True
-        #3. min_chain_work on dev chain = 0x0
+        # 3. min_chain_work on dev chain = 0x0
         assert sync_state["min_chain_work"] == "0x0"
-        #4. min_chain_work_reached on dev chain is 0x0,so will be reached return true
+        # 4. min_chain_work_reached on dev chain is 0x0,so will be reached return true
         assert sync_state["min_chain_work_reached"] is True
-
