@@ -27,11 +27,12 @@ class TestTxPoolLimit(CkbTest):
 
     def test_max_linked_transactions(self):
         """
+        https://github.com/nervosnetwork/ckb/blob/develop/util/app-config/src/legacy/tx_pool.rs#L15
         test linked tx limit
         1. keep sending linked transactions until an error occurs
             ERROR :PoolRejectedTransactionByMaxAncestorsCountLimit
         2. query max max_ancestors_count
-         max_ancestors_count == 125
+         max_ancestors_count == 2000
         :return:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(
@@ -74,12 +75,12 @@ class TestTxPoolLimit(CkbTest):
                 max_ancestors_count,
                 int(raw_tx_pools["pending"][tx_hash]["ancestors_count"], 16),
             )
-        assert max_ancestors_count == 125
+        assert max_ancestors_count == 2000
 
     def test_sub_tx(self):
         """
-        The sub transactions will not trigger an error until reaching 125
-        1. keep sending linked transactions until transaction len > 125
+        The sub transactions will not trigger an error until reaching 2000
+        1. keep sending linked transactions until transaction len > 2000
             pass
         :return:
         """

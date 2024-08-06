@@ -14,19 +14,25 @@ from websocket import create_connection, WebSocket
 
 
 class CkbNodeConfigPath(Enum):
-
     CURRENT_TEST = (
-        "source/template/ckb/v116/ckb.toml.j2",
-        "source/template/ckb/v116/ckb-miner.toml.j2",
-        "source/template/ckb/v116/specs/dev.toml",
-        "download/0.116.1",
+        "source/template/ckb/v117/ckb.toml.j2",
+        "source/template/ckb/v117/ckb-miner.toml.j2",
+        "source/template/ckb/v117/specs/dev.toml",
+        "download/0.117.0",
     )
 
     CURRENT_MAIN = (
-        "source/template/ckb/v116/ckb.toml.j2",
-        "source/template/ckb/v116/ckb-miner.toml.j2",
+        "source/template/ckb/v117/ckb.toml.j2",
+        "source/template/ckb/v117/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.116.1",
+        "download/0.117.0",
+    )
+
+    v117 = (
+        "source/template/ckb/v117/ckb.toml.j2",
+        "source/template/ckb/v117/ckb-miner.toml.j2",
+        "source/template/ckb/v117/specs/dev.toml",
+        "download/0.117.0",
     )
 
     v116 = (
@@ -124,7 +130,6 @@ class CkbNodeConfigPath(Enum):
 
 
 class CkbNode:
-
     @classmethod
     def init_dev_by_port(
         cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port
