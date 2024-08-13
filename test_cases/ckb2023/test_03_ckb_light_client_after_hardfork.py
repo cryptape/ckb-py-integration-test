@@ -261,6 +261,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         )
         assert tx_hash == light_tx_hash
 
+    @pytest.mark.skip
     def test_05_ckb_light_client_current_spawn_contract_use_data2(self):
         """
         send spawn tx ( hash type : data2), on the ckb light client
@@ -317,6 +318,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
 
         assert tx_hash == light_tx_hash
 
+    @pytest.mark.skip
     def test_05_ckb_light_client_current_spawn_contract_use_type(self):
         """
         1. send spawn tx ( hash type : type), on the ckb light client

@@ -240,10 +240,10 @@ class TestAfterHardFork(CkbTest):
     def test_08_0050_spawn_use_data1(self):
         """
         After a period of hard fork,send spawn tx by data1 .
-            - return Error: InvalidEcall(2101)
+            - return Error: InvalidEcall(2603)
 
         1. send tx contains spawn opcode use data1
-            - return Error: InvalidEcall(2101)
+            - return Error: InvalidEcall(2603)
         :return:
         """
 
@@ -260,7 +260,7 @@ class TestAfterHardFork(CkbTest):
                 invoke_data,
                 api_url=self.cluster.ckb_nodes[0].getClient().url,
             )
-        expected_error_message = "InvalidEcall(2101)"
+        expected_error_message = "InvalidEcall(2603)"
         assert (
             expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
@@ -271,7 +271,7 @@ class TestAfterHardFork(CkbTest):
             - return Error: InvalidInstruction
 
         1. send tx contains spawn opcode use data
-            - return Error: InvalidEcall(2101)
+            - return Error: MemWriteOnExecutablePage
         :return:
         """
 
@@ -288,7 +288,7 @@ class TestAfterHardFork(CkbTest):
                 invoke_data,
                 api_url=self.cluster.ckb_nodes[0].getClient().url,
             )
-        expected_error_message = "InvalidInstruction"
+        expected_error_message = "MemWriteOnExecutablePage"
         assert (
             expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"

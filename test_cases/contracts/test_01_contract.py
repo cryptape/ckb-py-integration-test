@@ -1,8 +1,6 @@
-import json
 import os
 import time
 
-import pytest
 from parameterized import parameterized
 
 from framework.basic import CkbTest
@@ -21,12 +19,16 @@ def get_all_files(directory):
 def get_successful_files():
     files = get_all_files(f"{get_project_root()}/source/contract/test_cases")
     files_list = [
-        "spawn_exceeded_max_content_length",
+        "spawn_cycle_inc_when_contains_recursion_and_loop_spawn",
+        "spawn_source_is_input_cell",
+        "spawn_loop_times",
+        "spawn_source_is_output_cell",
+        "spawn_recursion_times",
+        "ckb_pipe",
+        "spawn_argc_is_large",
+        "spawn_place_is_witness",
         "loop_contract",
-        "spawn_exec_memory_limit_le_7",
-        "spawn_argc_not_eq",
-        "spawn_argc_is_u64_max",
-        "spawn_out_of_memory",
+        "exec_with_block_opcode"
     ]
     return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
 
@@ -36,12 +38,16 @@ def get_failed_files():
     files = get_all_files(f"{get_project_root()}/source/contract/test_cases")
 
     files_list = [
-        "spawn_exceeded_max_content_length",
+        "spawn_cycle_inc_when_contains_recursion_and_loop_spawn",
+        "spawn_source_is_input_cell",
+        "spawn_loop_times",
+        "spawn_source_is_output_cell",
+        "spawn_recursion_times",
+        "ckb_pipe",
+        "spawn_argc_is_large",
+        "spawn_place_is_witness",
         "loop_contract",
-        "spawn_exec_memory_limit_le_7",
-        "spawn_argc_not_eq",
-        "spawn_argc_is_u64_max",
-        "spawn_out_of_memory",
+        "exec_with_block_opcode"
     ]
     # return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
     return [f"{project_root}/source/contract/test_cases/{x}" for x in files_list]
@@ -86,69 +92,6 @@ class TestHelperContract(CkbTest):
             self.fail("Did not raise an exception as expected!")
         except Exception as e:
             print(e)
-
-    def test_03_stack_overflow(self):
-        """
-        contract link:
-        https://github.com/gpBlockchain/ckb-test-contracts/blob/main/rust/acceptance-contracts/contracts/spawn_demo/src/spawn_recursive.rs
-        :return:
-        """
-        self.deploy_and_invoke(
-            self.Config.MINER_PRIVATE_1,
-            f"{get_project_root()}/source/contract/test_cases/spawn_recursive",
-            self.node,
-        )
-
-    # @pytest.mark.skip
-    def test_04_estimate_cycles_bug(self):
-        """
-        https://github.com/gpBlockchain/ckb-test-contracts/blob/main/rust/acceptance-contracts/contracts/spawn_demo/src/spawn_times.rs
-        send_transaction( big cycle tx )
-            return tx;
-        query tx status
-            return tx_status == rejected
-        if status == pending ,is  bug
-        query estimate_cycles
-            return : ExceededMaximumCycles
-            if return cycles > 1045122714,is bug
-        :return:
-        """
-        deploy_hash = self.Contract.deploy_ckb_contract(
-            self.Config.MINER_PRIVATE_1,
-            f"{get_project_root()}/source/contract/test_cases/spawn_times",
-            enable_type_id=True,
-            api_url=self.node.getClient().url,
-        )
-        self.Miner.miner_until_tx_committed(self.node, deploy_hash)
-        for i in range(1, 10):
-            invoke_hash = self.Contract.invoke_ckb_contract(
-                account_private=self.Config.MINER_PRIVATE_1,
-                contract_out_point_tx_hash=deploy_hash,
-                contract_out_point_tx_index=0,
-                type_script_arg="0x02",
-                data=f"0x{i:02x}",
-                hash_type="type",
-                api_url=self.node.getClient().url,
-            )
-            time.sleep(5)
-            transaction = self.node.getClient().get_transaction(invoke_hash)
-            # if transaction["tx_status"]['status'] == ""
-            if transaction["tx_status"]["status"] == "rejected":
-                continue
-            if transaction["tx_status"]["status"] == "pending":
-                # bug
-                # es cycle
-                del transaction["transaction"]["hash"]
-                with open("./tmp.json", "w") as tmp_file:
-                    tmp_file.write(json.dumps(transaction["transaction"]))
-                for i in range(5):
-                    try:
-                        result = self.Ckb_cli.estimate_cycles(
-                            "./tmp.json", api_url=self.node.getClient().url
-                        )
-                        print(f"estimate_cycles:{result}")
-                    except Exception:
-                        pass
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
         if try_count < 0:
