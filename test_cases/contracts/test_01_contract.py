@@ -28,7 +28,7 @@ def get_successful_files():
         "spawn_argc_is_large",
         "spawn_place_is_witness",
         "loop_contract",
-        "exec_with_block_opcode"
+        "exec_with_block_opcode",
     ]
     return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
 
@@ -47,7 +47,7 @@ def get_failed_files():
         "spawn_argc_is_large",
         "spawn_place_is_witness",
         "loop_contract",
-        "exec_with_block_opcode"
+        "exec_with_block_opcode",
     ]
     # return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
     return [f"{project_root}/source/contract/test_cases/{x}" for x in files_list]
