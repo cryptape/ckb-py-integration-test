@@ -178,7 +178,7 @@ class TestBeforeHardFork(CkbTest):
         """
         Before the fork, send a transaction contains spawn , use  script:type invoke it. will return error
         1. invoke spawn contrat
-        - return error: InvalidEcall(2101)
+        - return error: InvalidEcall(2603)
         :return:
         """
 
@@ -200,7 +200,7 @@ class TestBeforeHardFork(CkbTest):
                 api_url=self.cluster.ckb_nodes[0].getClient().url,
             )
             print("tx hash :", tx_hash)
-        expected_error_message = "InvalidEcall(2101)"
+        expected_error_message = "InvalidEcall(2603)"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
