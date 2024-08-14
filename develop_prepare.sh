@@ -20,7 +20,7 @@ GitCKBCLIBranch="${CKBCLIGitBranch:-$DEFAULT_CKB_CLI_BRANCH}"
 GitCKBCLIUrl="${CKBCLIGitUrl:-$DEFAULT_CKB_CLI_URL}"
 BUILD_CKB="${BuildCKb:-$DEFAULT_BUILD_CKB}"
 BUILD_CKB_CLI="${BuildCKbCLI:-$DEFAULT_BUILD_CKB_CLI}"
-if [ BUILD_CKB ]; then
+if [ "$BUILD_CKB" == "true" ]; then
   git clone -b $GitCKBBranch $GitCKBUrl
   cd ckb
   make prod
@@ -28,7 +28,7 @@ if [ BUILD_CKB ]; then
   cd ../
 fi
 cp download/0.110.2/ckb-cli ./source/ckb-cli-old
-if [ BUILD_CKB_CLI ]; then
+if [ "$BUILD_CKB_CLI" == "true" ]; then
   git clone -b $GitCKBCLIBranch $GitCKBCLIUrl
   cd ckb-cli
   make prod
