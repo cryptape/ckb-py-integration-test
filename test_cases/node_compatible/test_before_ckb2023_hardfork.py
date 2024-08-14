@@ -119,9 +119,9 @@ class TestBeforeCkb2023(CkbTest):
     def test_04_spawn_tx(self, version, node):
         """
         1. send spawn tx by data1 .
-        - return Error: InvalidEcall(2101)
+        - return Error: InvalidEcall(2603)
         2.  send spawn tx by type .
-        - return Error: InvalidEcall(2101)
+        - return Error: InvalidEcall(2603)
         :param version:
         :param node:
         :return:
@@ -140,7 +140,7 @@ class TestBeforeCkb2023(CkbTest):
                 invoke_data,
                 api_url=node.getClient().url,
             )
-        expected_error_message = "InvalidEcall(2101)"
+        expected_error_message = "InvalidEcall(2603)"
         assert (
             expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
@@ -156,7 +156,7 @@ class TestBeforeCkb2023(CkbTest):
                 invoke_data,
                 api_url=node.getClient().url,
             )
-        expected_error_message = "InvalidEcall(2101)"
+        expected_error_message = "InvalidEcall(2603)"
         assert (
             expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"

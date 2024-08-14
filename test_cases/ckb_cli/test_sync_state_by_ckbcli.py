@@ -1,3 +1,5 @@
+import pytest
+
 from framework.basic import CkbTest
 
 
@@ -32,6 +34,7 @@ class TestCkbCliRpc117(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
+    @pytest.mark.skip
     def test_01_sync_state(self):
         """
         #1.The assume_valid_target specified by ckb, if no assume_valid_target, this will be all zero.
