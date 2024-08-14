@@ -21,7 +21,7 @@ develop_prepare:
 
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
-	sh develop_prepare.sh
+	bash develop_prepare.sh
 
 test_cases := \
     test_cases/replace_rpc \
