@@ -53,6 +53,20 @@ test:
         exit 1; \
     fi
 
+develop_test:
+	@failed_cases=; \
+    for test_case in $(TestCases); do \
+        echo "Running tests for $$test_case"; \
+        if ! bash test.sh "$$test_case"; then \
+            echo "$$test_case" >> failed_test_cases.txt; \
+        fi \
+    done; \
+    if [ -s failed_test_cases.txt ]; then \
+        echo "Some test cases failed: $$(cat failed_test_cases.txt)"; \
+        rm -f failed_test_cases.txt; \
+        exit 1; \
+    fi
+
 
 clean:
 	pkill ckb
