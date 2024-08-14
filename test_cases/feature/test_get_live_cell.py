@@ -38,7 +38,6 @@ class TestGetLiveCell(CkbTest):
         Returns:
 
         """
-        # 1. get cells and tx is pending and with unspend
         account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
         tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
             self.Config.MINER_PRIVATE_1,
@@ -48,7 +47,6 @@ class TestGetLiveCell(CkbTest):
             "1500",
         )
         print(f"txHash:{tx_hash}")
-        # 2. query cell status will be live
         transaction = self.node.getClient().get_transaction(tx_hash)
         result = self.node.getClient().get_live_cell_with_include_tx_pool(
             transaction["transaction"]["inputs"][0]["previous_output"]["index"],
@@ -58,10 +56,8 @@ class TestGetLiveCell(CkbTest):
 
     def test_get_live_cell_with_spend(self):
         """
-        1. generate account and build normal tx
-        2. get live cells and cell is spend
-        3. send link tx and test_tx_pool_accept check success
-        4. query cell status will be unknown
+        1. get live cells and cell is spend
+        2. query cell status will be unknown
         Returns:
 
         """
@@ -69,7 +65,6 @@ class TestGetLiveCell(CkbTest):
         account = self.Ckb_cli.util_key_info_by_private_key(
             self.Config.ACCOUNT_PRIVATE_1
         )
-        # 2. get live cells and cell is spend
         father_tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
             self.Config.ACCOUNT_PRIVATE_1,
             account["address"]["testnet"],
@@ -78,7 +73,7 @@ class TestGetLiveCell(CkbTest):
             "1500000",
         )
         tx_hash = father_tx_hash
-        # 3. send link tx and test_tx_pool_accept check success
+        # 2. send link tx and test_tx_pool_accept check success
         for i in range(3):
             tx = self.Tx.build_send_transfer_self_tx_with_input(
                 [tx_hash],
@@ -96,5 +91,4 @@ class TestGetLiveCell(CkbTest):
                 transaction["transaction"]["inputs"][0]["previous_output"]["tx_hash"],
                 include_tx_pool=True,
             )
-            # 4. query cell status will be unknown
             assert result["status"] == "unknown"
