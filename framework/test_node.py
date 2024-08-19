@@ -34,7 +34,7 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v117/specs/dev.toml",
         "download/0.118.0",
     )
-    
+
     v117 = (
         "source/template/ckb/v117/ckb.toml.j2",
         "source/template/ckb/v117/ckb-miner.toml.j2",
