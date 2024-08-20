@@ -1,5 +1,4 @@
 from framework.basic import CkbTest
-import pytest
 
 
 class TestGetTransaction(CkbTest):
