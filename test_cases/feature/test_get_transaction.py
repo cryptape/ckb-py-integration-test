@@ -32,7 +32,6 @@ class TestGetTransaction(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
-    # @pytest.mark.skip("util v118")
     def test_get_transaction_by_tx_index(self):
         """
         1. new tx in block
