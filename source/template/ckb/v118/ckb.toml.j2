@@ -108,6 +108,11 @@ reject_ill_transactions = {{ ckb_rpc_reject_ill_transactions | default("true") }
 enable_deprecated_rpc = {{ ckb_rpc_enable_deprecated_rpc | default("false") }}
 
 
+{% if ckb_rpc_batch_limit is defined %}
+rpc_batch_limit = {{ ckb_rpc_batch_limit | default("2000") }}
+{% endif %}
+
+
 [tx_pool]
 max_tx_pool_size = {{ ckb_tx_pool_max_tx_pool_size | default("180_000_000") }}
 min_fee_rate = {{ ckb_tx_pool_min_fee_rate | default("1_000") }}
@@ -177,8 +182,15 @@ block_uncles_cache_size    = {{ ckb_store_block_uncles_cache_size    | default("
 # notify = ["http://127.0.0.1:8888"]
 # # Or you may want use more flexible scripts, block template as arg.
 # notify_scripts = ["{cmd} {blocktemplate}"]
-#
-# [indexer_v2]
+
+
+{% if ckb_request_limit is defined %}
+[indexer_v2]
+request_limit = {{ ckb_request_limit | default("400") }}
+{% endif %}
+
+
+
 # # Indexing the pending txs in the ckb tx-pool
 # index_tx_pool = false
 # # Customize block filtering rules to index only retained blocks
