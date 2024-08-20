@@ -37,7 +37,8 @@ test_cases := \
     test_cases/soft_fork \
     test_cases/issue \
     test_cases/tx_pool_refactor \
-    test_cases/feature
+    test_cases/feature \
+    test_cases/config
 
 test:
 	@failed_cases=; \
