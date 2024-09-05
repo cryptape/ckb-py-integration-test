@@ -6,7 +6,7 @@ class CyclingAttack(CkbTest):
     @classmethod
     def setup_class(cls):
         cls.node1 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.v117, "node/node1", 8119, 8125
+            cls.CkbNodeConfigPath.CURRENT_TEST, "node/node1", 8119, 8125
         )
 
         cls.node1.prepare()
