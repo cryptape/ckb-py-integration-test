@@ -6,7 +6,7 @@ class CyclingAttack(CkbTest):
     @classmethod
     def setup_class(cls):
         cls.node1 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "node/node1", 8114, 8115
+            cls.CkbNodeConfigPath.v117, "node/node1", 8119, 8125
         )
 
         cls.node1.prepare()
@@ -26,8 +26,8 @@ class CyclingAttack(CkbTest):
         3. B1 status ：rejected, A2 status: rejected
         4. A0 -> A3 (big fee)
         5. B2 statue: rejected
-        6. 等待a3 上链
-        7. B0 is living cell
+        6. wait a3 committed
+        7. b1 status: committed
         Returns:
         """
         account = self.Ckb_cli.util_key_info_by_private_key(
@@ -112,21 +112,9 @@ class CyclingAttack(CkbTest):
         # 5. B2 statue: rejected
         tx_b2_response = self.node1.getClient().get_transaction(tx_b2)
         print("tx_b2_response:", tx_b2_response)
-        # 6. 等待a3 上链
-        self.Miner.miner_until_tx_committed(self.node1, tx_a3)
-        # 7. B0 is living cell
-        tx_b0_status = self.node1.getClient().get_live_cell(tx_b0_index, tx_b0)
-        print("tx_b0_status:", tx_b0_status)
 
-        # 8. resend b1
-        tx_b1 = self.Tx.send_transfer_self_tx_with_input(
-            [tx_b0],
-            [tx_b0_index],
-            account_private,
-            output_count=1,
-            fee=1000,
-            api_url=self.node1.getClient().url,
-        )
-        tx_b1_response = self.node1.getClient().get_transaction(tx_b1)
-        print("tx_b1_response:", tx_b1_response)
+        # 6. wait a3 committed
+        self.Miner.miner_until_tx_committed(self.node1, tx_a3)
+
+        # 7. b1 status: committed
         self.Miner.miner_until_tx_committed(self.node1, tx_b1)
