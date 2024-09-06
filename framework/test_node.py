@@ -28,6 +28,13 @@ class CkbNodeConfigPath(Enum):
         "download/0.118.0",
     )
 
+    PREVIEW_DUMMY = (
+        "source/template/ckb/v118/ckb.toml.j2",
+        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/specs/preview_dev.toml",
+        "download/0.118.0",
+    )
+
     v118 = (
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
