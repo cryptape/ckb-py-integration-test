@@ -21,6 +21,13 @@ class CkbNodeConfigPath(Enum):
         "download/0.118.0",
     )
 
+    PREVIEW_DUMMY = (
+        "source/template/ckb/v118/ckb.toml.j2",
+        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/specs/preview_dev.toml",
+        "download/0.118.0",
+    )
+
     CURRENT_MAIN = (
         "source/template/ckb/v117/ckb.toml.j2",
         "source/template/ckb/v117/ckb-miner.toml.j2",
@@ -274,7 +281,7 @@ class CkbNode:
                     root_path=get_project_root(),
                     spec_path=self.ckb_config_path.ckb_spec_path,
                 ),
-                self.ckb_dir,
+                self.ckb_specs_config_path,
             )
 
         shutil.copy(
