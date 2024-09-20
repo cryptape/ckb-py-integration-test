@@ -1,7 +1,7 @@
 set -e
  git clone https://github.com/nervosnetwork/ckb-cli.git
  cd ckb-cli
- git checkout exec/bump-0.118.0
+ git checkout develop
  make prod
  cp target/release/ckb-cli ../source/ckb-cli
  cd ../
