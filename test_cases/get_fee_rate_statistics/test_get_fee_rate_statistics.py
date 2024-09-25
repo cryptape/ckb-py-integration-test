@@ -29,10 +29,10 @@ class TestGetFeeRateStatistics(CkbTest):
                 account1["address"]["testnet"],
                 140,
                 self.node.client.url,
-                fee_rate=str(1000 * (i + 1))
+                fee_rate=str(1000 * (i + 1)),
             )
             tx = self.node.getClient().get_pool_tx_detail_info(tx_hash)
             self.Miner.miner_until_tx_committed(self.node, tx_hash)
         ret = self.node.getClient().get_fee_rate_statics()
-        assert ret['mean'] == '0xbb8'
-        assert ret['median'] == '0xbb8'
+        assert ret["mean"] == "0xbb8"
+        assert ret["median"] == "0xbb8"
