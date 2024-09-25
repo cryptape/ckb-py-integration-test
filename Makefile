@@ -42,6 +42,7 @@ test_cases := \
     test_cases/miner \
     test_cases/get_fee_rate_statistics
 
+
 test:
 	@failed_cases=; \
     for test_case in $(test_cases); do \

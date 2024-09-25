@@ -174,6 +174,9 @@ class RPCClient:
     def clear_tx_pool(self):
         return self.call("clear_tx_pool", [])
 
+    def clear_tx_verify_queue(self):
+        return self.call("clear_tx_verify_queue", [])
+
     def generate_block(self):
         return self.call("generate_block", [])
 

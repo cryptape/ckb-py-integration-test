@@ -34,7 +34,6 @@ class TestCkbCliRpc117(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
-    @pytest.mark.skip
     def test_01_sync_state(self):
         """
         #1.The assume_valid_target specified by ckb, if no assume_valid_target, this will be all zero.
@@ -57,3 +56,14 @@ class TestCkbCliRpc117(CkbTest):
         assert sync_state["min_chain_work"] == "0x0"
         # 4. min_chain_work_reached on dev chain is 0x0,so will be reached return true
         assert sync_state["min_chain_work_reached"] is True
+
+    def test_02_remove_orphan_blocks_size(self):
+        """
+        #1. remove orphan_blocks_size
+        Returns:
+
+        """
+        # 1. remove orphan_blocks_size
+        self.Ckb_cli.version()
+        sync_state = self.Ckb_cli.sync_state(api_url=self.node.getClient().url)
+        assert "orphan_blocks_size" not in sync_state
