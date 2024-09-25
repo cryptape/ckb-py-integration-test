@@ -44,11 +44,18 @@ class TestCkbJsVm(CkbTest):
         cls.ckb_js_vm_deploy_hash = cls.Contract.deploy_ckb_contract(
             cls.Config.MINER_PRIVATE_1,
             f"{get_project_root()}/source/contract/js_vm/ckb-js-vm",
-            enable_type_id=False, api_url=cls.cluster.ckb_nodes[0].getClient().url
+            enable_type_id=False,
+            api_url=cls.cluster.ckb_nodes[0].getClient().url,
         )
-        cls.Miner.miner_until_tx_committed(cls.cluster.ckb_nodes[0], cls.ckb_js_vm_deploy_hash, with_unknown=True)
-        ckb_js_vm_codeHash = cls.Contract.get_ckb_contract_codehash(cls.ckb_js_vm_deploy_hash, 0, False,
-                                                                    cls.cluster.ckb_nodes[0].getClient().url)
+        cls.Miner.miner_until_tx_committed(
+            cls.cluster.ckb_nodes[0], cls.ckb_js_vm_deploy_hash, with_unknown=True
+        )
+        ckb_js_vm_codeHash = cls.Contract.get_ckb_contract_codehash(
+            cls.ckb_js_vm_deploy_hash,
+            0,
+            False,
+            cls.cluster.ckb_nodes[0].getClient().url,
+        )
         print("ckb_js_vm_codeHash:", ckb_js_vm_codeHash)
 
     @classmethod
@@ -58,19 +65,27 @@ class TestCkbJsVm(CkbTest):
         cls.cluster.clean_all_nodes()
 
     def test_01_deploy(self):
-        invoke_hash = self.deploy_js_code(self.Config.ACCOUNT_PRIVATE_1,
-                                          f"{get_project_root()}/source/contract/js_vm/spawn-code")
-        self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], invoke_hash, with_unknown=True)
+        invoke_hash = self.deploy_js_code(
+            self.Config.ACCOUNT_PRIVATE_1,
+            f"{get_project_root()}/source/contract/js_vm/spawn-code",
+        )
+        self.Miner.miner_until_tx_committed(
+            self.cluster.ckb_nodes[0], invoke_hash, with_unknown=True
+        )
 
     def deploy_js_code(self, account, code_path):
         js_code_deploy_hash = self.Contract.deploy_ckb_contract(
             account,
             code_path,
-            enable_type_id=True, api_url=self.cluster.ckb_nodes[0].getClient().url
+            enable_type_id=True,
+            api_url=self.cluster.ckb_nodes[0].getClient().url,
         )
-        self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], js_code_deploy_hash, with_unknown=True)
-        js_code_hash = self.Contract.get_ckb_contract_codehash(js_code_deploy_hash, 0, True,
-                                                               self.cluster.ckb_nodes[0].getClient().url)
+        self.Miner.miner_until_tx_committed(
+            self.cluster.ckb_nodes[0], js_code_deploy_hash, with_unknown=True
+        )
+        js_code_hash = self.Contract.get_ckb_contract_codehash(
+            js_code_deploy_hash, 0, True, self.cluster.ckb_nodes[0].getClient().url
+        )
 
         js_code_hash = js_code_hash.replace("0x", "")
         return self.Contract.invoke_ckb_contract(
@@ -81,8 +96,5 @@ class TestCkbJsVm(CkbTest):
             data="0x1234",
             hash_type="data2",
             api_url=self.cluster.ckb_nodes[0].getClient().url,
-            cell_deps=[{
-                "tx_hash": js_code_deploy_hash,
-                "index": "0x0"
-            }]
+            cell_deps=[{"tx_hash": js_code_deploy_hash, "index": "0x0"}],
         )

@@ -21,7 +21,6 @@ class TestRequestLimit(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
-
     def test_request_limit(self):
         """
         1. change ckb_request_limit = 10 in ckb.toml
@@ -40,30 +39,36 @@ class TestRequestLimit(CkbTest):
         with pytest.raises(Exception) as exc_info:
             self.node.getClient().get_cells(
                 {
-                    "script": {"code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                               "hash_type": "type",
-                               "args": "0x"},
+                    "script": {
+                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "type",
+                        "args": "0x",
+                    },
                     "script_type": "lock",
-                    "script_search_mode": "prefix"
+                    "script_search_mode": "prefix",
                 },
                 "asc",
-                "0xff", None
+                "0xff",
+                None,
             )
         expected_error_message = "Invalid params limit must be less than 10"
         assert (
-                expected_error_message in exc_info.value.args[0]
+            expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
         # 3. get_cells(len:10) =>  cells.length = 10
         cells = self.node.getClient().get_cells(
             {
-                "script": {"code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                           "hash_type": "type",
-                           "args": "0x"},
+                "script": {
+                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                    "hash_type": "type",
+                    "args": "0x",
+                },
                 "script_type": "lock",
-                "script_search_mode": "prefix"
+                "script_search_mode": "prefix",
             },
             "asc",
-            "0xa", None
+            "0xa",
+            None,
         )
-        assert len(cells['objects']) == 10
+        assert len(cells["objects"]) == 10

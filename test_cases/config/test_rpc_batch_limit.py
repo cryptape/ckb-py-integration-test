@@ -38,15 +38,15 @@ class TestRpcBatchLimit(CkbTest):
         requestBody = ""
         for i in range(11):
             requestBody = (
-                    requestBody
-                    + """{"jsonrpc": "2.0", "method": "get_block_by_number", "params": ["0x0"], 
+                requestBody
+                + """{"jsonrpc": "2.0", "method": "get_block_by_number", "params": ["0x0"], 
                         "id": "1"},"""
             )
         requestBody = requestBody[:-1]
         requests = (
-                """curl -X POST -H "Content-Type: application/json" -d '["""
-                + str(requestBody)
-                + f"""]' {self.node.rpcUrl} """
+            """curl -X POST -H "Content-Type: application/json" -d '["""
+            + str(requestBody)
+            + f"""]' {self.node.rpcUrl} """
         )
         response = run_command(requests)
         assert "batch size is too large, expect it less than: 10" in response
@@ -55,15 +55,15 @@ class TestRpcBatchLimit(CkbTest):
         requestBody = ""
         for i in range(10):
             requestBody = (
-                    requestBody
-                    + """{"jsonrpc": "2.0", "method": "get_block_by_number", "params": ["0x0"], 
+                requestBody
+                + """{"jsonrpc": "2.0", "method": "get_block_by_number", "params": ["0x0"], 
                                 "id": "1"},"""
             )
         requestBody = requestBody[:-1]
         requests = (
-                """curl -X POST -H "Content-Type: application/json" -d '["""
-                + str(requestBody)
-                + f"""]' {self.node.rpcUrl} """
+            """curl -X POST -H "Content-Type: application/json" -d '["""
+            + str(requestBody)
+            + f"""]' {self.node.rpcUrl} """
         )
         response = run_command(requests)
         assert "batch size is too large, expect it less than: 10" not in response

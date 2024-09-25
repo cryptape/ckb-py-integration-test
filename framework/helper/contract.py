@@ -25,11 +25,11 @@ class CkbContract(ABC):
 
 @exception_use_old_ckb()
 def deploy_ckb_contract(
-        private_key,
-        contract_path,
-        fee_rate=2000,
-        enable_type_id=True,
-        api_url="http://127.0.0.1:8114",
+    private_key,
+    contract_path,
+    fee_rate=2000,
+    enable_type_id=True,
+    api_url="http://127.0.0.1:8114",
 ):
     """
 
@@ -77,7 +77,7 @@ def deploy_ckb_contract(
 
 @exception_use_old_ckb()
 def get_ckb_contract_codehash(
-        tx_hash, tx_index, enable_type_id=True, api_url="http://127.0.0.1:8114"
+    tx_hash, tx_index, enable_type_id=True, api_url="http://127.0.0.1:8114"
 ):
     if enable_type_id:
         type_arg = (
@@ -108,15 +108,15 @@ def get_ckb_contract_codehash(
 
 @exception_use_old_ckb()
 def invoke_ckb_contract(
-        account_private,
-        contract_out_point_tx_hash,
-        contract_out_point_tx_index,
-        type_script_arg,
-        hash_type="type",
-        data="0x",
-        fee=1000,
-        api_url="http://127.0.0.1:8114",
-        cell_deps=[]
+    account_private,
+    contract_out_point_tx_hash,
+    contract_out_point_tx_index,
+    type_script_arg,
+    hash_type="type",
+    data="0x",
+    fee=1000,
+    api_url="http://127.0.0.1:8114",
+    cell_deps=[],
 ):
     """
 
@@ -160,12 +160,12 @@ def invoke_ckb_contract(
             "index": account_live_cells["live_cells"][i]["output_index"],
         }
         input_cell_cap += (
-                float(
-                    account_live_cells["live_cells"][i]["capacity"]
-                    .replace("(CKB)", "")
-                    .strip()
-                )
-                * 100000000
+            float(
+                account_live_cells["live_cells"][i]["capacity"]
+                .replace("(CKB)", "")
+                .strip()
+            )
+            * 100000000
         )
         input_cell_out_points.append(input_cell_out_point)
         if input_cell_cap > 10000000000:
@@ -208,7 +208,9 @@ def invoke_ckb_contract(
             tmp_tx_file,
             api_url,
         )
-        transaction = RPCClient(api_url).get_transaction(input_cell_out_point["tx_hash"])
+        transaction = RPCClient(api_url).get_transaction(
+            input_cell_out_point["tx_hash"]
+        )
         heads.add(transaction["tx_status"]["block_hash"])
     transaction = RPCClient(api_url).get_transaction(contract_out_point_tx_hash)
     heads.add(transaction["tx_status"]["block_hash"])
@@ -240,14 +242,14 @@ def invoke_ckb_contract(
 
 @exception_use_old_ckb()
 def build_invoke_ckb_contract(
-        account_private,
-        contract_out_point_tx_hash,
-        contract_out_point_tx_index,
-        type_script_arg,
-        hash_type="type",
-        data="0x",
-        fee=1000,
-        api_url="http://127.0.0.1:8114",
+    account_private,
+    contract_out_point_tx_hash,
+    contract_out_point_tx_index,
+    type_script_arg,
+    hash_type="type",
+    data="0x",
+    fee=1000,
+    api_url="http://127.0.0.1:8114",
 ):
     """
 
@@ -291,12 +293,12 @@ def build_invoke_ckb_contract(
             "index": account_live_cells["live_cells"][i]["output_index"],
         }
         input_cell_cap += (
-                float(
-                    account_live_cells["live_cells"][i]["capacity"]
-                    .replace("(CKB)", "")
-                    .strip()
-                )
-                * 100000000
+            float(
+                account_live_cells["live_cells"][i]["capacity"]
+                .replace("(CKB)", "")
+                .strip()
+            )
+            * 100000000
         )
         input_cell_out_points.append(input_cell_out_point)
         if input_cell_cap > 10000000000:
@@ -367,8 +369,8 @@ def build_tx_info(tmp_tx_file):
     tx = json.loads(tx_info_str)
     sign_keys = list(tx["signatures"].keys())[0]
     witness = (
-            "0x5500000010000000550000005500000041000000"
-            + tx["signatures"][sign_keys][0][2:]
+        "0x5500000010000000550000005500000041000000"
+        + tx["signatures"][sign_keys][0][2:]
     )
     tx_msg = tx["transaction"]
     tx_msg["witnesses"] = [witness]
