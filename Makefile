@@ -38,7 +38,10 @@ test_cases := \
     test_cases/issue \
     test_cases/tx_pool_refactor \
     test_cases/feature \
-    test_cases/config
+    test_cases/config \
+    test_cases/miner \
+    test_cases/get_fee_rate_statistics
+
 
 test:
 	@failed_cases=; \
