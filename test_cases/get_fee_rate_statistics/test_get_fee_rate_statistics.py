@@ -1,3 +1,5 @@
+import pytest
+
 from framework.basic import CkbTest
 
 
