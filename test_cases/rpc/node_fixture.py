@@ -37,7 +37,7 @@ def get_cluster():
 def get_cluster_indexer():
     nodes = [
         CkbNode.init_dev_by_port(
-            CkbNodeConfigPath.v115,
+            CkbNodeConfigPath.CURRENT_TEST,
             "cluster_indexer/node{i}".format(i=i),
             8114 + i,
             8225 + i,

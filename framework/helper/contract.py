@@ -116,6 +116,7 @@ def invoke_ckb_contract(
     data="0x",
     fee=1000,
     api_url="http://127.0.0.1:8114",
+    cell_deps=[],
 ):
     """
 
@@ -198,6 +199,7 @@ def invoke_ckb_contract(
     tx_init(tmp_tx_file, api_url)
     tx_add_multisig_config(account_address, tmp_tx_file, api_url)
     # add input
+    heads = set()
     for i in range(len(input_cell_out_points)):
         input_cell_out_point = input_cell_out_points[i]
         tx_add_input(
@@ -206,8 +208,15 @@ def invoke_ckb_contract(
             tmp_tx_file,
             api_url,
         )
+        transaction = RPCClient(api_url).get_transaction(
+            input_cell_out_point["tx_hash"]
+        )
+        heads.add(transaction["tx_status"]["block_hash"])
     transaction = RPCClient(api_url).get_transaction(contract_out_point_tx_hash)
-    tx_add_header_dep(transaction["tx_status"]["block_hash"], tmp_tx_file)
+    heads.add(transaction["tx_status"]["block_hash"])
+    for head in heads:
+        print("add header:", head)
+        tx_add_header_dep(head, tmp_tx_file)
     # add output
     tx_add_type_out_put(
         output_cell["type"]["code_hash"],
@@ -219,6 +228,8 @@ def invoke_ckb_contract(
     )
     # add dep
     tx_add_cell_dep(cell_dep["tx_hash"], cell_dep["index"], tmp_tx_file)
+    for cell_dep_tmp in cell_deps:
+        tx_add_cell_dep(cell_dep_tmp["tx_hash"], cell_dep_tmp["index"], tmp_tx_file)
     # sign
     sign_data = tx_sign_inputs(account_private, tmp_tx_file, api_url)
     tx_add_signature(

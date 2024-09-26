@@ -5,15 +5,34 @@ set -e
 # make prod
 # cp target/release/ckb-cli ../source/ckb-cli
 # cd ../
-DEFAULT_BRANCH="develop"
-DEFAULT_URL="https://github.com/nervosnetwork/ckb.git"
+DEFAULT_CKB_BRANCH="develop"
+DEFAULT_CKB_URL="https://github.com/nervosnetwork/ckb.git"
+DEFAULT_BUILD_CKB=false
 
-GitBranch="${GitBranch:-$DEFAULT_BRANCH}"
-GitUrl="${GitUrl:-$DEFAULT_URL}"
+DEFAULT_CKB_CLI_BRANCH="develop"
+DEFAULT_CKB_CLI_URL="https://github.com/nervosnetwork/ckb-cli.git"
+DEFAULT_BUILD_CKB_CLI=false
 
+
+GitCKBBranch="${GitBranch:-$DEFAULT_CKB_BRANCH}"
+GitCKBUrl="${GitUrl:-$DEFAULT_CKB_URL}"
+GitCKBCLIBranch="${CKBCLIGitBranch:-$DEFAULT_CKB_CLI_BRANCH}"
+GitCKBCLIUrl="${CKBCLIGitUrl:-$DEFAULT_CKB_CLI_URL}"
+BUILD_CKB="${BuildCKb:-$DEFAULT_BUILD_CKB}"
+BUILD_CKB_CLI="${BuildCKbCLI:-$DEFAULT_BUILD_CKB_CLI}"
+if [ "$BUILD_CKB" == "true" ]; then
+  git clone -b $GitCKBBranch $GitCKBUrl
+  cd ckb
+  make prod
+  cp target/prod/ckb ../download/0.117.0/ckb
+  cd ../
+fi
 cp download/0.110.2/ckb-cli ./source/ckb-cli-old
+if [ "$BUILD_CKB_CLI" == "true" ]; then
+  git clone -b $GitCKBCLIBranch $GitCKBCLIUrl
+  cd ckb-cli
+  make prod
+  cp target/release/ckb-cli ../source/ckb-cli
+  exit 0
+fi
 cp download/0.117.0/ckb-cli ./source/ckb-cli
-git clone -b $GitBranch $GitUrl
-cd ckb
-make prod
-cp target/prod/ckb ../download/0.117.0/ckb

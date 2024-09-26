@@ -1,5 +1,4 @@
 from framework.basic import CkbTest
-import pytest
 
 
 class TestGetTransaction(CkbTest):
@@ -14,7 +13,7 @@ class TestGetTransaction(CkbTest):
         """
         # 1. start 1 ckb node in tmp/get_transaction/node1 node dir
         cls.node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.develop, "get_transaction/node1", 8120, 8225
+            cls.CkbNodeConfigPath.CURRENT_TEST, "get_transaction/node1", 8120, 8225
         )
         cls.node.prepare(other_ckb_config={"ckb_tx_pool_max_tx_pool_size": "180_000"})
         cls.node.start()
@@ -32,7 +31,6 @@ class TestGetTransaction(CkbTest):
         cls.node.stop()
         cls.node.clean()
 
-    # @pytest.mark.skip("util v118 rc")
     def test_get_transaction_by_tx_index(self):
         """
         1. new tx in block

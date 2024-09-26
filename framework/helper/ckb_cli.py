@@ -1045,3 +1045,26 @@ def sync_state(
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     return json.loads(run_command(cmd))
+
+
+def clear_tx_verify_queue(
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    output_format="json",
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc clear_tx_verify_queue"
+    if raw_data:
+        cmd += " --raw-data"
+    if no_color:
+        cmd += " --no-color"
+    if debug:
+        cmd += " --debug"
+    if local_only:
+        cmd += " --local-only"
+    cmd += f" --output-format {output_format}"
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    return json.loads(run_command(cmd))

@@ -14,6 +14,21 @@ on:
       GitBranch:
         description: 'ckb -git branch'
         default: 'develop'
+      CLIGitUrl:
+        description: 'ckb-cli -git url'
+        default: 'https://github.com/nervosnetwork/ckb-cli.git'
+      CLIGitBranch:
+        description: 'ckb-cli -git branch'
+        default: 'develop'
+      BuildCKb:
+        description: 'build ckb'
+        default: 'true'
+      BuildCKbCLI:
+        description: 'build ckb-cli'
+        default: 'false'
+      TestCases:
+        description: 'test case: ex test_cases/ckb_cli'
+        default: 'all'
 
 permissions:
   contents: read
@@ -30,6 +45,17 @@ jobs:
       with:
         python-version: "3.10"
 
+    - name: Print Input Values
+      run: |
+        echo "**Input Values:**"
+        echo "  GitUrl: ${{ github.event.inputs.GitUrl }}"
+        echo "  GitBranch: ${{ github.event.inputs.GitBranch }}"
+        echo "  CLIGitUrl: ${{ github.event.inputs.CLIGitUrl }}"
+        echo "  CLIGitBranch: ${{ github.event.inputs.CLIGitBranch }}"
+        echo "  BuildCKb: ${{ github.event.inputs.BuildCKb }}"
+        echo "  BuildCKbCLI: ${{ github.event.inputs.BuildCKbCLI }}"
+        echo "  TestCases: ${{ github.event.inputs.TestCases }}"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -40,11 +66,21 @@ jobs:
       env:
         GitUrl: '${{ github.event.inputs.GitUrl }}'
         GitBranch: '${{ github.event.inputs.GitBranch }}'
+        CKBCLIGitUrl: '${{ github.event.inputs.CLIGitUrl }}'
+        CKBCLIGitBranch: '${{ github.event.inputs.CLIGitBranch }}'
+        BuildCKb: '${{ github.event.inputs.BuildCKb }}'
+        BuildCKbCLI: '${{ github.event.inputs.BuildCKbCLI }}'
 
 
     - name: Run tests
-      run: make test
-
+      run: |
+        if [ "${{ env.TestCases }}" == "all" ]; then
+          make test
+        else
+          make develop_test
+        fi
+      env:
+        TestCases:  '${{ github.event.inputs.TestCases }}'
 
     - name: Publish reports
       if: failure()
