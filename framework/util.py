@@ -4,6 +4,7 @@ import time
 import json
 import toml
 import os, re
+import random
 
 
 def to_json(value):
@@ -132,3 +133,10 @@ def read_toml_file(file_path):
     except Exception as e:
         print(f"Error reading TOML file: {e}")
         return None
+
+
+def generate_random_preimage():
+    hash_str = '0x'
+    for _ in range(64):
+        hash_str += hex(random.randint(0, 15))[2:]
+    return hash_str
