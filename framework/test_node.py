@@ -20,6 +20,12 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v118/specs/dev.toml",
         "download/0.118.0",
     )
+    TESTNET = (
+        "source/template/ckb/v118/ckb.toml.j2",
+        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/specs/testnet.toml.j2",
+        "download/0.118.0",
+    )
 
     CURRENT_MAIN = (
         "source/template/ckb/v118/ckb.toml.j2",
