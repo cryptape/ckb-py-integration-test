@@ -30,21 +30,13 @@ class CKBTestnet(CkbTest):
             for i in range(1, 5)
         ]
         cls.cluster = cls.Cluster(nodes)
-        cls.cluster.prepare_all_nodes(other_ckb_spec_config={'ckb_epoch_duration_target': 16})
+        cls.cluster.prepare_all_nodes(
+            other_ckb_spec_config={"ckb_epoch_duration_target": 16}
+        )
         cls.cluster.start_all_nodes()
 
         # 2. link ckb node each other
         cls.cluster.connected_all_nodes()
-        #
-        # # 3. deploy contract
-        # contracts = cls.Contract_util.deploy_contracts(
-        #     cls.Config.ACCOUNT_PRIVATE_1, cls.cluster.ckb_nodes[0]
-        # )
-        # cls.spawn_contract = contracts["SpawnContract"]
-
-        # 4. miner 1000 block
-        # cls.Miner.make_tip_height_number(cls.cluster.ckb_nodes[0], 1000)
-        # cls.Node.wait_cluster_height(cls.cluster, 1000, 100)
 
     @classmethod
     def teardown_class(cls):
@@ -53,6 +45,16 @@ class CKBTestnet(CkbTest):
         cls.cluster.clean_all_nodes()
 
     def test_01(self):
+        """
+        1. generate_epochs(hex(9690))
+        2. get_consensus(0048) == 9690
+        3. get_consensus(0049) == 9690
+        4. miner with 0x1
+        5. transfer data2
+        6. invoke spawn
+        Returns:
+
+        """
         self.cluster.ckb_nodes[0].getClient().get_consensus()
         self.cluster.ckb_nodes[0].client.generate_epochs(hex(9690))
         tip_number = self.cluster.ckb_nodes[0].client.get_tip_block_number()
