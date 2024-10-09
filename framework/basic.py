@@ -3,6 +3,7 @@ from abc import ABC
 import unittest
 import framework.helper.miner
 import framework.helper.ckb_cli
+import framework.helper.ckb_bin
 import framework.helper.contract
 import framework.helper.node
 import framework.helper.contract_util
@@ -17,6 +18,7 @@ from framework.util import get_project_root
 
 class CkbTest(ABC, unittest.TestCase):
     Miner: framework.helper.miner = framework.helper.miner
+    Ckb_bin: framework.helper.ckb_bin = framework.helper.ckb_bin
     Ckb_cli: framework.helper.ckb_cli = framework.helper.ckb_cli
     Contract: framework.helper.contract = framework.helper.contract
     Contract_util: framework.helper.contract_util = framework.helper.contract_util
