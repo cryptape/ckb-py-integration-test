@@ -123,6 +123,7 @@ jobs:
         wget https://github.com/nervosnetwork/ckb/releases/download/${CKB_VERSION}/ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
         tar -zxvf ckb_${CKB_VERSION}_${REL_PKG}.tar.gz
         wget_md5=$(md5sum "ckb_${CKB_VERSION}_${REL_PKG}/ckb" | awk '{print $1}')
+        pwd
         PKG_CONFIG_ALLOW_CROSS=1 CC=gcc CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc CKB_BUILD_TARGET="--target=aarch64-unknown-linux-gnu" make prod_portable
         cd target/aarch64-unknown-linux-gnu/prod
         build_md5=$(md5sum "ckb" | awk '{print $1}')
