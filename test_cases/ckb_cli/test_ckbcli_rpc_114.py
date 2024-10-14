@@ -15,7 +15,7 @@ class TestCkbCliRpc114(CkbTest):
         """
         # 1. start 1 ckb node in tmp/ckb_cli/node dir
         cls.node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "ckb_cli/node", 8314, 8315
+            cls.CkbNodeConfigPath.v119, "ckb_cli/node", 8314, 8315
         )
         cls.node.prepare()
         cls.node.start()
