@@ -1,3 +1,5 @@
+import time
+
 from framework.basic import CkbTest
 from framework.helper.spawn_contract import SpawnContract
 
@@ -64,6 +66,7 @@ class CKBTestnet(CkbTest):
         assert res == 9690
         res = get_epoch_number_by_consensus_response(consensus, "0049")
         assert res == 9690
+        time.sleep(20)
         # 0048 miner with other version block
         for i in range(20):
             self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x1")
