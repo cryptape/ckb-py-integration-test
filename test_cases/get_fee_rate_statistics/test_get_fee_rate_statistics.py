@@ -20,7 +20,6 @@ class TestGetFeeRateStatistics(CkbTest):
         cls.node.clean()
         print("\nTeardown TestClass1")
 
-    @pytest.mark.skip
     def test_01(self):
         # build Tx
         account1 = self.Ckb_cli.util_key_info_by_private_key(
