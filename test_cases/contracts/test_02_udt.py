@@ -20,16 +20,22 @@ class UdtTest(CkbTest):
         cls.node.clean()
 
     def test_01111(self):
-        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_1)
-        account1 = self.Ckb_cli.util_key_info_by_private_key(self.Config.ACCOUNT_PRIVATE_2)
-        account2 = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
+        account = self.Ckb_cli.util_key_info_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1
+        )
+        account1 = self.Ckb_cli.util_key_info_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_2
+        )
+        account2 = self.Ckb_cli.util_key_info_by_private_key(
+            self.Config.MINER_PRIVATE_1
+        )
 
         # deploy
         udtContract = UdtContract()
         udtContract.deploy(self.Config.ACCOUNT_PRIVATE_1, self.node)
         deploy_hash, deploy_index = udtContract.get_deploy_hash_and_index()
         # issue
-        invoke_arg, invoke_data = udtContract.issue(account1['lock_arg'], 100000)
+        invoke_arg, invoke_data = udtContract.issue(account1["lock_arg"], 100000)
         tx_hash = self.Contract.invoke_ckb_contract(
             account_private=self.Config.ACCOUNT_PRIVATE_2,
             contract_out_point_tx_hash=deploy_hash,
@@ -41,16 +47,17 @@ class UdtTest(CkbTest):
             api_url=self.node.getClient().url,
             cell_deps=[],
             input_cells=[],
-            output_lock_arg=account2['lock_arg']
+            output_lock_arg=account2["lock_arg"],
         )
         ret = self.node.getClient().get_transaction(tx_hash)
         print("ret:", ret)
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
-        result = udtContract.list_cell(self.node.getClient(), account1['lock_arg'],
-                                       account2['lock_arg'])
+        result = udtContract.list_cell(
+            self.node.getClient(), account1["lock_arg"], account2["lock_arg"]
+        )
         print("result ret:", result)
         # transfer
-        invoke_arg, invoke_data = udtContract.transfer(account1['lock_arg'], 100000)
+        invoke_arg, invoke_data = udtContract.transfer(account1["lock_arg"], 100000)
         tx_hash = self.Contract.invoke_ckb_contract(
             account_private=self.Config.MINER_PRIVATE_1,
             contract_out_point_tx_hash=deploy_hash,
@@ -61,12 +68,15 @@ class UdtTest(CkbTest):
             fee=1000,
             api_url=self.node.getClient().url,
             cell_deps=[],
-            input_cells=[result[0]['input_cell']],
-            output_lock_arg="0x0000000000000000000000000000000000000000"
+            input_cells=[result[0]["input_cell"]],
+            output_lock_arg="0x0000000000000000000000000000000000000000",
         )
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
         # query
-        result = udtContract.list_cell(self.node.getClient(), account1['lock_arg'],
-                                       "0x0000000000000000000000000000000000000000")
+        result = udtContract.list_cell(
+            self.node.getClient(),
+            account1["lock_arg"],
+            "0x0000000000000000000000000000000000000000",
+        )
         print("result:", result)
-        assert result[0]['balance'] == 100000
+        assert result[0]["balance"] == 100000
