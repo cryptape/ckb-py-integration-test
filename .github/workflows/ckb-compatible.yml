@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-12, macos-14, ubuntu-22.04, ubuntu-22.04-arm64, centos-7, windows-latest]
+        os: [macos-12, macos-14, ubuntu-22.04, ubuntu-22.04-arm64, centos-8, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
@@ -24,7 +24,7 @@ jobs:
             arch: x86
           - os: macos-14
             arch: arm64
-          - os: centos-7
+          - os: centos-8
             arch: x64
           - os: windows-latest
             arch: x64
@@ -70,7 +70,7 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-apple-darwin-portable.zip
               unzip ckb_v0.119.0-rc1_aarch64-apple-darwin-portable.zip
               ;;
-            "centos-7-x64")
+            "centos-8-x64")
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
               tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
               ;;
@@ -100,7 +100,7 @@ jobs:
             "ubuntu-22.04-arm64")
               ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb init 
               ;;
-            "centos-7")
+            "centos-8")
               ./ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable/ckb init 
               ;;
             "macos-12")
