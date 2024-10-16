@@ -44,7 +44,6 @@ jobs:
 
       - name: Download and extract CKB
         run: |
-          mkdir -p ckb
           case "${{ matrix.os }}-${{ matrix.arch }}" in
             "ubuntu-22.04-x64")
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
@@ -80,10 +79,10 @@ jobs:
         run: |
           case "${{ matrix.os }}" in
             "ubuntu-22.04" | "ubuntu-20.04" | "centos-7" | "macos-latest" | "macos-12")
-              ./ckb/ckb run &
+              ./ckb run &
               ;;
             "windows-latest")
-              powershell -Command "./ckb/ckb.exe run"
+              powershell -Command "./ckb.exe run"
               ;;
             *)
               echo "Unsupported OS: ${{ matrix.os }}"
