@@ -1,12 +1,13 @@
 name: CKB Start Validation
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    push:
+      branches:
+        - develop
+    pull_request:
+      branches:
+        - develop
+    workflow_dispatch:
 
 jobs:
   ckb-start-validation:
