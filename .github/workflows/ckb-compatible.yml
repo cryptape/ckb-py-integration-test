@@ -48,6 +48,8 @@ jobs:
             "ubuntu-22.04-x64")
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
               tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
+              pwd 
+              ls
               ;;
             "ubuntu-22.04-arm64")
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
