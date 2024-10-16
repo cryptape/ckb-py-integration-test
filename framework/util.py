@@ -4,6 +4,14 @@ import time
 import json
 import toml
 import os, re
+import struct
+
+import hashlib
+
+H256_ZEROS = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+U128_MIN_COMPATIBLE = 0  # Adjust according to your definition
+U128_MAX_COMPATIBLE = 2**128 - 1
 import random
 
 
@@ -135,8 +143,64 @@ def read_toml_file(file_path):
         return None
 
 
+def to_big_uint128_le_compatible(num):
+    if num < U128_MIN_COMPATIBLE:
+        raise ValueError(f"u128 {num} too small")
+
+    if num > U128_MAX_COMPATIBLE:
+        raise ValueError(f"u128 {num} too large")
+
+    buf = bytearray(16)
+
+    for i in range(4):
+        buf[i * 4 : i * 4 + 4] = struct.pack("<I", num & 0xFFFFFFFF)
+        num >>= 32
+    return "0x" + buf.hex()
+
+
+def to_int_from_big_uint128_le(hex_str):
+    # Strip the '0x' prefix if present
+    if hex_str.startswith("0x"):
+        hex_str = hex_str[2:]
+
+    # Convert the hex string into a byte array (16 bytes for uint128)
+    buf = bytearray.fromhex(hex_str)
+
+    # Reverse the byte array to convert from little-endian to big-endian
+    buf.reverse()
+
+    # Convert the byte array into an integer
+    result = int.from_bytes(buf, byteorder="big")
+    print("to_int_from_big_uint128_le:", hex_str, " result ", result)
+
+    return result
+
+
+def ckb_hasher():
+    return hashlib.blake2b(digest_size=32, person=b"ckb-default-hash")
+
+
+def ckb_hash(message):
+    hasher = ckb_hasher()
+    hasher.update(bytes.fromhex(message.replace("0x", "")))
+    return "0x" + hasher.hexdigest()
+
+
+def ckb_hash_script(arg):
+    arg = arg.replace("0x", "")
+    pack_lock = f"0x490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000{arg}"
+    return ckb_hash(pack_lock)
+  
+  
 def generate_random_preimage():
     hash_str = "0x"
     for _ in range(64):
         hash_str += hex(random.randint(0, 15))[2:]
     return hash_str
+
+  
+if __name__ == "__main__":
+    ret = to_big_uint128_le_compatible(100000)
+    ret1 = to_int_from_big_uint128_le(ret)
+    print(ret1)
+
