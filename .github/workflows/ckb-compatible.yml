@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11, macos-12, ubuntu-22.04, ubuntu-22.04-arm64, centos-7, windows-latest]
+        os: [macos-11, macos-14, ubuntu-22.04, ubuntu-22.04-arm64, centos-7, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
