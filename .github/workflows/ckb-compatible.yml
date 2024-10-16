@@ -43,8 +43,12 @@ jobs:
         shell: pwsh
         run: |
           $env:CKB_RELEASE_URL = "https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1"
-          echo "CKB_RELEASE_URL=$env:CKB_RELEASE_URL" | Out-File -FilePath $GITHUB_ENV -Append
-
+          # 确保 GITHUB_ENV 被正确设置
+          if ($env:GITHUB_ENV) {
+              echo "CKB_RELEASE_URL=$env:CKB_RELEASE_URL" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } else {
+              Write-Error "GITHUB_ENV is not set."
+          }
       - name: Download and extract CKB
         run: |
           mkdir -p ckb
@@ -83,22 +87,22 @@ jobs:
         run: |
           case "${{ matrix.os }}" in
             "ubuntu-22.04")
-              ./ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu/ckb run &
+              ./ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu/ckb init &
               ;;
             "ubuntu-22.04-arm64")
-              ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb run &
+              ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb init &
               ;;
             "centos-7")
-              ./ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable/ckb run &
+              ./ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable/ckb init &
               ;;
             "macos-11")
-              ./ckb_v0.119.0-rc1_x86_64-apple-darwin-portable/ckb run &
+              ./ckb_v0.119.0-rc1_x86_64-apple-darwin-portable/ckb init &
               ;;
            "macos-12")
-              ./ckb_v0.119.0-rc1_aarch64-apple-darwin-portable/ckb run &
+              ./ckb_v0.119.0-rc1_aarch64-apple-darwin-portable/ckb init &
               ;;              
             "windows-latest")
-              powershell -Command "./ckb_v0.119.0-rc1_windows_x86_64/ckb.exe run"
+              powershell -Command "./ckb_v0.119.0-rc1_windows_x86_64/ckb.exe init"
               ;;
             *)
               echo "Unsupported OS: ${{ matrix.os }}"
