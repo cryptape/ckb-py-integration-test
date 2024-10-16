@@ -33,14 +33,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up environment variables
+      - name: Set CKB Release URL
         run: |
-            if ($env:GITHUB_WORKFLOW -eq "windows-latest") {
-                $env:CKB_RELEASE_URL = "https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1"
-            } else {
-                $CKB_RELEASE_URL = "https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1"
-                echo "CKB_RELEASE_URL=$CKB_RELEASE_URL" | Out-File -FilePath $GITHUB_ENV -Append
-            }
+          echo "CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1" >> $GITHUB_ENV
+        shell: bash  # Linux 和 macOS 使用 bash
+
+      - name: Set CKB Release URL for Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:CKB_RELEASE_URL = "https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1"
+          echo "CKB_RELEASE_URL=$env:CKB_RELEASE_URL" | Out-File -FilePath $GITHUB_ENV -Append
 
       - name: Download and extract CKB
         run: |
