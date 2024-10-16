@@ -83,8 +83,8 @@ jobs:
       - name: Download and extract CKB (Windows)
         if: runner.os == 'Windows'  # 只在 Windows 系统上运行
         run: |
-          curl -LO $env:CKB_RELEASE_URL/ckb_v0.119.0-rc1_windows_x86_64.zip
-          Expand-Archive -Path ckb_v0.119.0-rc1_windows_x86_64.zip -DestinationPath .
+          curl -LO $env:CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip
+          Expand-Archive -Path ckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip -DestinationPath .
 
       - name: Run CKB node (Linux and macOS)
         if: runner.os != 'Windows'  # 只在非 Windows 系统上运行
@@ -111,7 +111,18 @@ jobs:
               ;;
           esac
 
+          
+          if [ $? -ne 0 ]; then
+            echo "CKB init failed on ${{ matrix.os }} ${{ matrix.arch }}"
+            exit 1
+          else
+            echo "CKB init succeeded on ${{ matrix.os }} ${{ matrix.arch }}"
+          fi
       - name: Run CKB node (Windows)
         if: runner.os == 'Windows'  # 只在 Windows 系统上运行
         run: |
-          powershell -Command "./ckb_v0.119.0-rc1_windows_x86_64/ckb.exe init"
+          powershell -Command "./ckb_v0.119.0-rc1_x86_64-pc-windows-msvc/ckb.exe init"
+          if ($LASTEXITCODE -ne 0) {
+              Write-Error "CKB init failed."
+          }
+        shell: pwsh
