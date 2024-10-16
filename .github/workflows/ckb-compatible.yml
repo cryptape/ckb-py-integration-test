@@ -11,7 +11,7 @@ on:
 
 jobs:
   ckb-start-validation:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.arch }}
     strategy:
       fail-fast: false
       matrix:
@@ -119,12 +119,7 @@ jobs:
           esac
 
 
-          if [ $? -ne 0 ]; then
-            echo "CKB init failed on ${{ matrix.os }} ${{ matrix.arch }}"
-            exit 1
-          else
-            echo "CKB init succeeded on ${{ matrix.os }} ${{ matrix.arch }}"
-          fi
+
       - name: Run CKB node (Windows)
         if: runner.os == 'Windows'  
         run: |
