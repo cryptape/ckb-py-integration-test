@@ -15,12 +15,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, macos-14, ubuntu-22.04, centos-8, windows-latest]
+        os: [macos-12, macos-14, ubuntu-22.04,ubuntu-22.04-arm, centos-8, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
-        #   - os: ubuntu-22.04
-        #     arch: arm64
+          - os: ubuntu-22.04-arm
+            arch: arm64
+            runs-on: [self-hosted,ubuntu-22.04-arm,ARM64,Linux]
           - os: macos-12
             arch: x86
           - os: macos-14
@@ -61,10 +62,10 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
               tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
               ;;
-            # "ubuntu-22.04-arm64")
-            #   curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
-            #   tar -xzf ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
-            #   ;;
+            "ubuntu-22.04-arm")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
+              tar -xzf ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
+              ;;
             "macos-12-x86")
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-apple-darwin-portable.zip
               unzip ckb_v0.119.0-rc1_x86_64-apple-darwin-portable.zip
@@ -100,9 +101,9 @@ jobs:
             "ubuntu-22.04")
               ./ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu/ckb init 
               ;;
-            # "ubuntu-22.04-arm64")
-            #   ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb init 
-            #   ;;
+            "ubuntu-22.04-arm")
+              ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb init 
+              ;;
             "centos-8")
               ./ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable/ckb init 
               ;;
