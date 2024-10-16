@@ -89,21 +89,25 @@ jobs:
       - name: Run CKB node (Linux and macOS)
         if: runner.os != 'Windows'  # 只在非 Windows 系统上运行
         run: |
+          # 打印系统 OS 和架构
+          echo "Current OS: $(uname -s)"
+          echo "Current Architecture: $(uname -m)"
+
           case "${{ matrix.os }}" in
             "ubuntu-22.04")
-              ./ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu/ckb init &
+              ./ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu/ckb init 
               ;;
             "ubuntu-22.04-arm64")
-              ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb init &
+              ./ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu/ckb init 
               ;;
             "centos-7")
-              ./ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable/ckb init &
+              ./ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable/ckb init 
               ;;
             "macos-11")
-              ./ckb_v0.119.0-rc1_x86_64-apple-darwin-portable/ckb init &
+              ./ckb_v0.119.0-rc1_x86_64-apple-darwin-portable/ckb init 
               ;;
             "macos-12")
-              ./ckb_v0.119.0-rc1_aarch64-apple-darwin-portable/ckb init &
+              ./ckb_v0.119.0-rc1_aarch64-apple-darwin-portable/ckb init 
               ;;              
             *)
               echo "Unsupported OS: ${{ matrix.os }}"
@@ -111,7 +115,7 @@ jobs:
               ;;
           esac
 
-          
+
           if [ $? -ne 0 ]; then
             echo "CKB init failed on ${{ matrix.os }} ${{ matrix.arch }}"
             exit 1
