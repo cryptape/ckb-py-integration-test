@@ -22,7 +22,7 @@ jobs:
             arch: arm64
           - os: macos-11
             arch: x86
-          - os: macos-12
+          - os: macos-14
             arch: arm64
           - os: centos-7
             arch: x64
@@ -66,7 +66,7 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-apple-darwin-portable.zip
               unzip ckb_v0.119.0-rc1_x86_64-apple-darwin-portable.zip
               ;;
-            "macos-12-arm64")
+            "macos-14-arm64")
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-apple-darwin-portable.zip
               unzip ckb_v0.119.0-rc1_aarch64-apple-darwin-portable.zip
               ;;
@@ -106,7 +106,7 @@ jobs:
             "macos-11")
               ./ckb_v0.119.0-rc1_x86_64-apple-darwin-portable/ckb init 
               ;;
-            "macos-12")
+            "macos-14")
               ./ckb_v0.119.0-rc1_aarch64-apple-darwin-portable/ckb init 
               ;;              
             *)
