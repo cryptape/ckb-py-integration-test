@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, macos-14, ubuntu-22.04, centos-8, windows-latest]
+        os: [macos-12, macos-14, ubuntu-22.04,ubuntu-22.04-arm64, centos-8, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
@@ -27,8 +27,10 @@ jobs:
             arch: arm64
           - os: centos-8
             arch: x64
+            runs-on: [self-hosted,centos8]
           - os: windows-latest
             arch: x64
+            
 
     steps:
       - name: Checkout code
@@ -52,7 +54,7 @@ jobs:
           }
 
       - name: Download and extract CKB (Linux and macOS)
-        if: runner.os != 'Windows'  # 只在非 Windows 系统上运行
+        if: runner.os != 'Windows'  
         run: |
           case "${{ matrix.os }}-${{ matrix.arch }}" in
             "ubuntu-22.04-x64")
@@ -82,15 +84,15 @@ jobs:
           esac
 
       - name: Download and extract CKB (Windows)
-        if: runner.os == 'Windows'  # 只在 Windows 系统上运行
+        if: runner.os == 'Windows'  
         run: |
           curl -LO $env:CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip
           Expand-Archive -Path ckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip -DestinationPath .
 
       - name: Run CKB node (Linux and macOS)
-        if: runner.os != 'Windows'  # 只在非 Windows 系统上运行
+        if: runner.os != 'Windows'  
         run: |
-          # 打印系统 OS 和架构
+      
           echo "Current OS: $(uname -s)"
           echo "Current Architecture: $(uname -m)"
 
@@ -124,7 +126,7 @@ jobs:
             echo "CKB init succeeded on ${{ matrix.os }} ${{ matrix.arch }}"
           fi
       - name: Run CKB node (Windows)
-        if: runner.os == 'Windows'  # 只在 Windows 系统上运行
+        if: runner.os == 'Windows'  
         run: |
           powershell -Command "./ckb_v0.119.0-rc1_x86_64-pc-windows-msvc/ckb.exe init"
           if ($LASTEXITCODE -ne 0) {
