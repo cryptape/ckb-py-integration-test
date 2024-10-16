@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, macos-14, ubuntu-22.04,ubuntu-22.04-arm64, centos-8, windows-latest]
+        os: [macos-12, macos-14, ubuntu-22.04-x64,ubuntu-22.04-arm64, centos-8, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
@@ -97,7 +97,7 @@ jobs:
           echo "Current Architecture: $(uname -m)"
 
           case "${{ matrix.os }}" in
-            "ubuntu-22.04")
+            "ubuntu-22.04-x64")
               ./ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu/ckb init 
               ;;
             "ubuntu-22.04-arm64")
