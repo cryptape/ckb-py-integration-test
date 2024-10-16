@@ -1,13 +1,13 @@
 name: CKB Start Validation
 
 on:
-    push:
-      branches:
-        - develop
-    pull_request:
-      branches:
-        - develop
-    workflow_dispatch: 
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch: 
 
 jobs:
   ckb-start-validation:
@@ -49,7 +49,9 @@ jobs:
           } else {
               Write-Error "GITHUB_ENV is not set."
           }
-      - name: Download and extract CKB
+
+      - name: Download and extract CKB (Linux and macOS)
+        if: runner.os != 'Windows'  # 只在非 Windows 系统上运行
         run: |
           case "${{ matrix.os }}-${{ matrix.arch }}" in
             "ubuntu-22.04-x64")
@@ -72,17 +74,20 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
               tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
               ;;
-            "windows-latest-x64")
-              curl -LO $env:CKB_RELEASE_URL/ckb_v0.119.0-rc1_windows_x86_64.zip
-              Expand-Archive -Path ckb_v0.119.0-rc1_windows_x86_64.zip -DestinationPath .
-              ;;
             *)
               echo "Unsupported OS or architecture: ${{ matrix.os }} ${{ matrix.arch }}"
               exit 1
               ;;
           esac
 
-      - name: Run CKB node
+      - name: Download and extract CKB (Windows)
+        if: runner.os == 'Windows'  # 只在 Windows 系统上运行
+        run: |
+          curl -LO $env:CKB_RELEASE_URL/ckb_v0.119.0-rc1_windows_x86_64.zip
+          Expand-Archive -Path ckb_v0.119.0-rc1_windows_x86_64.zip -DestinationPath .
+
+      - name: Run CKB node (Linux and macOS)
+        if: runner.os != 'Windows'  # 只在非 Windows 系统上运行
         run: |
           case "${{ matrix.os }}" in
             "ubuntu-22.04")
@@ -97,16 +102,16 @@ jobs:
             "macos-11")
               ./ckb_v0.119.0-rc1_x86_64-apple-darwin-portable/ckb init &
               ;;
-           "macos-12")
+            "macos-12")
               ./ckb_v0.119.0-rc1_aarch64-apple-darwin-portable/ckb init &
               ;;              
-            "windows-latest")
-              powershell -Command "./ckb_v0.119.0-rc1_windows_x86_64/ckb.exe init"
-              ;;
             *)
               echo "Unsupported OS: ${{ matrix.os }}"
               exit 1
               ;;
           esac
 
-  
+      - name: Run CKB node (Windows)
+        if: runner.os == 'Windows'  # 只在 Windows 系统上运行
+        run: |
+          powershell -Command "./ckb_v0.119.0-rc1_windows_x86_64/ckb.exe init"
