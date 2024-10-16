@@ -12,6 +12,7 @@ H256_ZEROS = "0x0000000000000000000000000000000000000000000000000000000000000000
 
 U128_MIN_COMPATIBLE = 0  # Adjust according to your definition
 U128_MAX_COMPATIBLE = 2**128 - 1
+import random
 
 
 def to_json(value):
@@ -189,9 +190,17 @@ def ckb_hash_script(arg):
     arg = arg.replace("0x", "")
     pack_lock = f"0x490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000{arg}"
     return ckb_hash(pack_lock)
+  
+  
+def generate_random_preimage():
+    hash_str = "0x"
+    for _ in range(64):
+        hash_str += hex(random.randint(0, 15))[2:]
+    return hash_str
 
-
+  
 if __name__ == "__main__":
     ret = to_big_uint128_le_compatible(100000)
     ret1 = to_int_from_big_uint128_le(ret)
     print(ret1)
+
