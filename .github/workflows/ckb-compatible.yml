@@ -78,12 +78,25 @@ jobs:
       - name: Run CKB node
         run: |
           case "${{ matrix.os }}" in
+            "ubuntu-22.04")
+              ./ckb/ckb run &
+              ;;
+            "ubuntu-20.04")
+              ./ckb/ckb run &
+              ;;
+            "centos-7")
+              ./ckb/ckb run &
+              ;;
+            "macos-latest")
+              ./ckb/ckb run &
+              ;;
             "windows-latest")
-              ./ckb/ckb.exe run 
+              ./ckb/ckb.exe run &
+              ;;
             *)
-              ./ckb/ckb run
+              echo "Unsupported OS: ${{ matrix.os }}"
+              exit 1
               ;;
           esac
-
 
   
