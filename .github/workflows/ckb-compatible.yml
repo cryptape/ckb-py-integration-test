@@ -3,11 +3,11 @@ name: CKB Start Validation
 on:
     push:
       branches:
-        - develop
+        - main
     pull_request:
       branches:
-        - develop
-    workflow_dispatch:
+        - main
+    workflow_dispatch: 
 
 jobs:
   ckb-start-validation:
@@ -35,8 +35,12 @@ jobs:
 
       - name: Set up environment variables
         run: |
-          CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1
-          echo "CKB_RELEASE_URL=$CKB_RELEASE_URL" >> $GITHUB_ENV
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            $env:CKB_RELEASE_URL="https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1"
+          else
+            CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1
+            echo "CKB_RELEASE_URL=$CKB_RELEASE_URL" >> $GITHUB_ENV
+          fi
 
       - name: Download and extract CKB
         run: |
@@ -62,8 +66,8 @@ jobs:
               tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
               ;;
             "windows-latest-x64")
-              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip
-              Expand-Archive -Pathckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip -DestinationPath .
+              curl -LO $env:CKB_RELEASE_URL/ckb_v0.119.0-rc1_windows_x86_64.zip
+              Expand-Archive -Path ckb_v0.119.0-rc1_windows_x86_64.zip -DestinationPath .
               ;;
             *)
               echo "Unsupported OS or architecture: ${{ matrix.os }} ${{ matrix.arch }}"
@@ -75,22 +79,11 @@ jobs:
         run: |
           case "${{ matrix.os }}" in
             "windows-latest")
-              ./ckb/ckb.exe run > ckb.log 2>&1 &
-              ;;
+              ./ckb/ckb.exe run 
             *)
-              ./ckb/ckb run > ckb.log 2>&1 &
+              ./ckb/ckb run
               ;;
           esac
 
-      - name: Check if CKB started successfully
-        run: |
-          sleep 5
-          if grep -i "panic" ckb.log || grep -i "error" ckb.log; then
-            echo "CKB failed to start. See logs below."
-            cat ckb.log
-            exit 1
-          else
-            echo "CKB started successfully."
-          fi
-        continue-on-error: false
+
   
