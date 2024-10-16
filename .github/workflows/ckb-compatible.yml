@@ -1,0 +1,95 @@
+name: CKB Start Validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ckb-start-validation:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-11, macos-12, ubuntu-22.04, ubuntu-22.04-arm64, centos-7, windows-latest]
+        include:
+          - os: ubuntu-22.04
+            arch: x64
+          - os: ubuntu-22.04-arm64
+            arch: arm64
+          - os: macos-11
+            arch: x86
+          - os: macos-12
+            arch: arm64
+          - os: centos-7
+            arch: x64
+          - os: windows-latest
+            arch: x64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up environment variables
+        run: |
+          CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/v1.119.0-rc1
+          echo "CKB_RELEASE_URL=$CKB_RELEASE_URL" >> $GITHUB_ENV
+
+      - name: Download and extract CKB
+        run: |
+          case "${{ matrix.os }}-${{ matrix.arch }}" in
+            "ubuntu-22.04-x64")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
+              tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-linux-gnu.tar.gz
+              ;;
+            "ubuntu-22.04-arm64")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
+              tar -xzf ckb_v0.119.0-rc1_aarch64-unknown-linux-gnu.tar.gz
+              ;;
+            "macos-11-x86")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-apple-darwin-portable.zip
+              unzip ckb_v0.119.0-rc1_x86_64-apple-darwin-portable.zip
+              ;;
+            "macos-12-arm64")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_aarch64-apple-darwin-portable.zip
+              unzip ckb_v0.119.0-rc1_aarch64-apple-darwin-portable.zip
+              ;;
+            "centos-7-x64")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
+              tar -xzf ckb_v0.119.0-rc1_x86_64-unknown-centos-gnu-portable.tar.gz
+              ;;
+            "windows-latest-x64")
+              curl -LO $CKB_RELEASE_URL/ckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip
+              Expand-Archive -Pathckb_v0.119.0-rc1_x86_64-pc-windows-msvc.zip -DestinationPath .
+              ;;
+            *)
+              echo "Unsupported OS or architecture: ${{ matrix.os }} ${{ matrix.arch }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Run CKB node
+        run: |
+          case "${{ matrix.os }}" in
+            "windows-latest")
+              ./ckb/ckb.exe run > ckb.log 2>&1 &
+              ;;
+            *)
+              ./ckb/ckb run > ckb.log 2>&1 &
+              ;;
+          esac
+
+      - name: Check if CKB started successfully
+        run: |
+          sleep 5
+          if grep -i "panic" ckb.log || grep -i "error" ckb.log; then
+            echo "CKB failed to start. See logs below."
+            cat ckb.log
+            exit 1
+          else
+            echo "CKB started successfully."
+          fi
+
+  
