@@ -35,7 +35,7 @@ jobs:
 
       - name: Set up environment variables
         run: |
-          CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/v1.119.0-rc1
+          CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/v0.119.0-rc1
           echo "CKB_RELEASE_URL=$CKB_RELEASE_URL" >> $GITHUB_ENV
 
       - name: Download and extract CKB
@@ -92,5 +92,5 @@ jobs:
           else
             echo "CKB started successfully."
           fi
-
+        continue-on-error: false
   
