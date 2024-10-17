@@ -11,6 +11,7 @@ from framework.rpc import RPCClient
 import shutil
 import telnetlib
 from websocket import create_connection, WebSocket
+import toml
 
 
 class CkbNodeConfigPath(Enum):
@@ -18,6 +19,13 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/v118/specs/dev.toml",
+        "download/0.119.0",
+    )
+
+    CURRENT_FIBER = (
+        "source/template/ckb/v118/ckb.toml.j2",
+        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/ckb/fiber/dev.toml",
         "download/0.119.0",
     )
     TESTNET = (
@@ -345,6 +353,13 @@ class CkbNode:
 
     def version(self):
         pass
+
+    def list_hashes(self):
+        ret = run_command(
+            "cd {ckb_dir} && ./ckb list-hashes".format(ckb_dir=self.ckb_dir)
+        )
+        data = toml.loads(ret)
+        return data
 
     def subscribe_telnet(self, topic, other_url=None) -> telnetlib.Telnet:
         # new_tip_header | new_tip_block | new_transaction | proposed_transaction | rejected_transaction

@@ -72,6 +72,15 @@ class FiberRPCClient:
     def send_payment(self, param):
         return self.call("send_payment", [param])
 
+    def node_info(self):
+        return self.call("node_info", [{}])
+
+    def graph_nodes(self):
+        return self.call("graph_nodes", [{}])
+
+    def graph_channels(self):
+        return self.call("graph_channels", [{}])
+
     def call(self, method, params):
         headers = {"content-type": "application/json"}
         data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}

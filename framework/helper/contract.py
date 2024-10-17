@@ -185,21 +185,51 @@ def invoke_ckb_contract(
     # get output_cells.cap = input_cell.cap - fee
     #  "capacity": "21685.0 (CKB)",
     output_cell_capacity = input_cell_cap - fee
-
-    output_cell = {
-        "capacity": hex(int(output_cell_capacity)),
-        # rand ckb address for pass ckb-cli check lock address
-        "lock": {
-            "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-            "hash_type": "type",
-            "args": output_lock_arg,
-        },
-        "type": {
-            "code_hash": contract_code_hash,
-            "hash_type": hash_type,
-            "args": type_script_arg,
-        },
-    }
+    output_cells = []
+    if output_cell_capacity > 1000 * 00000000:
+        print("output_cell_capacity to big ")
+        output_cell = {
+            "capacity": hex(int(500 * 100000000)),
+            # rand ckb address for pass ckb-cli check lock address
+            "lock": {
+                "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                "hash_type": "type",
+                "args": output_lock_arg,
+            },
+            "type": {
+                "code_hash": contract_code_hash,
+                "hash_type": hash_type,
+                "args": type_script_arg,
+            },
+        }
+        output_cells.append(output_cell)
+        output_cells.append(
+            {
+                "capacity": hex(int(output_cell_capacity - 500 * 100000000)),
+                # rand ckb address for pass ckb-cli check lock address
+                "lock": {
+                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                    "hash_type": "type",
+                    "args": output_lock_arg,
+                },
+            }
+        )
+    else:
+        output_cell = {
+            "capacity": hex(int(output_cell_capacity)),
+            # rand ckb address for pass ckb-cli check lock address
+            "lock": {
+                "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                "hash_type": "type",
+                "args": output_lock_arg,
+            },
+            "type": {
+                "code_hash": contract_code_hash,
+                "hash_type": hash_type,
+                "args": type_script_arg,
+            },
+        }
+        output_cells.append(output_cell)
     # add dep
     cell_dep = {
         "tx_hash": contract_out_point_tx_hash,
@@ -229,11 +259,13 @@ def invoke_ckb_contract(
         print("add header:", head)
         tx_add_header_dep(head, tmp_tx_file)
     # add output
-    tx_add_output(
-        output_cell,
-        data,
-        tmp_tx_file,
-    )
+    for output_cell in output_cells:
+        tx_add_output(
+            output_cell,
+            data,
+            tmp_tx_file,
+        )
+        data = "0x"
     # add dep
     tx_add_cell_dep(cell_dep["tx_hash"], cell_dep["index"], tmp_tx_file)
     for cell_dep_tmp in cell_deps:

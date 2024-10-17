@@ -78,12 +78,12 @@ def create_config_file(config_values, template_path, output_file):
         f.write(output)
 
 
-def run_command(cmd, check_exit_code=True):
+def run_command(cmd, check_exit_code=True, env=None):
     if cmd[-1] == "&":
         cmd1 = "{cmd} echo $! > pid.txt".format(cmd=cmd)
         print("cmd:{cmd}".format(cmd=cmd1))
 
-        process = subprocess.Popen(cmd1, shell=True)
+        process = subprocess.Popen(cmd1, shell=True, env=env)
         time.sleep(1)
         print("process PID:", process.pid)
         with open("pid.txt", "r") as f:
@@ -101,7 +101,7 @@ def run_command(cmd, check_exit_code=True):
 
     print("cmd:{cmd}".format(cmd=cmd))
     process = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=env
     )
     stdout, stderr = process.communicate()
     exit_code = process.returncode
@@ -190,17 +190,16 @@ def ckb_hash_script(arg):
     arg = arg.replace("0x", "")
     pack_lock = f"0x490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000{arg}"
     return ckb_hash(pack_lock)
-  
-  
+
+
 def generate_random_preimage():
     hash_str = "0x"
     for _ in range(64):
         hash_str += hex(random.randint(0, 15))[2:]
     return hash_str
 
-  
+
 if __name__ == "__main__":
     ret = to_big_uint128_le_compatible(100000)
     ret1 = to_int_from_big_uint128_le(ret)
     print(ret1)
-

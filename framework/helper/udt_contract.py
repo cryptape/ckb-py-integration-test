@@ -17,23 +17,30 @@ class UdtContract(CkbContract):
         self.contract_tx_index = contract_tx_index
         if contract_hash is None:
             self.deployed = False
+        else:
+            self.deployed = True
         self.contract_path = UDT_CONTRACT_PATH
         self.method = {"demo": {"args": "0x", "data": "0x"}}
 
     def deploy(self, account_private, node: CkbNode):
         if self.deployed:
             return
-        self.contract_path = deploy_ckb_contract(
+        self.contract_hash = deploy_ckb_contract(
             account_private, self.contract_path, api_url=node.getClient().url
         )
         self.contract_tx_index = 0
-        miner_until_tx_committed(node, self.contract_path)
+        miner_until_tx_committed(node, self.contract_hash)
         self.deployed = True
 
     def get_deploy_hash_and_index(self) -> (str, int):
         if not self.deployed:
             raise Exception("pls deploy first")
-        return self.contract_path, self.contract_tx_index
+        return self.contract_hash, self.contract_tx_index
+
+    def get_code_hash(self, type_id, api):
+        return get_ckb_contract_codehash(
+            self.contract_hash, self.contract_tx_index, type_id, api
+        )
 
     @classmethod
     def issue(cls, own_arg, amount) -> (str, str):
@@ -48,7 +55,7 @@ class UdtContract(CkbContract):
 
     def list_cell(self, client, own_arg, query_arg):
         code_hash = get_ckb_contract_codehash(
-            self.contract_path,
+            self.contract_hash,
             self.contract_tx_index,
             enable_type_id=True,
             api_url=client.url,
@@ -82,6 +89,7 @@ class UdtContract(CkbContract):
                         "index": int(cell["out_point"]["index"], 16),
                     },
                     "balance": to_int_from_big_uint128_le(cell["output_data"]),
+                    "ckb": int(cell["output"]["capacity"], 16),
                 }
             )
         return info
