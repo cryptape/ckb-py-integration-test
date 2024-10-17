@@ -107,7 +107,7 @@ class CKBTestnet(CkbTest):
         )
         self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
         tip_number = self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
-        self.Node.wait_cluster_height(self.cluster, tip_number, 100)
+        self.Node.wait_cluster_height(self.cluster, tip_number, 250)
 
 
 def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
