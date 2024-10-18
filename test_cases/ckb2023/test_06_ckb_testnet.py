@@ -15,8 +15,6 @@ class CKBTestnet(CkbTest):
         """
         1. star 4 node in tmp/cluster/hardFork dir
         2. link ckb node each other
-        3. deploy contract
-        4. miner 1000 block
         Returns:
 
         """
