@@ -56,7 +56,9 @@ class CKBTestnet(CkbTest):
 
         """
         self.cluster.ckb_nodes[0].getClient().get_consensus()
-        self.cluster.ckb_nodes[0].client.generate_epochs(hex(9690))
+        self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 20000)
+        # generate_epochs will cause HeadersIsInvalid
+        # self.cluster.ckb_nodes[0].client.generate_epochs(hex(9690))
         tip_number = self.cluster.ckb_nodes[0].client.get_tip_block_number()
         print("tip number:", tip_number)
         consensus = self.cluster.ckb_nodes[0].getClient().get_consensus()
@@ -64,7 +66,7 @@ class CKBTestnet(CkbTest):
         assert res == 9690
         res = get_epoch_number_by_consensus_response(consensus, "0049")
         assert res == 9690
-        time.sleep(20)
+        time.sleep(5)
         # 0048 miner with other version block
         for i in range(20):
             self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x1")
@@ -105,7 +107,7 @@ class CKBTestnet(CkbTest):
         )
         self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
         tip_number = self.cluster.ckb_nodes[0].getClient().get_tip_block_number()
-        # self.Node.wait_cluster_height(self.cluster, tip_number, 250)
+        self.Node.wait_cluster_height(self.cluster, tip_number, 250)
 
 
 def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
