@@ -88,6 +88,7 @@ lock.hash_type = "type"
 
 
 [params]
+epoch_duration_target = {{ ckb_epoch_duration_target | default(8) }}
 genesis_epoch_length = {{ ckb_params_genesis_epoch_length | default(1) }}
 permanent_difficulty_in_dummy = true
 

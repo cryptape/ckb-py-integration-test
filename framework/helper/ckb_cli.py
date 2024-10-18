@@ -428,6 +428,20 @@ def tx_info(tx_file_path, api_url="http://127.0.0.1:8114"):
     return run_command(cmd)
 
 
+def tx_add_output(output, out_put_data, tx_file):
+    with open(tx_file, "r") as file:
+        tx_info_str = file.read()
+
+    with open(tx_file, "w") as f:
+        tx = json.loads(tx_info_str)
+        tx["transaction"]["outputs"].append(output)
+        tx["transaction"]["outputs_data"].append(out_put_data)
+
+        tx_info_str = json.dumps(tx, indent=4)
+        f.write(tx_info_str)
+    pass
+
+
 def tx_add_type_out_put(
     code_hash, hash_type, arg, capacity_hex, out_put_data, tx_file, with_type=True
 ):

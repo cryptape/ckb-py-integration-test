@@ -10,11 +10,9 @@ from framework.rpc import RPCClient
 
 class CkbContract(ABC):
 
-    @abstractmethod
     def deploy(self, account_private, node: CkbNode):
         pass
 
-    @abstractmethod
     def get_deploy_hash_and_index(self) -> (str, int):
         pass
 
@@ -117,6 +115,8 @@ def invoke_ckb_contract(
     fee=1000,
     api_url="http://127.0.0.1:8114",
     cell_deps=[],
+    input_cells=[],
+    output_lock_arg="0x470dcdc5e44064909650113a274b3b36aecb6dc7",
 ):
     """
 
@@ -154,7 +154,17 @@ def invoke_ckb_contract(
     assert len(account_live_cells["live_cells"]) > 0
     input_cell_out_points = []
     input_cell_cap = 0
+    for i in range(len(input_cells)):
+        input_cell_out_points.append(input_cells[i])
+        cell = RPCClient(api_url).get_live_cell(
+            hex(input_cells[i]["index"]), input_cells[i]["tx_hash"], True
+        )
+        input_cell_cap += int(cell["cell"]["output"]["capacity"], 16)
+    input_cells_hashs = [input_cell["tx_hash"] for input_cell in input_cells]
+
     for i in range(len(account_live_cells["live_cells"])):
+        if account_live_cells["live_cells"][i]["tx_hash"] in input_cells_hashs:
+            continue
         input_cell_out_point = {
             "tx_hash": account_live_cells["live_cells"][i]["tx_hash"],
             "index": account_live_cells["live_cells"][i]["output_index"],
@@ -167,6 +177,7 @@ def invoke_ckb_contract(
             )
             * 100000000
         )
+
         input_cell_out_points.append(input_cell_out_point)
         if input_cell_cap > 10000000000:
             break
@@ -181,7 +192,7 @@ def invoke_ckb_contract(
         "lock": {
             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
             "hash_type": "type",
-            "args": "0x470dcdc5e44064909650113a274b3b36aecb6dc7",
+            "args": output_lock_arg,
         },
         "type": {
             "code_hash": contract_code_hash,
@@ -218,11 +229,8 @@ def invoke_ckb_contract(
         print("add header:", head)
         tx_add_header_dep(head, tmp_tx_file)
     # add output
-    tx_add_type_out_put(
-        output_cell["type"]["code_hash"],
-        output_cell["type"]["hash_type"],
-        output_cell["type"]["args"],
-        output_cell["capacity"],
+    tx_add_output(
+        output_cell,
         data,
         tmp_tx_file,
     )
@@ -236,6 +244,11 @@ def invoke_ckb_contract(
         sign_data[0]["lock-arg"], sign_data[0]["signature"], tmp_tx_file, api_url
     )
     tx_info(tmp_tx_file, api_url)
+    for i in range(len(input_cells)):
+        cell = RPCClient(api_url).get_live_cell(
+            hex(input_cells[i]["index"]), input_cells[i]["tx_hash"], True
+        )
+
     # send tx return hash
     return tx_send(tmp_tx_file, api_url).strip()
 

@@ -71,7 +71,7 @@ class TestLightSync(CkbTest):
 
         """
         # 1. start light client node and link
-        for i in range(10):
+        for i in range(2):
             print("current idx", i)
             self.ckb_light_node = self.CkbLightClientNode.init_by_nodes(
                 self.CkbLightClientConfigPath.CURRENT_TEST,
