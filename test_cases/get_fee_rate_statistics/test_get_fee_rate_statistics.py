@@ -49,7 +49,7 @@ class TestGetFeeRateStatistics(CkbTest):
 
     def test_02_statistical_range(self):
         """
-                1.  If there are no transactions in the most recent block, get_fee_rate_statics should return null.
+            1.  If there are no transactions in the most recent block, get_fee_rate_statics should return null.
             2.	Send a transaction with a free_rate of 1000, and immediately after this transaction is confirmed on the blockchain, call get_fee_rate_statics. Both mean and median should be 1000.
             3.	After waiting for 10 blocks, send a transaction with a free_rate of 2000. Immediately after this transaction is confirmed, call get_fee_rate_statics. Both mean and median should be 1500, indicating that the statistics included both the transaction with free_rate = 1000 and free_rate = 2000.
             4.	Wait another 10 blocks and then call get_fee_rate_statics. Both mean and median should now be 2000, indicating that only the transaction with free_rate = 2000 was counted.
@@ -64,6 +64,8 @@ class TestGetFeeRateStatistics(CkbTest):
         )
 
         # 1. If there are no transactions in the most recent block, get_fee_rate_statics should return null.
+        block_number0 = self.node.getClient().get_tip_block_number()
+        self.Miner.make_tip_height_number(self.node, block_number0 + 21)
         ret0 = self.node.getClient().get_fee_rate_statics()
         print("ret0: ", ret0)
         assert ret0 is None
