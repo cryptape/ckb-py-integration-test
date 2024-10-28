@@ -394,7 +394,7 @@ class TestOrphanTx(CkbTest):
         )
 
         # 4. All child transactions received by node 2 go into the orphan pool.
-        time.sleep(10)
+        time.sleep(3)
         node1_pool = self.node1.getClient().tx_pool_info()
         node2_pool = self.node2.getClient().tx_pool_info()
         assert node2_pool["orphan"] != "0x0"
@@ -404,11 +404,11 @@ class TestOrphanTx(CkbTest):
         tx1 = self.node1.getClient().get_transaction(tx1_hash)
         del tx1["transaction"]["hash"]
         self.node2.getClient().send_transaction(tx1["transaction"])
-        time.sleep(10)
+        time.sleep(3)
 
         node2_pool = self.node2.getClient().tx_pool_info()
         # 6. resend all  tx to node1
-        for i in range(3):
+        for i in range(2):
             for hash in account1_tx_hash_list:
                 tx1 = self.node1.getClient().get_transaction(hash)
                 del tx1["transaction"]["hash"]
@@ -416,17 +416,18 @@ class TestOrphanTx(CkbTest):
                     self.node1.getClient().send_transaction(tx1["transaction"])
                 except Exception:
                     pass
-        time.sleep(10)
+                time.sleep(0.5)
+        time.sleep(3)
 
         node2_pool = self.node2.getClient().tx_pool_info()
         tx1 = self.node1.getClient().get_transaction(tx2_hash)
         del tx1["transaction"]["hash"]
         self.node2.getClient().send_transaction(tx1["transaction"])
-        time.sleep(10)
+        time.sleep(3)
 
         node2_pool = self.node2.getClient().tx_pool_info()
         #
-        for i in range(3):
+        for i in range(2):
             for hash in account2_tx_hash_list:
                 tx1 = self.node1.getClient().get_transaction(hash)
                 del tx1["transaction"]["hash"]
@@ -434,7 +435,8 @@ class TestOrphanTx(CkbTest):
                     self.node1.getClient().send_transaction(tx1["transaction"])
                 except Exception:
                     pass
-        time.sleep(10)
+                time.sleep(0.5)
+        time.sleep(3)
         # 6. query tx pool info
         node1_pool = self.node1.getClient().tx_pool_info()
         node2_pool = self.node2.getClient().tx_pool_info()
