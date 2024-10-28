@@ -1,6 +1,9 @@
+import time
+
 import pytest
 
 from framework.basic import CkbTest
+from framework.util import get_project_root
 
 
 class TestAfterHardFork(CkbTest):
@@ -324,6 +327,46 @@ class TestAfterHardFork(CkbTest):
 
         # 3. miner until tx committed
         self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
+
+    def test_remove_a(self):
+        """
+        After a period of hard fork,send a opcode tx will failed  .
+        - The transaction will be committed on the blockchain
+
+        1. miner 11 block
+        2. send tx contains a opcode use type
+            InvalidInstruction
+        Returns:
+
+        """
+        path = f"{get_project_root()}/source/contract/test_cases/rfc49_atomic"
+        # 1. miner 11 block
+        for i in range(11):
+            self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
+
+        # 2. send tx contains spawn opcode use type
+        deploy_hash = self.Contract.deploy_ckb_contract(
+            self.Config.MINER_PRIVATE_1,
+            path,
+            enable_type_id=True,
+            api_url=self.cluster.ckb_nodes[0].getClient().url,
+        )
+        self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], deploy_hash)
+        time.sleep(1)
+        with pytest.raises(Exception) as exc_info:
+            invoke_hash = self.Contract.invoke_ckb_contract(
+                account_private=self.Config.MINER_PRIVATE_1,
+                contract_out_point_tx_hash=deploy_hash,
+                contract_out_point_tx_index=0,
+                type_script_arg="0x02",
+                data="0x1234",
+                hash_type="type",
+                api_url=self.cluster.ckb_nodes[0].getClient().url,
+            )
+        expected_error_message = "InvalidInstruction"
+        assert (
+            expected_error_message in exc_info.value.args[0]
+        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
 
 def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
