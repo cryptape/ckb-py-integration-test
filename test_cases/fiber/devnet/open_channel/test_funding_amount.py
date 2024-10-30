@@ -6,7 +6,7 @@ from framework.basic_fiber import FiberTest
 
 
 class FundingAmount(FiberTest):
-    FiberTest.debug = True
+    # FiberTest.debug = True
 
     def test_funding_amount_ckb_is_zero(self):
         """
