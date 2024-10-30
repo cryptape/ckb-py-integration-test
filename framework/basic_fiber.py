@@ -20,6 +20,13 @@ class FiberTest(CkbTest):
 
     @classmethod
     def setup_class(cls):
+        """
+        部署一个ckb 节点
+        启动 ckb 节点
+
+        Returns:
+
+        """
         cls.account1_private_key = cls.Config.ACCOUNT_PRIVATE_1
         cls.account2_private_key = cls.Config.ACCOUNT_PRIVATE_2
         cls.account1 = cls.Ckb_cli.util_key_info_by_private_key(
@@ -46,6 +53,16 @@ class FiberTest(CkbTest):
         cls.Miner.make_tip_height_number(cls.node, 20)
 
     def setup_method(cls, method):
+        """
+        启动2个fiber
+        给 fiber1 充值udt 金额
+        连接2个fiber
+        Args:
+            method:
+
+        Returns:
+
+        """
         cls.did_pass = None
         cls.fibers = []
         cls.new_fibers = []
@@ -161,20 +178,20 @@ class FiberTest(CkbTest):
         if udt_owner_private_key is None:
             return account_private_key
         tx_hash = issue_udt_tx(
-            cls.udtContract,
+            self.udtContract,
             self.node.rpcUrl,
             udt_owner_private_key,
             account_private_key,
             udt_balance,
         )
-        self.Miner.miner_until_tx_committed(cls.node, tx_hash)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
     def generate_account(
         self, ckb_balance, udt_owner_private_key=None, udt_balance=1000 * 1000000000
     ):
         # error
-        if self.debug:
-            raise Exception("debug not support generate_account")
+        # if self.debug:
+        #     raise Exception("debug not support generate_account")
         account_private_key = generate_account_privakey()
         self.faucet(
             account_private_key, ckb_balance, udt_owner_private_key, udt_balance
@@ -192,6 +209,7 @@ class FiberTest(CkbTest):
         )
         fiber.read_ckb_key()
         self.new_fibers.append(fiber)
+        self.fibers.append(fiber)
         return fiber
 
     def start_new_fiber(self, account_private_key, config=None):

@@ -151,6 +151,7 @@ def invoke_ckb_contract(
     account = util_key_info_by_private_key(account_private)
     account_address = account["address"]["testnet"]
     account_live_cells = wallet_get_live_cells(account_address, api_url=api_url)
+    input_cell_lock = account["lock_arg"]
     assert len(account_live_cells["live_cells"]) > 0
     input_cell_out_points = []
     input_cell_cap = 0
@@ -213,7 +214,7 @@ def invoke_ckb_contract(
                 "lock": {
                     "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
                     "hash_type": "type",
-                    "args": output_lock_arg,
+                    "args": input_cell_lock,
                 },
             }
         )

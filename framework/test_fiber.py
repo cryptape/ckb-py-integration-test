@@ -139,7 +139,7 @@ class Fiber:
         for key in env_map:
             print(f"{key}={env_map[key]}")
         run_command(
-            f"RUST_LOG=info,fnn=info {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &",
+            f"RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &",
             env=env_map,
         )
         # wait rpc start
