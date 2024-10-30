@@ -55,9 +55,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-                int(before_channel["channels"][0]["local_balance"], 16)
-                - int(after_channel["channels"][0]["local_balance"], 16)
-                == invoice_balance
+            int(before_channel["channels"][0]["local_balance"], 16)
+            - int(after_channel["channels"][0]["local_balance"], 16)
+            == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -149,9 +149,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-                int(before_channel["channels"][0]["local_balance"], 16)
-                - int(after_channel["channels"][0]["local_balance"], 16)
-                == invoice_balance
+            int(before_channel["channels"][0]["local_balance"], 16)
+            - int(after_channel["channels"][0]["local_balance"], 16)
+            == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -239,9 +239,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-                int(before_channel["channels"][0]["local_balance"], 16)
-                - int(after_channel["channels"][0]["local_balance"], 16)
-                == invoice_balance
+            int(before_channel["channels"][0]["local_balance"], 16)
+            - int(after_channel["channels"][0]["local_balance"], 16)
+            == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(

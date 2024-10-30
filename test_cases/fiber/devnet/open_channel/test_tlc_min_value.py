@@ -288,7 +288,7 @@ class TlcMinValue(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        self.wait_payment_state(self.fiber1, payment['payment_hash'], 'Success')
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
         after_channel = self.fiber1.get_client().list_channels({})
         assert int(before_channel["channels"][0]["local_balance"], 16) - int(
             after_channel["channels"][0]["local_balance"], 16

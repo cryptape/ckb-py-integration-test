@@ -23,6 +23,7 @@ class TestFundingUdtTypeScript(FiberTest):
         1. udt script 不在自己节点
         Returns:
         """
+
     @pytest.mark.skip("todo")
     def test_funding_udt_type_script_not_exist_in_node2(self):
         """
@@ -53,7 +54,9 @@ class TestFundingUdtTypeScript(FiberTest):
                 "peer_id": self.fiber2.get_peer_id(),
                 "funding_amount": hex(1000 * 100000000),
                 "public": True,
-                "funding_udt_type_script": self.get_account_udt_script(self.fiber1.account_private),
+                "funding_udt_type_script": self.get_account_udt_script(
+                    self.fiber1.account_private
+                ),
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
@@ -75,7 +78,9 @@ class TestFundingUdtTypeScript(FiberTest):
                 "final_cltv": "0x28",
                 "payment_preimage": payment_preimage,
                 "hash_algorithm": "sha256",
-                "udt_type_script": self.get_account_udt_script(self.fiber1.account_private),
+                "udt_type_script": self.get_account_udt_script(
+                    self.fiber1.account_private
+                ),
             }
         )
         before_channel = self.fiber1.get_client().list_channels({})
@@ -88,9 +93,9 @@ class TestFundingUdtTypeScript(FiberTest):
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-                int(before_channel["channels"][0]["local_balance"], 16)
-                - int(after_channel["channels"][0]["local_balance"], 16)
-                == invoice_balance
+            int(before_channel["channels"][0]["local_balance"], 16)
+            - int(after_channel["channels"][0]["local_balance"], 16)
+            == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
