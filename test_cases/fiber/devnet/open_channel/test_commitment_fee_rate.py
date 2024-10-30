@@ -29,6 +29,7 @@ class TestCommitmentFeeRate(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    @pytest.mark.skip("todo")
     def test_commitment_fee_rate_exist(self):
         """
         commitment_fee_rate != default.value

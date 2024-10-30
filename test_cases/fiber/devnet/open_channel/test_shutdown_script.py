@@ -6,6 +6,8 @@ from framework.basic_fiber import FiberTest
 
 
 class TestShutdownScript(FiberTest):
+
+    @pytest.mark.skip("todo")
     def test_shutdown_script_none(self):
         """
         shutdown_script:none

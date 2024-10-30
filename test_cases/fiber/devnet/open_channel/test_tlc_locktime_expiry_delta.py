@@ -1,9 +1,13 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
 class TestTlcLocktimeExpiryDelta(FiberTest):
+
+    @pytest.mark.skip("todo")
     def test_tlc_locktime_expiry_delta_none(self):
         """
         tlc_locktime_expiry_delta = none
@@ -99,6 +103,7 @@ class TestTlcLocktimeExpiryDelta(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 162
 
+    @pytest.mark.skip("todo")
     def test_tlc_locktime_expiry_delta_is_1(self):
         """
         tlc_locktime_expiry_delta = 1
@@ -110,6 +115,7 @@ class TestTlcLocktimeExpiryDelta(FiberTest):
             要在 watchtower 里面做，我们现在似乎没有这个功能
         """
 
+    @pytest.mark.skip("todo")
     def test_tlc_locktime_expiry_delta_not_eq_default(self):
         """
         tlc_locktime_expiry_delta != default

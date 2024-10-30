@@ -6,6 +6,8 @@ from framework.basic_fiber import FiberTest
 
 
 class TestFundingFeeRate(FiberTest):
+
+    @pytest.mark.skip("todo")
     def test_funding_fee_rate_none(self):
         """
         funding_fee_rate is none

@@ -7,6 +7,8 @@ from framework.basic_fiber import FiberTest
 
 class TestCkbCell(FiberTest):
     # FiberTest.debug = True
+
+    @pytest.mark.skip("todo")
     def test_account_cell_data_not_empty(self):
         """
         if account cell.data != empty

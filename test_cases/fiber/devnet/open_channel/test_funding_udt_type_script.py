@@ -1,12 +1,14 @@
 import time
 
-from framework.basic_fiber import FiberTest
+import pytest
 
+from framework.basic_fiber import FiberTest
 
 
 class TestFundingUdtTypeScript(FiberTest):
     # FiberTest.debug = True
 
+    @pytest.mark.skip("todo")
     def test_funding_udt_type_script_is_empty(self):
         """
         1. funding_udt_type_script is none
@@ -15,12 +17,13 @@ class TestFundingUdtTypeScript(FiberTest):
         """
         # LinkedTest().test_linked_peer()
 
+    @pytest.mark.skip("todo")
     def test_funding_udt_type_script_not_exist_in_node1(self):
         """
         1. udt script 不在自己节点
         Returns:
         """
-
+    @pytest.mark.skip("todo")
     def test_funding_udt_type_script_not_exist_in_node2(self):
         """
         1. udt script 不在对方节点
@@ -50,13 +53,7 @@ class TestFundingUdtTypeScript(FiberTest):
                 "peer_id": self.fiber2.get_peer_id(),
                 "funding_amount": hex(1000 * 100000000),
                 "public": True,
-                "funding_udt_type_script": {
-                    "code_hash": self.udtContract.get_code_hash(True, self.node.rpcUrl),
-                    "hash_type": "type",
-                    "args": self.udtContract.get_owner_arg_by_lock_arg(
-                        account["lock_arg"]
-                    ),
-                },
+                "funding_udt_type_script": self.get_account_udt_script(self.fiber1.account_private),
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
@@ -78,13 +75,7 @@ class TestFundingUdtTypeScript(FiberTest):
                 "final_cltv": "0x28",
                 "payment_preimage": payment_preimage,
                 "hash_algorithm": "sha256",
-                "udt_type_script": {
-                    "code_hash": self.udtContract.get_code_hash(True, self.node.rpcUrl),
-                    "hash_type": "type",
-                    "args": self.udtContract.get_owner_arg_by_lock_arg(
-                        account["lock_arg"]
-                    ),
-                },
+                "udt_type_script": self.get_account_udt_script(self.fiber1.account_private),
             }
         )
         before_channel = self.fiber1.get_client().list_channels({})
@@ -95,13 +86,11 @@ class TestFundingUdtTypeScript(FiberTest):
             }
         )
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
-
-        time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -120,11 +109,7 @@ class TestFundingUdtTypeScript(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": account["lock_arg"],
-                },
+                "close_script": self.get_account_script(self.fiber1.account_private),
                 "fee_rate": "0x3FC",
             }
         )

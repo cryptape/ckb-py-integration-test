@@ -6,12 +6,15 @@ from framework.basic_fiber import FiberTest
 
 
 class TestTlcMaxValue(FiberTest):
+
+    @pytest.mark.skip("todo")
     def test_tlc_max_value_none(self):
         """
         tlc_max_value: none
         Returns:
         """
 
+    @pytest.mark.skip("todo")
     def test_ckb_tlc_max_value_not_eq_default(self):
         """
         tlc_max_value != default

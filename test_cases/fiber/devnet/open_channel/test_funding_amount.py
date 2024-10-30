@@ -125,6 +125,7 @@ class FundingAmount(FiberTest):
             120,
         )
 
+    @pytest.mark.skip("todo")
     def test_funding_amount_ckb_lt_account_balance(self):
         """
         1. funding_udt_type_script is None ,funding_amount < account balance

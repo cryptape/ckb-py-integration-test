@@ -537,6 +537,7 @@ class TlcMinValue(FiberTest):
         print("after_balance1:", after_balance1)
         print("after_balance2:", after_balance2)
 
+    @pytest.mark.skip("todo")
     def test_ckb_tlc_min_value_gt_tlc_max_value(self):
         pass
 
