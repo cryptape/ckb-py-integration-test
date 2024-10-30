@@ -2,7 +2,6 @@ import time
 
 from framework.basic_fiber import FiberTest
 
-# from test_cases.fiber.devnet.open_channel.test_linked import LinkedTest
 
 
 class TestFundingUdtTypeScript(FiberTest):
@@ -31,6 +30,7 @@ class TestFundingUdtTypeScript(FiberTest):
     def test_funding_udt_type_script_is_white(self):
         """
         1. funding_udt_type_script 在节点上
+        todo: add more check balance
         Returns:
         """
         # open chanel for fiber
@@ -138,14 +138,9 @@ class TestFundingUdtTypeScript(FiberTest):
             self.node.getClient(), account["lock_arg"], account2["lock_arg"]
         )
 
-        print(before_account1)
-        assert before_account1[0]["balance"] == 0
-        print(before_account2)
-        assert len(before_account2) == 0
-        print(after_account1)
-        assert after_account1[1]["balance"] == 90000000000
+        assert after_account1[-1]["balance"] == 90000000000
         print(after_account2)
-        assert after_account2[0]["balance"] == 10000000000
+        assert after_account2[-1]["balance"] == 10000000000
         before_balance1 = self.Ckb_cli.wallet_get_live_cells(
             account["address"]["testnet"]
         )

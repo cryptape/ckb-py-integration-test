@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
@@ -114,7 +116,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
             }
         )
         time.sleep(1)
-        wait_for_channel_state(
+        self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
         time.sleep(5)
@@ -132,7 +134,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
         invoice_count = 16
         for i in range(invoice_count):
             print("current :", i)
-            payment_preimage = generate_random_preimage()
+            payment_preimage = self.generate_random_preimage()
             add_tlc = self.fiber1.get_client().add_tlc(
                 {
                     "channel_id": channel_id,
@@ -147,7 +149,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
             # time.sleep(0.5)
         time.sleep(10)
         with pytest.raises(Exception) as exc_info:
-            payment_preimage = generate_random_preimage()
+            payment_preimage = self.generate_random_preimage()
             self.fiber1.get_client().add_tlc(
                 {
                     "channel_id": channel_id,

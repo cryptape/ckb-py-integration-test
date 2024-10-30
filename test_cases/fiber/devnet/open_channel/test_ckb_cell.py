@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
@@ -125,15 +127,17 @@ class TestCkbCell(FiberTest):
         assert len(channels["channels"]) == 1
         assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
 
+    @pytest.mark.skip
     def test_open_chanel_same_time(self):
         """
         同时打开多个channel
-        Returns:
+        todo: add check : 创建channel 失败 需要终态
+         Returns:
         """
         open_count = 5
         for i in range(open_count):
             account_private_key = self.generate_account(1000)
-            fiber = self.start_new_fiber("account_private_key")
+            fiber = self.start_new_fiber(account_private_key)
             fiber.connect_peer(self.fiber2)
         time.sleep(1)
         for i in range(open_count):

@@ -259,11 +259,10 @@ class TlcMinValue(FiberTest):
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
-        time.sleep(1)
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
-        time.sleep(5)
+        time.sleep(3)
         # transfer
         self.fiber1.get_client().graph_channels()
         self.fiber1.get_client().graph_nodes()
@@ -284,12 +283,12 @@ class TlcMinValue(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment['payment_hash'], 'Success')
         after_channel = self.fiber1.get_client().list_channels({})
         assert int(before_channel["channels"][0]["local_balance"], 16) - int(
             after_channel["channels"][0]["local_balance"], 16
@@ -318,7 +317,7 @@ class TlcMinValue(FiberTest):
                     "invoice": invoice["invoice_address"],
                 }
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -337,14 +336,10 @@ class TlcMinValue(FiberTest):
             self.account2["address"]["testnet"]
         )
         # shut down
-        self.fiber2.get_client().shutdown_channel(
+        self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
+                "close_script": self.get_account_script(self.fiber1.account_private),
                 "fee_rate": "0x3FC",
             }
         )
@@ -360,7 +355,7 @@ class TlcMinValue(FiberTest):
         print("before_balance2:", before_balance2)
         print("after_balance1:", after_balance1)
         print("after_balance2:", after_balance2)
-        assert after_balance2 - before_balance2 == 162
+        assert after_balance2 - before_balance2 == 200
 
     def test_ckb_tlc_min_value_not_eq_default(self):
         """
@@ -499,7 +494,7 @@ class TlcMinValue(FiberTest):
                     "invoice": invoice["invoice_address"],
                 }
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -640,7 +635,7 @@ class TlcMinValue(FiberTest):
                     "invoice": invoice["invoice_address"],
                 }
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"

@@ -119,7 +119,7 @@ class TestTlcFeeProportionalMillionths(FiberTest):
 
         # self.fiber3.connect_peer(self.fiber2)
         time.sleep(3)
-        self.fiber2.connect_peer(self.fiber3)
+        self.fiber2.connect_peer(new_fiber)
         time.sleep(3)
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -148,7 +148,7 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         )
         time.sleep(1)
         self.wait_for_channel_state(
-            self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY", 120
+            self.fiber2.get_client(), new_fiber.get_peer_id(), "CHANNEL_READY", 120
         )
         invoice_balance = hex(100 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -168,12 +168,12 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         time.sleep(10)
         self.fiber2.get_client().graph_channels()
         self.fiber2.get_client().graph_nodes()
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment['payment_hash'])
         after_channel_12 = self.fiber1.get_client().list_channels({})
         after_channel_32 = new_fiber.get_client().list_channels({})
 
@@ -217,10 +217,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         print("after_channel_2_12:", after_channel_2_32)
         # assert
         assert (
-            int(after_channel_32["channels"][0]["local_balance"], 16)
-            - int(after_channel_2_32["channels"][0]["local_balance"], 16)
-            == int(invoice_balance, 16)
-            + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
+                int(after_channel_32["channels"][0]["local_balance"], 16)
+                - int(after_channel_2_32["channels"][0]["local_balance"], 16)
+                == int(invoice_balance, 16)
+                + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
         )
 
         assert int(after_channel_2_12["channels"][0]["local_balance"], 16) - int(
@@ -239,12 +239,17 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         new_fiber = self.start_new_fiber(account3_private_key)
         time.sleep(3)
         self.fiber2.connect_peer(new_fiber)
-
+        self.faucet(self.fiber2.account_private, 0, self.fiber1.account_private, 1000 * 100000000)
+        self.faucet(self.fiber1.account_private, 0, self.fiber1.account_private, 1000 * 100000000)
         account1_cells = self.udtContract.list_cell(
-            self.node.getClient(), self.account1["lock_arg"], self.account1["lock_arg"]
+            self.node.getClient(),
+            self.get_account_script(self.fiber1.account_private)['args'],
+            self.get_account_script(self.fiber1.account_private)['args']
         )
         account2_cells = self.udtContract.list_cell(
-            self.node.getClient(), self.account1["lock_arg"], self.account2["lock_arg"]
+            self.node.getClient(),
+            self.get_account_script(self.fiber1.account_private)['args'],
+            self.get_account_script(self.fiber2.account_private)['args'],
         )
         print("account1:", account1_cells)
         print("account2:", account2_cells)
@@ -280,7 +285,7 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         fiber2_tlc_fee = 1000000
         temporary_channel_id = self.fiber2.get_client().open_channel(
             {
-                "peer_id": self.fiber3.get_peer_id(),
+                "peer_id": new_fiber.get_peer_id(),
                 "funding_amount": hex(1000 * 100000000),
                 "public": True,
                 "tlc_fee_proportional_millionths": hex(fiber2_tlc_fee),
@@ -298,7 +303,7 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         )
         time.sleep(1)
         self.wait_for_channel_state(
-            self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY", 120
+            self.fiber2.get_client(), new_fiber.get_peer_id(), "CHANNEL_READY", 120
         )
         invoice_balance = hex(100 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -325,12 +330,12 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         time.sleep(10)
         self.fiber2.get_client().graph_channels()
         self.fiber2.get_client().graph_nodes()
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment['payment_hash'])
         after_channel_12 = self.fiber1.get_client().list_channels({})
         after_channel_32 = new_fiber.get_client().list_channels({})
 
@@ -381,10 +386,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         print("after_channel_2_12:", after_channel_2_32)
         # assert
         assert (
-            int(after_channel_32["channels"][0]["local_balance"], 16)
-            - int(after_channel_2_32["channels"][0]["local_balance"], 16)
-            == int(invoice_balance, 16)
-            + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
+                int(after_channel_32["channels"][0]["local_balance"], 16)
+                - int(after_channel_2_32["channels"][0]["local_balance"], 16)
+                == int(invoice_balance, 16)
+                + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
         )
 
         assert int(after_channel_2_12["channels"][0]["local_balance"], 16) - int(

@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
@@ -11,6 +13,7 @@ class TestShutdownScript(FiberTest):
         """
         # self.test_linked_peer()
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/274")
     def test_shutdown_script_too_large(self):
         """
         Returns:
@@ -59,9 +62,9 @@ class TestShutdownScript(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(

@@ -1,14 +1,18 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
 class TestPublic(FiberTest):
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/170")
     def test_public_none(self):
         """
         https://github.com/nervosnetwork/fiber/issues/268
         public :None
+        todo : 预期是public
         Returns:
         """
         self.fiber1.connect_peer(self.fiber2)
@@ -51,9 +55,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -93,11 +97,16 @@ class TestPublic(FiberTest):
         print("after_balance1:", after_balance1)
         print("after_balance2:", after_balance2)
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/170")
     def test_public_false(self):
         """
+        https://github.com/nervosnetwork/fiber/issues/268
+        https://github.com/nervosnetwork/fiber/issues/170
         public : false
-        Returns:
 
+        todo: add check 多路支付会失败
+
+        Returns:
         """
         self.fiber1.connect_peer(self.fiber2)
         time.sleep(5)
@@ -140,9 +149,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -230,9 +239,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
