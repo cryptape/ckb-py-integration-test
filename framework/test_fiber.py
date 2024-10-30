@@ -1,6 +1,8 @@
 import shutil
 from enum import Enum
 import time
+
+import framework.helper.ckb_cli
 from framework.util import (
     create_config_file,
     get_project_root,
@@ -123,6 +125,12 @@ class Fiber:
             )
         return contract_map
 
+    def read_ckb_key(self):
+        with open(f"{self.tmp_path}/ckb/key") as f:
+            key = f.read()
+        self.account_private = f"0x{key}"
+        return self.account_private
+
     def start(self, node=None):
         env_map = dict(os.environ)  # Make a copy of the current environment
         if node:
@@ -131,7 +139,7 @@ class Fiber:
         for key in env_map:
             print(f"{key}={env_map[key]}")
         run_command(
-            f"RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &",
+            f"RUST_LOG=info,fnn=info {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &",
             env=env_map,
         )
         # wait rpc start
@@ -153,6 +161,11 @@ class Fiber:
 
     def get_peer_id(self):
         return self.get_client().node_info()["peer_id"]
+
+    def get_account(self):
+        return framework.helper.ckb_cli.util_key_info_by_private_key(
+            self.account_private
+        )
 
     def connect_peer(self, node):
         address = (

@@ -72,6 +72,28 @@ class FiberRPCClient:
     def send_payment(self, param):
         return self.call("send_payment", [param])
 
+    def get_payment(self, param):
+        """
+        curl --location 'http://127.0.0.1:8228' --header 'Content-Type: application/json' --data '{
+            "id": 42,
+            "jsonrpc": "2.0",
+            "method": "get_payment",
+            "params": [
+                {
+                    "payment_hash": "0x03f43a02479d6901b53f88a4fa8a550786b1dad78d1bdb165a8afc8d19e89ffb"
+                }
+            ]
+        }'
+        {"jsonrpc": "2.0", "result": {"payment_hash": "0x03f43a02479d6901b53f88a4fa8a550786b1dad78d1bdb165a8afc8d19e89ffb", "status": "Success", "created_at": "0x192d868eaae", "last_updated_at": "0x6259d59d61040", "failed_error": null}, "id": 42}
+
+        Args:
+            param:
+
+        Returns:
+
+        """
+        return self.call("get_payment", [param])
+
     def node_info(self):
         return self.call("node_info", [{}])
 

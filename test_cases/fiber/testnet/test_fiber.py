@@ -53,10 +53,10 @@ class TestFiber(CkbTest):
             "8229",
             "8230",
         )
-        # self.fiber1.prepare()
-        # self.fiber1.start()
-        # self.fiber2.prepare()
-        # self.fiber2.start()
+        self.fiber1.prepare()
+        self.fiber1.start()
+        self.fiber2.prepare()
+        self.fiber2.start()
         # connect  2 fiber
         self.fiber1.connect_peer(self.fiber2)
 

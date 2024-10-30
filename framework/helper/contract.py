@@ -165,10 +165,13 @@ def invoke_ckb_contract(
     for i in range(len(account_live_cells["live_cells"])):
         if account_live_cells["live_cells"][i]["tx_hash"] in input_cells_hashs:
             continue
+        if input_cell_cap > 10000000000:
+            break
         input_cell_out_point = {
             "tx_hash": account_live_cells["live_cells"][i]["tx_hash"],
             "index": account_live_cells["live_cells"][i]["output_index"],
         }
+
         input_cell_cap += (
             float(
                 account_live_cells["live_cells"][i]["capacity"]
@@ -186,7 +189,7 @@ def invoke_ckb_contract(
     #  "capacity": "21685.0 (CKB)",
     output_cell_capacity = input_cell_cap - fee
     output_cells = []
-    if output_cell_capacity > 1000 * 00000000:
+    if output_cell_capacity > 1000 * 100000000:
         print("output_cell_capacity to big ")
         output_cell = {
             "capacity": hex(int(500 * 100000000)),

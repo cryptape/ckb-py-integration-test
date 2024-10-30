@@ -199,6 +199,13 @@ def generate_random_preimage():
     return hash_str
 
 
+def generate_account_privakey():
+    hash_str = "0x"
+    for _ in range(64):
+        hash_str += hex(random.randint(0, 15))[2:]
+    return hash_str
+
+
 if __name__ == "__main__":
     ret = to_big_uint128_le_compatible(100000)
     ret1 = to_int_from_big_uint128_le(ret)

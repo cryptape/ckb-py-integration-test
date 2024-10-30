@@ -1,6 +1,9 @@
 from framework.config import UDT_CONTRACT_PATH
 from framework.helper.contract import deploy_ckb_contract, CkbContract
 from framework.helper.miner import miner_until_tx_committed
+from framework.helper.ckb_cli import util_key_info_by_private_key
+from framework.helper.contract import invoke_ckb_contract
+
 from framework.test_node import CkbNode
 from framework.util import (
     ckb_hash_script,
@@ -41,6 +44,9 @@ class UdtContract(CkbContract):
         return get_ckb_contract_codehash(
             self.contract_hash, self.contract_tx_index, type_id, api
         )
+
+    def get_owner_arg_by_lock_arg(self, lock_arg):
+        return ckb_hash_script(lock_arg)
 
     @classmethod
     def issue(cls, own_arg, amount) -> (str, str):
@@ -99,3 +105,23 @@ class UdtContract(CkbContract):
             # return "0x0","0x0"
             raise Exception("key not exist in method list")
         return self.method[key]["args"], self.method[key]["data"]
+
+
+def issue_udt_tx(udt_contract, rpc_url, owner_private, account_private, amount):
+    account = util_key_info_by_private_key(owner_private)
+    account1 = util_key_info_by_private_key(account_private)
+    invoke_arg, invoke_data = udt_contract.issue(account["lock_arg"], amount)
+    tx_hash = invoke_ckb_contract(
+        account_private=owner_private,
+        contract_out_point_tx_hash=udt_contract.contract_hash,
+        contract_out_point_tx_index=udt_contract.contract_tx_index,
+        type_script_arg=invoke_arg,
+        hash_type="type",
+        data=invoke_data,
+        fee=1000,
+        api_url=rpc_url,
+        cell_deps=[],
+        input_cells=[],
+        output_lock_arg=account1["lock_arg"],
+    )
+    return tx_hash
