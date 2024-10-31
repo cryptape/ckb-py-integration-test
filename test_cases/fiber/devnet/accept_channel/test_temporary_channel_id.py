@@ -46,12 +46,16 @@ class TestTemporaryChannelId(FiberTest):
             }
         )
         time.sleep(1)
-        self.fiber2.get_client().accept_channel(
+        accept_channel = self.fiber2.get_client().accept_channel(
             {
                 "temporary_channel_id": temporary_channel["temporary_channel_id"],
                 "funding_amount": hex(63 * 100000000),
             }
         )
+        time.sleep(1)
+        # channel_id
+        channel = self.fiber1.get_client().list_channels({})
+        assert channel["channels"][0]["channel_id"] == accept_channel["channel_id"]
 
         with pytest.raises(Exception) as exc_info:
             self.fiber2.get_client().accept_channel(
