@@ -34,18 +34,14 @@ capacity = 1_048_617_0000_0000
 file = { bundled = "specs/cells/secp256k1_blake160_multisig_all" }
 create_type_id = true
 capacity = 100_000_0000_0000
-
-[[genesis.system_cells]]
-file = { file = "../../../source/contract/fiber/always_success" }
-create_type_id = true
 [[genesis.system_cells]]
 file = { file = "../../../source/contract/fiber/auth" }
 create_type_id = true
 [[genesis.system_cells]]
-file = { file = "../../../source/contract/fiber/commitment-lock" }
+file = { file = "../../../source/contract/fiber/funding-lock" }
 create_type_id = true
 [[genesis.system_cells]]
-file = { file = "../../../source/contract/fiber/funding-lock" }
+file = { file = "../../../source/contract/fiber/commitment-lock" }
 create_type_id = true
 [[genesis.system_cells]]
 file = { file = "../../../source/contract/fiber/simple_udt" }
@@ -73,20 +69,20 @@ files = [
     { bundled = "specs/cells/secp256k1_data" },
     { bundled = "specs/cells/secp256k1_blake160_multisig_all" },
 ]
-
-[[genesis.dep_groups]]
-name = "funding-lock"
-files = [
-    { file = "../../../source/contract/fiber/funding-lock" },
-    { file = "../../../source/contract/fiber/auth" }
-
-]
-[[genesis.dep_groups]]
-name = "commitment-lock"
-files = [
-    { file = "../../../source/contract/fiber/commitment-lock" },
-    { file = "../../../source/contract/fiber/auth" }
-]
+#
+#[[genesis.dep_groups]]
+#name = "funding-lock"
+#files = [
+#    { file = "../../../source/contract/fiber/funding-lock" },
+#    { file = "../../../source/contract/fiber/auth" }
+#
+#]
+#[[genesis.dep_groups]]
+#name = "commitment-lock"
+#files = [
+#    { file = "../../../source/contract/fiber/commitment-lock" },
+#    { file = "../../../source/contract/fiber/auth" }
+#]
 
 # For first 11 block
 [genesis.bootstrap_lock]

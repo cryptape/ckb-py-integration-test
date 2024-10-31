@@ -12,59 +12,9 @@ class AcceptChannel(CkbTest):
     4. 同意的channel 和 temporary_channel_id 如何关联起来
     """
 
-    def test_temporary_channel_id_not_exist(self):
-        """
 
-        Returns:
 
-        """
 
-    def test_ckb_temporary_channel_id_exist(self):
-        """
-        channel is ckb
-        Returns:
-
-        """
-
-    def test_udt_temporary_channel_id_exist(self):
-        """
-        channel is udt
-        Returns:
-        """
-
-    def test_funding_amount_zero(self):
-        """
-        funding_amount :0x0
-        Returns:
-
-        """
-
-    def test_ckb_funding_amount_lt_account(self):
-        """
-        funding_amount < account
-        Returns:
-        """
-
-    def test_udt_funding_amount_lt_account(self):
-        """
-        udt < amount
-        Returns:
-
-        """
-
-    def test_funding_amount_gt_account(self):
-        """
-        funding_amount > account
-        Returns:
-
-        """
-
-    def test_funding_amount_over_flow(self):
-        """
-        funding_amount > int.max
-        Returns:
-
-        """
 
     def test_shutdown_script_none(self):
         """
