@@ -77,6 +77,12 @@ class Fiber:
             self.fiber_config_enum.fiber_config_path,
             self.fiber_config_path,
         )
+        shutil.copy(
+            "{root_path}/source/template/ckb/fiber/dev.toml".format(
+                root_path=get_project_root()
+            ),
+            self.tmp_path,
+        )
         target_dir = os.path.join(self.tmp_path, "ckb")
         os.makedirs(target_dir, exist_ok=True)  # 创建文件夹，如果已存在则不报错
         with open(f"{self.tmp_path}/ckb/key", "w") as f:
@@ -132,15 +138,15 @@ class Fiber:
         return self.account_private
 
     def start(self, node=None):
-        env_map = dict(os.environ)  # Make a copy of the current environment
-        if node:
-            contract_map = self.get_contract_env_map(node)
-            env_map.update(contract_map)
-        for key in env_map:
-            print(f"{key}={env_map[key]}")
+        # env_map = dict(os.environ)  # Make a copy of the current environment
+        # if node:
+        #     contract_map = self.get_contract_env_map(node)
+        #     env_map.update(contract_map)
+        # for key in env_map:
+        #     print(f"{key}={env_map[key]}")
         run_command(
-            f"RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &",
-            env=env_map,
+            f"RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
+            # env=env_map,
         )
         # wait rpc start
         time.sleep(2)

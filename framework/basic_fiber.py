@@ -36,7 +36,7 @@ class FiberTest(CkbTest):
             cls.account2_private_key
         )
         cls.node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_FIBER, "contract/node", 8114, 8115
+            cls.CkbNodeConfigPath.CURRENT_FIBER, "contract/node", 8114, 8125
         )
 
         if cls.debug:
@@ -87,7 +87,7 @@ class FiberTest(CkbTest):
             "transactions"
         ][0]["hash"]
         #
-        cls.udtContract = UdtContract(xudt_contract_hash, 10)
+        cls.udtContract = UdtContract(xudt_contract_hash, 9)
         #
         deploy_hash, deploy_index = cls.udtContract.get_deploy_hash_and_index()
 
@@ -245,7 +245,12 @@ class FiberTest(CkbTest):
         return fiber
 
     def wait_for_channel_state(self, client, peer_id, expected_state, timeout=120):
-        """Wait for a channel to reach a specific state."""
+        """Wait for a channel to reach a specific state.
+        1. NEGOTIATING_FUNDING
+        2. CHANNEL_READY
+        3. Closed
+
+        """
         for _ in range(timeout):
             channels = client.list_channels({"peer_id": peer_id})
             if len(channels["channels"]) == 0:
@@ -284,6 +289,27 @@ class FiberTest(CkbTest):
             if result["status"] == status:
                 return
             time.sleep(1)
+        raise TimeoutError(
+            f"status did not reach state {expected_state} within timeout period."
+        )
+
+    def wait_invoice_state(
+        self, client, payment_hash, status="Success", timeout=120, interval=1
+    ):
+        """
+        status:
+            1. 状态为Open
+            2. 状态为Cancelled
+            3. 状态为Expired
+            4. 状态为Received
+            5. 状态为Paid
+
+        """
+        for i in range(timeout):
+            result = client.get_client().get_invoice({"payment_hash": payment_hash})
+            if result["status"] == status:
+                return
+            time.sleep(interval)
         raise TimeoutError(
             f"status did not reach state {expected_state} within timeout period."
         )

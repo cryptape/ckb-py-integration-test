@@ -161,12 +161,12 @@ def invoke_ckb_contract(
             hex(input_cells[i]["index"]), input_cells[i]["tx_hash"], True
         )
         input_cell_cap += int(cell["cell"]["output"]["capacity"], 16)
-    input_cells_hashs = [input_cell["tx_hash"] for input_cell in input_cells]
+    input_cells_hashes = [input_cell["tx_hash"] for input_cell in input_cells]
 
     for i in range(len(account_live_cells["live_cells"])):
-        if account_live_cells["live_cells"][i]["tx_hash"] in input_cells_hashs:
+        if account_live_cells["live_cells"][i]["tx_hash"] in input_cells_hashes:
             continue
-        if input_cell_cap > 10000000000:
+        if input_cell_cap > 20000000000:
             break
         input_cell_out_point = {
             "tx_hash": account_live_cells["live_cells"][i]["tx_hash"],
@@ -183,7 +183,7 @@ def invoke_ckb_contract(
         )
 
         input_cell_out_points.append(input_cell_out_point)
-        if input_cell_cap > 10000000000:
+        if input_cell_cap > 20000000000:
             break
 
     # get output_cells.cap = input_cell.cap - fee
@@ -271,9 +271,10 @@ def invoke_ckb_contract(
         )
         data = "0x"
     # add dep
-    tx_add_cell_dep(cell_dep["tx_hash"], cell_dep["index"], tmp_tx_file)
     for cell_dep_tmp in cell_deps:
         tx_add_cell_dep(cell_dep_tmp["tx_hash"], cell_dep_tmp["index"], tmp_tx_file)
+    tx_add_cell_dep(cell_dep["tx_hash"], cell_dep["index"], tmp_tx_file)
+
     # sign
     sign_data = tx_sign_inputs(account_private, tmp_tx_file, api_url)
     tx_add_signature(

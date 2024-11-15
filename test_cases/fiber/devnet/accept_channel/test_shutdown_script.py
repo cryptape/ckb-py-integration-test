@@ -6,7 +6,7 @@ from framework.basic_fiber import FiberTest
 
 
 class TestShutdownScript(FiberTest):
-    FiberTest.debug = True
+    # FiberTest.debug = True
 
     @pytest.mark.skip("repeat")
     def test_shutdown_script_none(self):
@@ -300,3 +300,7 @@ class TestShutdownScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
+        time.sleep(10)
+        self.fiber1.get_client().list_channels({})
+        self.fiber2.get_client().list_channels({})
+        # todo close 失败，需要能查到channels
