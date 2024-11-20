@@ -47,17 +47,17 @@ class TestPublic(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -149,9 +149,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -239,9 +239,9 @@ class TestPublic(FiberTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-            int(before_channel["channels"][0]["local_balance"], 16)
-            - int(after_channel["channels"][0]["local_balance"], 16)
-            == invoice_balance
+                int(before_channel["channels"][0]["local_balance"], 16)
+                - int(after_channel["channels"][0]["local_balance"], 16)
+                == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(

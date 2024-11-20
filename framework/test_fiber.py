@@ -16,7 +16,7 @@ from framework.config import get_tmp_path
 
 
 class FiberConfigPath(Enum):
-    V100 = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
+    V100_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
     V100_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
 
     def __init__(self, fiber_config_path, fiber_bin_path):

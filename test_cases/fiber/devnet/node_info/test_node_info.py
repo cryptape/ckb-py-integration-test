@@ -22,14 +22,12 @@ class TestNodeInfo(FiberTest):
         """
         check peer id
         Returns:
-
         """
 
     def test_addresses(self):
         """
         check addresses
         Returns:
-
         """
 
     def test_chain_hash(self):
@@ -85,6 +83,7 @@ class TestNodeInfo(FiberTest):
         check channel_count
         Returns:
         """
+
 
     def test_pending_channel_count(self):
         """

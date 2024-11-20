@@ -167,10 +167,10 @@ class TestListChannels(FiberTest):
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
         channels = self.fiber1.get_client().list_channels({})
-        created_at_hex = int(channels["channels"][0]["created_at"], 16) / 1000000
+        created_at_hex = int(channels["channels"][0]["created_at"], 16) / 1000
 
-        assert int(created_at_hex / 100) == int(
-            int(datetime.datetime.now().timestamp()) / 100
+        assert int(created_at_hex / 1000) == int(
+            int(datetime.datetime.now().timestamp()) / 1000
         )
 
     def test_is_public(self):

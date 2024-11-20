@@ -294,7 +294,7 @@ class FiberTest(CkbTest):
         )
 
     def wait_invoice_state(
-        self, client, payment_hash, status="Success", timeout=120, interval=1
+        self, client, payment_hash, status="Paid", timeout=120, interval=1
     ):
         """
         status:
@@ -436,6 +436,12 @@ class FiberTest(CkbTest):
     def generate_random_preimage(self):
         hash_str = "0x"
         for _ in range(64):
+            hash_str += hex(random.randint(0, 15))[2:]
+        return hash_str
+
+    def generate_random_str(self, num):
+        hash_str = "0x"
+        for _ in range(num):
             hash_str += hex(random.randint(0, 15))[2:]
         return hash_str
 

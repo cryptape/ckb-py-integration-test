@@ -1,3 +1,5 @@
+import time
+
 from framework.basic import CkbTest
 
 
