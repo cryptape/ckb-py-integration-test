@@ -235,9 +235,9 @@ def invoke_ckb_contract(
         tmp_tx_file,
     )
     # add dep
-    tx_add_cell_dep(cell_dep["tx_hash"], cell_dep["index"], tmp_tx_file)
     for cell_dep_tmp in cell_deps:
         tx_add_cell_dep(cell_dep_tmp["tx_hash"], cell_dep_tmp["index"], tmp_tx_file)
+    tx_add_cell_dep(cell_dep["tx_hash"], cell_dep["index"], tmp_tx_file)
     # sign
     sign_data = tx_sign_inputs(account_private, tmp_tx_file, api_url)
     tx_add_signature(
