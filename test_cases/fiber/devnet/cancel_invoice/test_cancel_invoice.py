@@ -337,3 +337,6 @@ class TestCancelInvoice(FiberTest):
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
         self.wait_payment_state(self.fiber2, payment["payment_hash"], "Failed")
+        self.fiber1.get_client().get_invoice(
+            {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
+        )
