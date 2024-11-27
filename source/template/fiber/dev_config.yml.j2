@@ -2,7 +2,7 @@ fiber:
   listening_addr: {{ fiber_listening_addr | default("/ip4/127.0.0.1/tcp/8228") }}
   chain: dev.toml
   announce_listening_addr: true
-
+  announce_private_addr: true
 rpc:
   listening_addr: {{ rpc_listening_addr | default("127.0.0.1:8227") }}
 

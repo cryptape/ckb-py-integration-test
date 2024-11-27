@@ -72,7 +72,9 @@ class TestDescription(FiberTest):
                     "hash_algorithm": "sha256",
                 }
             )
-        expected_error_message = "Description with length of 641 is too long, max length is 639"
+        expected_error_message = (
+            "Description with length of 641 is too long, max length is 639"
+        )
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"

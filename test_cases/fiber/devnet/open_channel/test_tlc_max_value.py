@@ -78,12 +78,12 @@ class TestTlcMaxValue(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
         after_channel = self.fiber1.get_client().list_channels({})
         assert int(before_channel["channels"][0]["local_balance"], 16) - int(
             after_channel["channels"][0]["local_balance"], 16
@@ -110,7 +110,7 @@ class TestTlcMaxValue(FiberTest):
             }
         )
         before_channel = self.fiber2.get_client().list_channels({})
-        print("node2 send 1 ckb failed ")
+
         with pytest.raises(Exception) as exc_info:
             self.fiber2.get_client().send_payment(
                 {

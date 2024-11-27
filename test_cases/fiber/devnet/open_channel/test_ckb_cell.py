@@ -39,7 +39,6 @@ class TestCkbCell(FiberTest):
 
     def test_account_mutil_cell_gt_funding_amount(self):
         """
-        https://github.com/nervosnetwork/fiber/issues/284
          N cell balance > funding_amount
         Returns:
         """
@@ -128,6 +127,86 @@ class TestCkbCell(FiberTest):
         channels = new_fiber.get_client().graph_channels()
         assert len(channels["channels"]) == 1
         assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+
+    FiberTest.debug = True
+
+    def test_config_not_eq(self):
+        """
+            https://github.com/nervosnetwork/fiber/issues/284
+            cause :
+                node3 的 node1_to_node2_fee_rate 为null ?
+        Returns:
+
+        """
+        account3_private_key = self.generate_account(1000)
+
+        # start fiber3
+        new_fiber = self.start_new_fiber(
+            account3_private_key,
+            {
+                "ckb_rpc_url": self.node.rpcUrl,
+            },
+        )
+        new_fiber.connect_peer(self.fiber2)
+        time.sleep(1)
+        self.fiber2.get_client().open_channel(
+            {
+                "peer_id": new_fiber.get_peer_id(),
+                "funding_amount": hex(990 * 100000000),
+                "public": True,
+                # "tlc_fee_proportional_millionths": "0x4B0",
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber2.get_client(), new_fiber.get_peer_id(), "CHANNEL_READY", 120
+        )
+        channels = new_fiber.get_client().graph_channels()
+        assert len(channels["channels"]) == 1
+        assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+        node3_info = new_fiber.get_client().node_info()
+        fiber3_pub = node3_info["public_key"]
+        payment = self.fiber2.get_client().send_payment(
+            {
+                "target_pubkey": fiber3_pub,
+                "amount": hex(10 * 100000000),
+                "keysend": True,
+                # "invoice": "0x123",
+            }
+        )
+        self.wait_payment_state(self.fiber2, payment["payment_hash"], "Success", 120)
+
+    def test_config_eq(self):
+        account3_private_key = self.generate_account(1000)
+
+        # start fiber3
+        new_fiber = self.start_new_fiber(account3_private_key)
+        new_fiber.connect_peer(self.fiber2)
+        time.sleep(1)
+        self.fiber2.get_client().open_channel(
+            {
+                "peer_id": new_fiber.get_peer_id(),
+                "funding_amount": hex(990 * 100000000),
+                "public": True,
+                # "tlc_fee_proportional_millionths": "0x4B0",
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber2.get_client(), new_fiber.get_peer_id(), "CHANNEL_READY", 120
+        )
+        channels = new_fiber.get_client().graph_channels()
+        assert len(channels["channels"]) == 1
+        assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+        node3_info = new_fiber.get_client().node_info()
+        fiber3_pub = node3_info["public_key"]
+        payment = self.fiber2.get_client().send_payment(
+            {
+                "target_pubkey": fiber3_pub,
+                "amount": hex(10 * 100000000),
+                "keysend": True,
+                # "invoice": "0x123",
+            }
+        )
+        self.wait_payment_state(self.fiber2, payment["payment_hash"], "Success", 120)
 
     @pytest.mark.skip
     def test_open_chanel_same_time(self):

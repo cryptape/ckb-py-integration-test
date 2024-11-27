@@ -9,7 +9,6 @@ class TestTlcFeeProportionalMillionths(FiberTest):
 
     def test_tlc_fee_proportional_millionths_default(self):
         """
-
         tlc_fee_proportional_millionths : none
         Returns:
         """
@@ -110,6 +109,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
     def test_ckb_tlc_fee_proportional_millionths_not_eq_default(self):
         """
         tlc_fee_proportional_millionths != default
+        - node1 send node3
+            node1 - node2（fee = 1000）
+        - node3 send node1
+            node3- node2（fee = 1000000）
         Returns:
         """
         account3_private_key = self.generate_account(1000)
@@ -216,10 +219,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         print("after_channel_2_32:", after_channel_2_32)
         # assert
         assert (
-                int(after_channel_32["channels"][0]["local_balance"], 16)
-                - int(after_channel_2_32["channels"][0]["local_balance"], 16)
-                == int(invoice_balance, 16)
-                + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
+            int(after_channel_32["channels"][0]["local_balance"], 16)
+            - int(after_channel_2_32["channels"][0]["local_balance"], 16)
+            == int(invoice_balance, 16)
+            + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
         )
 
         assert int(after_channel_2_12["channels"][0]["local_balance"], 16) - int(
@@ -331,10 +334,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         print("after_channel_2_32:", after_channel_2_32)
         # assert
         assert (
-                int(after_channel_32["channels"][0]["local_balance"], 16)
-                - int(after_channel_2_32["channels"][0]["local_balance"], 16)
-                == int(invoice_balance, 16)
-                + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
+            int(after_channel_32["channels"][0]["local_balance"], 16)
+            - int(after_channel_2_32["channels"][0]["local_balance"], 16)
+            == int(invoice_balance, 16)
+            + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
         )
 
         assert int(after_channel_2_12["channels"][0]["local_balance"], 16) - int(
@@ -510,10 +513,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         print("after_channel_2_12:", after_channel_2_32)
         # assert
         assert (
-                int(after_channel_32["channels"][0]["local_balance"], 16)
-                - int(after_channel_2_32["channels"][0]["local_balance"], 16)
-                == int(invoice_balance, 16)
-                + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
+            int(after_channel_32["channels"][0]["local_balance"], 16)
+            - int(after_channel_2_32["channels"][0]["local_balance"], 16)
+            == int(invoice_balance, 16)
+            + int(invoice_balance, 16) * fiber2_tlc_fee / 1000000
         )
 
         assert int(after_channel_2_12["channels"][0]["local_balance"], 16) - int(

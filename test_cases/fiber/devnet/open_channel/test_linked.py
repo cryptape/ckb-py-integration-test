@@ -60,8 +60,6 @@ class LinkedTest(FiberTest):
         )
 
         # transfer
-        self.fiber1.get_client().graph_channels()
-        self.fiber1.get_client().graph_nodes()
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 100 * 100000000
         invoice = self.fiber2.get_client().new_invoice(

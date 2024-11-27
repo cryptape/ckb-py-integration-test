@@ -6,7 +6,6 @@ from framework.basic_fiber import FiberTest
 
 
 class TestFundingUdtTypeScript(FiberTest):
-    # FiberTest.debug = True
 
     @pytest.mark.skip("todo")
     def test_funding_udt_type_script_is_empty(self):
@@ -17,19 +16,47 @@ class TestFundingUdtTypeScript(FiberTest):
         """
         # LinkedTest().test_linked_peer()
 
-    @pytest.mark.skip("todo")
-    def test_funding_udt_type_script_not_exist_in_node1(self):
+    def test_funding_udt_type_script_not_exist(self):
         """
         1. udt script 不在自己节点
+            will reject and channel length == 0
         Returns:
         """
+        account3_private = self.generate_account(1000)
+        self.fiber3 = self.start_new_fiber(
+            account3_private, {"ckb_rpc_url": self.node.getClient().url}
+        )
+        self.fiber3.connect_peer(self.fiber1)
+        self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber3.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+                "funding_udt_type_script": self.get_account_udt_script(
+                    self.fiber1.account_private
+                ),
+            }
+        )
+        time.sleep(3)
+        channels = self.fiber1.get_client().list_channels({})
+        assert len(channels["channels"]) == 0
 
-    @pytest.mark.skip("todo")
-    def test_funding_udt_type_script_not_exist_in_node2(self):
-        """
-        1. udt script 不在对方节点
-        Returns:
-        """
+        with pytest.raises(Exception) as exc_info:
+            self.fiber3.get_client().open_channel(
+                {
+                    "peer_id": self.fiber1.get_peer_id(),
+                    "funding_amount": hex(1000 * 100000000),
+                    "public": True,
+                    "funding_udt_type_script": self.get_account_udt_script(
+                        self.fiber1.account_private
+                    ),
+                }
+            )
+        expected_error_message = "Invalid UDT type script"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
+        )
 
     def test_funding_udt_type_script_is_white(self):
         """

@@ -52,6 +52,7 @@ class TestFundingFeeRate(FiberTest):
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
+        # self.wait_and_check_tx_pool_fee(int("0xffffffffffffffff", 16))
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
@@ -155,16 +156,18 @@ class TestFundingFeeRate(FiberTest):
         """
         self.fiber1.connect_peer(self.fiber2)
         time.sleep(5)
+        funding_fee_rate = 2000
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
                 "funding_amount": hex(200 * 100000000),
                 "public": True,
-                "funding_fee_rate": "0xffff",
+                "funding_fee_rate": hex(funding_fee_rate),
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
-        time.sleep(1)
+        # todo fee 结果不准确
+        # self.wait_and_check_tx_pool_fee(funding_fee_rate)
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
@@ -237,6 +240,21 @@ class TestFundingFeeRate(FiberTest):
         print("after_balance1:", after_balance1)
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 162
+
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/276")
+    def test_ckb_check_funding_fee_rate(self):
+        funding_fee_rate = 2000
+        temporary_channel_id = self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(200 * 100000000),
+                "public": True,
+                "funding_fee_rate": hex(funding_fee_rate),
+                # "tlc_fee_proportional_millionths": "0x4B0",
+            }
+        )
+        # todo fee 结果不准确
+        self.wait_and_check_tx_pool_fee(funding_fee_rate)
 
     def test_funding_fee_rate_gt_balance(self):
         """
