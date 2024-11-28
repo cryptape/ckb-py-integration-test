@@ -30,11 +30,6 @@ class FundingAmount(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    def test_debug(self):
-        self.wait_for_channel_state(
-            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
-        )
-
     @pytest.mark.skip("仅 dev 报错 script not found")
     def test_funding_amount_udt_is_zero(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(

@@ -128,11 +128,12 @@ class TestCkbCell(FiberTest):
         assert len(channels["channels"]) == 1
         assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
 
-    FiberTest.debug = True
+    # FiberTest.debug = True
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/284")
     def test_config_not_eq(self):
         """
-            https://github.com/nervosnetwork/fiber/issues/284
+
             cause :
                 node3 的 node1_to_node2_fee_rate 为null ?
         Returns:

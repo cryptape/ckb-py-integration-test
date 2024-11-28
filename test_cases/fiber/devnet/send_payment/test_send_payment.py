@@ -15,5 +15,4 @@ class TestSendPayment(FiberTest):
         channel 在各个状态调用 send_payment，只有在ready 才可以
         并发测试
         如何查询过去的交易记录
-
     """
