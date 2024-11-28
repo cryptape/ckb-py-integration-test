@@ -44,7 +44,21 @@ test_cases := \
 
 
 fiber_test_cases := \
-    test_cases/fiber/devnet/open_channel
+    test_cases/fiber/devnet/open_channel \
+	test_cases/fiber/devnet/accept_channel \
+	test_cases/fiber/devnet/cancel_invoice \
+	test_cases/fiber/devnet/connect_peer \
+	test_cases/fiber/devnet/disconnect_peer \
+	test_cases/fiber/devnet/get_invoice \
+	test_cases/fiber/devnet/graph_channels \
+	test_cases/fiber/devnet/graph_nodes \
+	test_cases/fiber/devnet/list_channels \
+	test_cases/fiber/devnet/new_invoice \
+	test_cases/fiber/devnet/open_channel \
+	test_cases/fiber/devnet/send_payment \
+	test_cases/fiber/devnet/shutdown_channel \
+	test_cases/fiber/devnet/update_channel \
+
 
 
 test:
@@ -63,7 +77,7 @@ test:
 
 fiber_test:
 	@failed_cases=; \
-    for fiber_test_cases in $(test_cases); do \
+    for test_case in $(fiber_test_cases); do \
         echo "Running tests for $$test_case"; \
         if ! bash test.sh "$$test_case"; then \
             echo "$$test_case" >> failed_test_cases.txt; \
