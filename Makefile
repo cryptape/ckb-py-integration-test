@@ -43,9 +43,27 @@ test_cases := \
     test_cases/get_fee_rate_statistics
 
 
+fiber_test_cases := \
+    test_cases/fiber/devnet/open_channel
+
+
 test:
 	@failed_cases=; \
     for test_case in $(test_cases); do \
+        echo "Running tests for $$test_case"; \
+        if ! bash test.sh "$$test_case"; then \
+            echo "$$test_case" >> failed_test_cases.txt; \
+        fi \
+    done; \
+    if [ -s failed_test_cases.txt ]; then \
+        echo "Some test cases failed: $$(cat failed_test_cases.txt)"; \
+        rm -f failed_test_cases.txt; \
+        exit 1; \
+    fi
+
+fiber_test:
+	@failed_cases=; \
+    for fiber_test_cases in $(test_cases); do \
         echo "Running tests for $$test_case"; \
         if ! bash test.sh "$$test_case"; then \
             echo "$$test_case" >> failed_test_cases.txt; \
