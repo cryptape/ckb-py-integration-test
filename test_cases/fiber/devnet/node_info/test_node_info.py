@@ -84,7 +84,6 @@ class TestNodeInfo(FiberTest):
         Returns:
         """
 
-
     def test_pending_channel_count(self):
         """
         check pending_channel_count
