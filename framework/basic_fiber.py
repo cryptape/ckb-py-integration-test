@@ -132,7 +132,7 @@ class FiberTest(CkbTest):
         )
         cls.fiber2.start(cls.node)
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
-            cls.account1["address"]["testnet"]
+            cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
         print("before_balance1:", before_balance1)
         cls.fiber1.connect_peer(cls.fiber2)
@@ -292,6 +292,33 @@ class FiberTest(CkbTest):
         raise TimeoutError(
             f"status did not reach state {expected_state} within timeout period."
         )
+
+    def wait_tx_pool(self, pending_size, try_size=100):
+        for i in range(try_size):
+            tx_pool_info = self.node.getClient().tx_pool_info()
+            current_pending_size = int(tx_pool_info["pending"], 16)
+            if current_pending_size < pending_size:
+                time.sleep(0.2)
+                continue
+            return
+        raise TimeoutError(
+            f"status did not reach state {expected_state} within timeout period."
+        )
+
+    def wait_and_check_tx_pool_fee(self, fee_rate, check=True):
+        self.wait_tx_pool(1)
+        pool = self.node.getClient().get_raw_tx_pool()
+        pool_tx_detail_info = self.node.getClient().get_pool_tx_detail_info(
+            pool["pending"][0]
+        )
+        if check:
+            assert (
+                int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
+                * 1000
+                / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
+                == fee_rate
+            )
+        return pool["pending"][0]
 
     def wait_invoice_state(
         self, client, payment_hash, status="Paid", timeout=120, interval=1
