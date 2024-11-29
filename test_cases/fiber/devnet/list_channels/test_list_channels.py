@@ -60,8 +60,8 @@ class TestListChannels(FiberTest):
             {"peer_id": self.fiber1.get_peer_id()}
         )
         assert (
-                n12_channels["channels"][0]["channel_id"]
-                == n21_channels["channels"][0]["channel_id"]
+            n12_channels["channels"][0]["channel_id"]
+            == n21_channels["channels"][0]["channel_id"]
         )
 
         n13_channels = self.fiber1.get_client().list_channels(
@@ -71,8 +71,8 @@ class TestListChannels(FiberTest):
             {"peer_id": self.fiber1.get_peer_id()}
         )
         assert (
-                n13_channels["channels"][0]["channel_id"]
-                == n31_channels["channels"][0]["channel_id"]
+            n13_channels["channels"][0]["channel_id"]
+            == n31_channels["channels"][0]["channel_id"]
         )
 
     def test_empty(self):
@@ -134,8 +134,8 @@ class TestListChannels(FiberTest):
         )
         channels = self.fiber1.get_client().list_channels({})
         assert channels["channels"][0][
-                   "funding_udt_type_script"
-               ] == self.get_account_udt_script(self.fiber1.account_private)
+            "funding_udt_type_script"
+        ] == self.get_account_udt_script(self.fiber1.account_private)
 
     @pytest.mark.skip("pass")
     def test_funding_udt_type_script_none(self):
