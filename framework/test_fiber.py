@@ -156,6 +156,10 @@ class Fiber:
         run_command(f"kill $(lsof -t -i:{self.rpc_port})", False)
         time.sleep(3)
 
+    def force_stop(self):
+        run_command(f"kill -9 $(lsof -t -i:{self.rpc_port})", False)
+        time.sleep(3)
+
     def clean(self):
         run_command("rm -rf {tmp_path}".format(tmp_path=self.tmp_path))
 
