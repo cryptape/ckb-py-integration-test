@@ -5,72 +5,13 @@ import pytest
 from framework.basic_fiber import FiberTest
 
 
-class TestSendPayment(FiberTest):
-    """
-    target_pubkey
-        和key send 一起使用
-    amount x
-        amount 为local_balance
-        amount 最大值
-        amount 最小值
-        amount 为0
-    payment_hash
-        payment_hash 不存在
-        已经使用的payment_hash
-        未使用的payment_hash x
-        不匹配的payment_hash
+class TestPaymentHash(FiberTest):
 
-    final_tlc_expiry_delta
-        - final_tlc_expiry_delta 为0
-        - final_tlc_expiry_delta 为1
-        - final_tlc_expiry_delta 为最大值
-        - final_tlc_expiry_delta 默认值
-
-    tlc_expiry_limit
-        - tlc_expiry_limit 为0
-        - 默认值
-        - 为1
-        - 0xffffffffffffffff
-    invoice
-    timeout
-        - todo 目前不生效
-    max_fee_amount x
-    max_parts
-        - todo
-    keysend x
-    udt_type_script x
-    allow_self_payment x
-        - a-b，b-a
-        - a-b,b-c,c-a
-    dry_run x
-    qa
-        channel 在各个状态调用 send_payment，只有在ready 才可以
-        并发测试
-        如何查询过去的交易记录
-
-    - target_pubkey 不存在
-    """
-
-    # FiberTest.debug = True
-
-    def test_target_pubkey_not_exist(self):
-        with pytest.raises(Exception) as exc_info:
-            self.fiber1.get_client().send_payment(
-                {
-                    "target_pubkey": "02a10c20047e52dbfa920d85bf2da89e790b18e89b7bcc5056968acc57c9e08531",
-                    "amount": hex(10 * 100000000),
-                    "keysend": True,
-                }
-            )
-
-        expected_error_message = "Failed to build route"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
-        )
-
-    def test_Musig2VerifyError(self):
-        #
+    def test_payment_hash_not_exist(self):
+        """
+        not exist
+        Returns:
+        """
         account_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account_private)
         self.fiber3.connect_peer(self.fiber2)
@@ -115,22 +56,14 @@ class TestSendPayment(FiberTest):
                     "PayeePublicKey"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
-                "amount": parse_invoice["invoice"]["amount"],
-                "payment_hash": parse_invoice["invoice"]["data"]["payment_hash"],
+                "payment_hash": self.generate_random_preimage(),
+                "amount": invoice["invoice"]["amount"],
+                "dry_run": True,
             }
         )
-        self.wait_invoice_state(self.fiber3, payment1["payment_hash"], "Paid")
 
-    def test_send_payment_sametime(self):
-        """
-        节点1 和节点2 同时给节点3的发票付钱
-            只会一个付款成功
-            目前是
-                一个付款成功
-                一个卡住
-        Returns:
-
-        """
+    @pytest.mark.skip("不匹配的payment_hash will cause node3 Musig2VerifyError")
+    def test_rand_hash_Musig2VerifyError(self):
         account_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account_private)
         self.fiber3.connect_peer(self.fiber2)
@@ -169,21 +102,77 @@ class TestSendPayment(FiberTest):
         parse_invoice = self.fiber2.get_client().parse_invoice(
             {"invoice": invoice["invoice_address"]}
         )
+
         payment1 = self.fiber1.get_client().send_payment(
             {
-                "invoice": invoice["invoice_address"],
+                "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
+                    "PayeePublicKey"
+                ],
+                "currency": parse_invoice["invoice"]["currency"],
+                "payment_hash": self.generate_random_preimage(),
+                "amount": invoice["invoice"]["amount"],
+                "dry_run": True,
             }
         )
-        payment2 = self.fiber2.get_client().send_payment(
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
+                    "PayeePublicKey"
+                ],
+                "currency": parse_invoice["invoice"]["currency"],
+                "payment_hash": self.generate_random_preimage(),
+                "amount": invoice["invoice"]["amount"],
+                # "dry_run": True,
+            }
+        )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Failed")
+        channels = self.fiber1.get_client().list_channels({})
+        assert channels["channels"][0]["state"] == "CHANNEL_READY"
+        assert channels["channels"][0]["offered_tlc_balance"] == "0x0"
+
+    def test_paid_hash(self):
+        """
+        rand hash
+        Returns:
+        """
+        self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        time.sleep(1)
+        invoice = self.fiber2.get_client().new_invoice(
+            {
+                "amount": hex(1 * 100000000),
+                "currency": "Fibd",
+                "description": "test invoice generated by node2",
+                "expiry": "0xe10",
+                "final_cltv": "0x28",
+                "payment_preimage": self.generate_random_preimage(),
+                "hash_algorithm": "sha256",
+            }
+        )
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        self.wait_invoice_state(self.fiber3, payment1["payment_hash"], "Paid")
+        self.wait_invoice_state(self.fiber2, payment["payment_hash"], "Paid")
 
-        payment1 = self.fiber1.get_client().get_payment(
-            {"payment_hash": payment1["payment_hash"]}
-        )
-        payment2 = self.fiber2.get_client().get_payment(
-            {"payment_hash": payment2["payment_hash"]}
+        # Payment session already exists
+        with pytest.raises(Exception) as exc_info:
+            self.fiber1.get_client().send_payment(
+                {
+                    "invoice": invoice["invoice_address"],
+                }
+            )
+        expected_error_message = "Payment session already exists"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
         )

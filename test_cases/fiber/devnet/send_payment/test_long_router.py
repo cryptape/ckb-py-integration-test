@@ -22,29 +22,40 @@ class TestLongRouter(FiberTest):
             linked_fiber.connect_peer(current_fiber)
             time.sleep(1)
             # open channel
-            current_fiber.get_client().open_channel({
-                "peer_id": linked_fiber.get_peer_id(),
-                "funding_amount": hex(
-                    500 * 100000000
-                ),
-                "public": True,
-            })
+            current_fiber.get_client().open_channel(
+                {
+                    "peer_id": linked_fiber.get_peer_id(),
+                    "funding_amount": hex(500 * 100000000),
+                    "public": True,
+                }
+            )
             # // AWAITING_TX_SIGNATURES
-            self.wait_for_channel_state(current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY")
-            linked_fiber.get_client().update_channel({
-                "channel_id": current_fiber.get_client().list_channels({})["channels"][0]["channel_id"],
-                "tlc_fee_proportional_millionths": hex(2000),
-            })
-            self.wait_for_channel_state(current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY")
+            self.wait_for_channel_state(
+                current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY"
+            )
+            linked_fiber.get_client().update_channel(
+                {
+                    "channel_id": current_fiber.get_client().list_channels({})[
+                        "channels"
+                    ][0]["channel_id"],
+                    "tlc_fee_proportional_millionths": hex(2000),
+                }
+            )
+            self.wait_for_channel_state(
+                current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY"
+            )
 
         time.sleep(1)
-        pub_key = self.fibers[-1].get_client().node_info()['public_key']
-        payment = self.fibers[0].get_client().send_payment({
-            "target_pubkey": pub_key,
-            "amount": hex(10 * 100000000),
-            "keysend": True,
-        })
-        self.wait_payment_state(self.fibers[0], payment['payment_hash'], 'Success')
-
-
-
+        pub_key = self.fibers[-1].get_client().node_info()["public_key"]
+        payment = (
+            self.fibers[0]
+            .get_client()
+            .send_payment(
+                {
+                    "target_pubkey": pub_key,
+                    "amount": hex(10 * 100000000),
+                    "keysend": True,
+                }
+            )
+        )
+        self.wait_payment_state(self.fibers[0], payment["payment_hash"], "Success")
