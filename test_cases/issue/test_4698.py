@@ -3,7 +3,7 @@ import pytest
 from framework.basic import CkbTest
 
 
-class TestTestTxPoolAccept(CkbTest):
+class Test4698(CkbTest):
 
     @classmethod
     def setup_class(cls):
@@ -47,7 +47,7 @@ class TestTestTxPoolAccept(CkbTest):
         self.node.getClient().clear_tx_pool()
 
     @pytest.mark.skip("wait for 120-rc3 release")
-    def test_send_transaction_fix(self):
+    def test_4698(self):
         """
         1. RPC send_transaction should not include stack trace in the RPC response
         Returns:
