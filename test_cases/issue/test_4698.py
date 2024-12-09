@@ -46,7 +46,6 @@ class Test4698(CkbTest):
         """
         self.node.getClient().clear_tx_pool()
 
-
     def test_4698(self):
         """
         1. RPC send_transaction should not include stack trace in the RPC response
