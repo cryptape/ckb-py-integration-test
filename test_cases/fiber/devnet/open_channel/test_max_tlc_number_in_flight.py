@@ -69,7 +69,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
                 }
             )
             add_tlc_list.append(add_tlc)
-            # time.sleep(0.5)
+            time.sleep(1)
         time.sleep(10)
         with pytest.raises(Exception) as exc_info:
             payment_preimage = self.generate_random_preimage()
@@ -143,17 +143,13 @@ class TestMaxTlcNumberInFlight(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        with pytest.raises(Exception) as exc_info:
-            self.fiber1.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                }
-            )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        payment = self.fiber1.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
         )
+        expected_error_message = "TemporaryChannelFailure"
+        assert expected_error_message in payment["failed_error"]
 
         channels = self.fiber1.get_client().list_channels(
             {"peer_id": self.fiber2.get_peer_id()}
@@ -257,7 +253,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
                 }
             )
             add_tlc_list.append(add_tlc)
-            # time.sleep(0.5)
+            time.sleep(1)
         time.sleep(10)
         with pytest.raises(Exception) as exc_info:
             payment_preimage = self.generate_random_preimage()

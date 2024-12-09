@@ -153,13 +153,12 @@ class TestAmount(FiberTest):
                     "dry_run": True,
                 }
             )
-        expected_error_message = "amount must be greater than 0"
+        expected_error_message = "no path found"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/361")
     def test_over_flow_panic(self):
         self.fiber3 = self.start_new_fiber(self.generate_account(1000))
         self.fiber3.connect_peer(self.fiber2)
@@ -189,15 +188,20 @@ class TestAmount(FiberTest):
 
         # amount : 0xfffffffffffffffffffffffffffffff
         channels = self.fiber1.get_client().list_channels({})
-        payment = self.fiber1.get_client().send_payment(
-            {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
-                "amount": "0xfffffffffffffffffffffffffffffff",
-                "keysend": True,
-                "dry_run": True,
-            }
+        with pytest.raises(Exception) as exc_info:
+            payment = self.fiber1.get_client().send_payment(
+                {
+                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                    "amount": "0xfffffffffffffffffffffffffffffff",
+                    "keysend": True,
+                    "dry_run": True,
+                }
+            )
+        expected_error_message = "should be less than"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        self.fiber1.get_client().list_channels({})
 
     @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/359")
     def test_send_mutil_channel(self):

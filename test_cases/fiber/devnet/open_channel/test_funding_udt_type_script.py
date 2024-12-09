@@ -38,7 +38,7 @@ class TestFundingUdtTypeScript(FiberTest):
             }
         )
         time.sleep(3)
-        channels = self.fiber1.get_client().list_channels({})
+        channels = self.fiber3.get_client().list_channels({})
         assert len(channels["channels"]) == 0
 
         with pytest.raises(Exception) as exc_info:

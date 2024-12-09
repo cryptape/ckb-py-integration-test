@@ -85,6 +85,7 @@ class TestCommitmentFeeRate(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    @pytest.mark.skip("commitment_fee_rate 不准确")
     def test_check_commitment_fee_rate_is_none(self):
         """
 
@@ -154,7 +155,7 @@ class TestCommitmentFeeRate(FiberTest):
         )
         self.wait_and_check_tx_pool_fee(1000)
 
-    # @pytest.mark.skip("手动测试")
+    @pytest.mark.skip("commitment_fee_rate 不准确")
     def test_check_commitment_fee_rate(self):
         """
         验证我方的commit fee

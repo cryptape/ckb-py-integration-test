@@ -193,10 +193,11 @@ class TestListChannels(FiberTest):
         channels = self.fiber1.get_client().list_channels({})
         assert channels["channels"][0]["is_public"] == True
 
-    def test_channel_outpoint(self):
+    def test_check_channel_result(self):
         """
         Returns:
         """
+        begin_time = time.time()
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
@@ -219,9 +220,43 @@ class TestListChannels(FiberTest):
         channels = self.fiber1.get_client().list_channels(
             {"peer_id": self.fiber2.get_peer_id()}
         )
+        # channel_id
+        assert channels["channels"][0]["channel_id"] is not None
+
+        # is_public
+        assert channels["channels"][0]["is_public"] is True
+
+        # channel_outpoint
         assert channels["channels"][0]["channel_outpoint"] is not None
         print("channel_outpoint:", channels["channels"][0]["channel_outpoint"])
         assert open_tx_hash in channels["channels"][0]["channel_outpoint"]
+
+        # peer_id
+        assert channels["channels"][0]["peer_id"] == self.fiber2.get_peer_id()
+
+        # funding_udt_type_script
+        assert channels["channels"][0][
+            "funding_udt_type_script"
+        ] == self.get_account_udt_script(self.fiber1.account_private)
+
+        # state
+        assert channels["channels"][0]["state"]["state_name"] == "CHANNEL_READY"
+
+        # local_balance
+        assert channels["channels"][0]["local_balance"] == hex(1000 * 100000000)
+
+        # offered_tlc_balance
+        assert channels["channels"][0]["offered_tlc_balance"] == hex(0)
+
+        # remote_balance
+        assert channels["channels"][0]["remote_balance"] == hex(0)
+
+        # received_tlc_balance
+        assert channels["channels"][0]["received_tlc_balance"] == hex(0)
+
+        # created_at
+        assert int(channels["channels"][0]["created_at"], 16) / 1000 > begin_time
+        assert int(channels["channels"][0]["created_at"], 16) / 1000 < time.time()
 
     @pytest.mark.skip("close channels can't found")
     def test_close_channels(self):

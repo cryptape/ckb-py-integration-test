@@ -29,9 +29,7 @@ class TestFundingAmount(FiberTest):
                     "funding_amount": "0x0",
                 }
             )
-        expected_error_message = (
-            "The funding amount should be greater than the reserved amount"
-        )
+        expected_error_message = "should be greater than or equal to 6200000000"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"

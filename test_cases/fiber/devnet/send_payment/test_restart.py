@@ -228,7 +228,7 @@ class TestRestart(FiberTest):
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(30 * 100000000)
 
-
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
     def test_restart_when_node_send_payment(self):
         account3_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account3_private)

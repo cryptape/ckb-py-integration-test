@@ -8,9 +8,29 @@ from framework.basic_fiber import FiberTest
 class TestLongRouter(FiberTest):
     # FiberTest.debug = True
 
-    @pytest.mark.skip("not support 3 channel")
+    def test_fee(self):
+        self.get_fiber_env(5)
+
+    def test_ccc(self):
+        for i in range(5):
+            self.start_new_mock_fiber("")
+        pub_key = self.fibers[3].get_client().node_info()["public_key"]
+        payment = (
+            self.fibers[0]
+            .get_client()
+            .send_payment(
+                {
+                    "target_pubkey": pub_key,
+                    "amount": hex(10 * 100000000),
+                    "keysend": True,
+                    # "dry_run": True,
+                }
+            )
+        )
+        self.wait_payment_state(self.fibers[0], payment["payment_hash"], "Success")
+
     def test_long_router(self):
-        router_length = 2
+        router_length = 5
         for i in range(router_length):
             account_private = self.generate_account(1000)
             fiber = self.start_new_fiber(account_private)
@@ -33,14 +53,14 @@ class TestLongRouter(FiberTest):
             self.wait_for_channel_state(
                 current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY"
             )
-            linked_fiber.get_client().update_channel(
-                {
-                    "channel_id": current_fiber.get_client().list_channels({})[
-                        "channels"
-                    ][0]["channel_id"],
-                    "tlc_fee_proportional_millionths": hex(2000),
-                }
-            )
+            # linked_fiber.get_client().update_channel(
+            #     {
+            #         "channel_id": current_fiber.get_client().list_channels({})[
+            #             "channels"
+            #         ][0]["channel_id"],
+            #         "tlc_fee_proportional_millionths": hex(2000),
+            #     }
+            # )
             self.wait_for_channel_state(
                 current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY"
             )

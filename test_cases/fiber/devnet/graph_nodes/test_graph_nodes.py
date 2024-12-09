@@ -68,7 +68,7 @@ class TestGraphNodes(FiberTest):
         print(graph_nodes)
         node_info = self.fiber1.get_client().node_info()
         if graph_nodes["nodes"][0]["node_id"] != node_info["public_key"]:
-            graph_nodes["nodes"] = graph_nodes["nodes"].reverse()
+            graph_nodes["nodes"].reverse()
         for i in range(len(graph_nodes["nodes"])):
             node = graph_nodes["nodes"][i]
             node_info = self.fibers[i].get_client().node_info()

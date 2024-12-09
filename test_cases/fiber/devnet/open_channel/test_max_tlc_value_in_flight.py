@@ -68,18 +68,14 @@ class TestMaxTlcValueInFlight(FiberTest):
                 },
             }
         )
-        with pytest.raises(Exception) as exc_info:
-            self.fiber1.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                }
-            )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        payment = self.fiber1.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
         )
-        #
+        expected_error_message = "TemporaryChannelFailure"
+        assert expected_error_message in payment["failed_error"]
+
         # invoice_balance = hex(160 * 100000000)
         # payment_preimage = self.generate_random_preimage()
         # invoice = self.fiber1.get_client().new_invoice(
@@ -511,17 +507,13 @@ class TestMaxTlcValueInFlight(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        with pytest.raises(Exception) as exc_info:
-            self.fiber1.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                }
-            )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        payment = self.fiber1.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
         )
+        expected_error_message = "TemporaryChannelFailure"
+        assert expected_error_message in payment["failed_error"]
         # send 1  ckb
         invoice_balance = hex(1 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -596,17 +588,13 @@ class TestMaxTlcValueInFlight(FiberTest):
         )
         before_channel = self.fiber2.get_client().list_channels({})
 
-        with pytest.raises(Exception) as exc_info:
-            self.fiber2.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                }
-            )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        payment = self.fiber2.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
         )
+        expected_error_message = "TemporaryChannelFailure"
+        assert expected_error_message in payment["failed_error"]
         # node2 send 1 ckb
         invoice_balance = hex(1 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -717,17 +705,13 @@ class TestMaxTlcValueInFlight(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        with pytest.raises(Exception) as exc_info:
-            self.fiber1.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                }
-            )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        payment = self.fiber1.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
         )
+        expected_error_message = "TemporaryChannelFailure"
+        assert expected_error_message in payment["failed_error"]
         # send 1  ckb
         invoice_balance = hex(1 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -811,17 +795,13 @@ class TestMaxTlcValueInFlight(FiberTest):
         )
         before_channel = self.fiber2.get_client().list_channels({})
 
-        with pytest.raises(Exception) as exc_info:
-            self.fiber2.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                }
-            )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        payment = self.fiber2.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
         )
+        expected_error_message = "TemporaryChannelFailure"
+        assert expected_error_message in payment["failed_error"]
 
         # node2 send 1 ckb
         invoice_balance = hex(1 * 100000000)

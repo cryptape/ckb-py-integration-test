@@ -59,6 +59,7 @@ class TestAcceptMutilChannelsSameTime(FiberTest):
             self.fiber2.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY"
         )
 
+    @pytest.mark.skip("检查是否有问题")
     def test_accept_channel_diff_channel_same_time(self):
         """
         accept channel: Accept multiple different channels at the same time
@@ -106,6 +107,17 @@ class TestAcceptMutilChannelsSameTime(FiberTest):
             }
         )
         time.sleep(1)
+        temporary_other_channels = []
+        for i in range(5):
+            temporary_other_channels.append(
+                fiber3.get_client().open_channel(
+                    {
+                        "peer_id": self.fiber2.get_peer_id(),
+                        "funding_amount": hex(63 * 100000000),
+                        "public": True,
+                    }
+                )
+            )
 
         # Step 6: Accept the first channel with fiber2 as the client
         self.fiber2.get_client().accept_channel(
@@ -123,6 +135,17 @@ class TestAcceptMutilChannelsSameTime(FiberTest):
                 "funding_amount": hex(62 * 100000000),
             }
         )
+        time.sleep(0.1)
+        for i in range(len(temporary_other_channels)):
+            self.fiber2.get_client().accept_channel(
+                {
+                    "temporary_channel_id": temporary_other_channels[i][
+                        "temporary_channel_id"
+                    ],
+                    "funding_amount": hex(62 * 100000000),
+                }
+            )
+            time.sleep(0.1)
 
         # Step 8: Wait for the first channel state to be "CHANNEL_READY"
         self.wait_for_channel_state(

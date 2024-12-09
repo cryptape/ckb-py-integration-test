@@ -159,6 +159,7 @@ class FundingAmount(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/373")
     def test_funding_amount_udt_gt_account_balance(self):
         account3_private = self.generate_account(
             1000, self.fiber1.account_private, 1000 * 100000000
