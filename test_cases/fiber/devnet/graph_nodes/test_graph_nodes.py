@@ -29,7 +29,7 @@ class TestGraphNodes(FiberTest):
             current_fiber.connect_peer(new_fiber)
             new_fibers.append(new_fiber)
             current_fiber = new_fiber
-
+        time.sleep(1)
         current_fiber.connect_peer(self.fiber1)
 
         current_fiber1 = self.start_new_fiber(self.generate_random_preimage())
