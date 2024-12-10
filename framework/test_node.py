@@ -269,6 +269,9 @@ class CkbNode:
         self.ckb_pid = -1
         time.sleep(3)
 
+    def rmLockFile(self):
+        run_command(f"cd {self.ckb_dir} && rm -rf data/db/LOCK")
+
     def prepare(
         self,
         other_ckb_config={},
