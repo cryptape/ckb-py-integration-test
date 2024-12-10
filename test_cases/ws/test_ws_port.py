@@ -258,7 +258,6 @@ class TestWs(CkbTest):
         self.Node.wait_node_height(self.cluster.ckb_nodes[0], tip_number, 1000)
         self.cluster.ckb_nodes[0].start_miner()
 
-
     def test_ckb_network_reuse_tcp_with_ws(self):
         # 1. new_node start with tcp
         new_node = self.CkbNode.init_dev_by_port(
