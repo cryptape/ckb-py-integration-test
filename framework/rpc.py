@@ -4,6 +4,9 @@ from typing import Union
 import requests
 
 import json
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 
 class RPCClient:
@@ -244,25 +247,25 @@ class RPCClient:
 
         headers = {"content-type": "application/json"}
         data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}
-        print(f"request:url:{self.url},data:\n{json.dumps(data)}")
+        LOGGER.debug(f"request:url:{self.url},data:\n{json.dumps(data)}")
         for i in range(try_count):
             try:
                 response = requests.post(
                     self.url, data=json.dumps(data), headers=headers
                 ).json()
-                print(f"response:\n{json.dumps(response)}")
+                LOGGER.debug(f"response:\n{json.dumps(response)}")
                 if "error" in response.keys():
                     error_message = response["error"].get("message", "Unknown error")
                     raise Exception(f"Error: {error_message}")
 
                 return response.get("result", None)
             except requests.exceptions.ConnectionError as e:
-                print(e)
-                print("request too quickly, wait 2s")
+                LOGGER.debug(e)
+                LOGGER.debug("request too quickly, wait 2s")
                 time.sleep(2)
                 continue
             except Exception as e:
-                print("Exception:", e)
+                LOGGER.error("Exception:", e)
                 raise e
         raise Exception("request time out")
 

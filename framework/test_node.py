@@ -19,7 +19,7 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/v118/specs/dev.toml",
-        "download/0.119.0",
+        "download/0.120.0",
     )
 
     CURRENT_FIBER = (
@@ -218,6 +218,22 @@ class CkbNode:
         peer_id = node.get_peer_id()
         peer_address = node.get_peer_address()
         print("add node response:", self.getClient().add_node(peer_id, peer_address))
+
+    def connected_ws(self, node):
+        peer_id = node.get_peer_id()
+        peer_address = node.get_peer_address()
+        if "ws" not in peer_address:
+            peer_address = peer_address + "/ws"
+        print("add node response:", self.getClient().add_node(peer_id, peer_address))
+
+    def connected_all_address(self, node):
+        peer_id = node.get_peer_id()
+        node_info = node.client.local_node_info()
+        for address in node_info["addresses"]:
+            peer_address = address["address"].replace("0.0.0.0", "127.0.0.1")
+            print(
+                "add node response:", self.getClient().add_node(peer_id, peer_address)
+            )
 
     def getClient(self) -> RPCClient:
         return self.client

@@ -4,6 +4,10 @@ import requests
 
 import json
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 
 class FiberRPCClient:
     def __init__(self, url):
@@ -192,7 +196,7 @@ class FiberRPCClient:
     def call(self, method, params):
         headers = {"content-type": "application/json"}
         data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}
-        print(
+        LOGGER.debug(
             "curl --location '{url}' --header 'Content-Type: application/json' --data '{data}'".format(
                 url=self.url, data=json.dumps(data, indent=4)
             )
@@ -202,15 +206,17 @@ class FiberRPCClient:
                 response = requests.post(
                     self.url, data=json.dumps(data), headers=headers
                 ).json()
-                print("response:\n{response}".format(response=json.dumps(response)))
+                LOGGER.debug(
+                    "response:\n{response}".format(response=json.dumps(response))
+                )
                 if "error" in response.keys():
                     error_message = response["error"].get("message", "Unknown error")
                     raise Exception(f"Error: {error_message}")
 
                 return response.get("result", None)
             except requests.exceptions.ConnectionError as e:
-                print(e)
-                print("request too quickly, wait 2s")
+                LOGGER.debug(e)
+                LOGGER.debug("request too quickly, wait 2s")
                 time.sleep(2)
                 continue
         raise Exception("request time out")

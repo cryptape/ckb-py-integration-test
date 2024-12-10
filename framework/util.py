@@ -15,6 +15,11 @@ U128_MAX_COMPATIBLE = 2**128 - 1
 import random
 
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
+
 def to_json(value):
     return json.dumps(value)
 
@@ -81,14 +86,14 @@ def create_config_file(config_values, template_path, output_file):
 def run_command(cmd, check_exit_code=True, env=None):
     if cmd[-1] == "&":
         cmd1 = "{cmd} echo $! > pid.txt".format(cmd=cmd)
-        print("cmd:{cmd}".format(cmd=cmd1))
+        LOGGER.debug("cmd:{cmd}".format(cmd=cmd1))
 
         process = subprocess.Popen(cmd1, shell=True, env=env)
         time.sleep(1)
-        print("process PID:", process.pid)
+        LOGGER.debug("process PID:", process.pid)
         with open("pid.txt", "r") as f:
             pid = int(f.read().strip())
-            print("PID:", pid)
+            LOGGER.debug("PID:", pid)
             # pid is new shell
             # pid+1 = run cmd
             # result:       55456  13.6  0.2 409387712  34448   ??  R     4:22PM   0:00.05 ./ckb run --indexer
@@ -99,7 +104,7 @@ def run_command(cmd, check_exit_code=True, env=None):
             #        ./ckb run --indexer > node.log 2>&1 & echo $! > pid.txt
             return pid + 1
 
-    print("cmd:{cmd}".format(cmd=cmd))
+    LOGGER.debug("cmd:{cmd}".format(cmd=cmd))
     process = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=env
     )
@@ -107,17 +112,17 @@ def run_command(cmd, check_exit_code=True, env=None):
     exit_code = process.returncode
 
     if exit_code != 0:
-        print("Command failed with exit code:", exit_code)
+        LOGGER.debug("Command failed with exit code:", exit_code)
         if stderr:
-            print("Error:", stderr.decode("utf-8"))
+            LOGGER.debug("Error:", stderr.decode("utf-8"))
         if not check_exit_code:
             return exit_code
         raise Exception(stderr.decode("utf-8"))
     if stderr.decode("utf-8") != "" and stdout.decode("utf-8") != "":
-        print("wain:{result}".format(result=stderr.decode("utf-8")))
-        print("result:{result}".format(result=stdout.decode("utf-8")))
+        LOGGER.debug("wain:{result}".format(result=stderr.decode("utf-8")))
+        LOGGER.debug("result:{result}".format(result=stdout.decode("utf-8")))
         return stdout.decode("utf-8")
-    print("result:{result}".format(result=stdout.decode("utf-8")))
+    LOGGER.debug("result:{result}".format(result=stdout.decode("utf-8")))
     return stdout.decode("utf-8")
 
 
@@ -139,7 +144,7 @@ def read_toml_file(file_path):
             config = toml.loads(toml_content)
             return config
     except Exception as e:
-        print(f"Error reading TOML file: {e}")
+        LOGGER.debug(f"Error reading TOML file: {e}")
         return None
 
 
@@ -171,7 +176,7 @@ def to_int_from_big_uint128_le(hex_str):
 
     # Convert the byte array into an integer
     result = int.from_bytes(buf, byteorder="big")
-    print("to_int_from_big_uint128_le:", hex_str, " result ", result)
+    LOGGER.debug("to_int_from_big_uint128_le:", hex_str, " result ", result)
 
     return result
 
@@ -209,4 +214,4 @@ def generate_account_privakey():
 if __name__ == "__main__":
     ret = to_big_uint128_le_compatible(100000)
     ret1 = to_int_from_big_uint128_le(ret)
-    print(ret1)
+    LOGGER.debug(ret1)

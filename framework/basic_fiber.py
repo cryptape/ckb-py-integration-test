@@ -8,6 +8,8 @@ import time
 import random
 import datetime
 
+import logging
+
 
 class FiberTest(CkbTest):
     # deploy
@@ -17,6 +19,7 @@ class FiberTest(CkbTest):
     fiber2: Fiber
     debug = False
     first_debug = False
+    logger = logging.getLogger(__name__)
 
     @classmethod
     def setup_class(cls):
@@ -41,10 +44,10 @@ class FiberTest(CkbTest):
 
         if cls.debug:
             if check_port(8114):
-                print("=====不是第一次启动=====")
+                cls.logger.debug("=====不是第一次启动=====")
                 return
             cls.debug = False
-            print("====debug====第一次启动=")
+            cls.logger.debug("====debug====第一次启动=")
             cls.first_debug = True
 
         cls.node.prepare()
@@ -134,10 +137,10 @@ class FiberTest(CkbTest):
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
-        print("before_balance1:", before_balance1)
+        cls.logger.debug("before_balance1:", before_balance1)
         cls.fiber1.connect_peer(cls.fiber2)
         time.sleep(1)
-        print("\nSetting up method", method.__name__)
+        cls.logger.debug("\nSetting up method", method.__name__)
 
     def teardown_method(self, method):
         if self.debug:
@@ -214,7 +217,7 @@ class FiberTest(CkbTest):
 
     def start_new_fiber(self, account_private_key, config=None):
         if self.debug:
-            print("=================start  mock fiber ==================")
+            self.logger.debug("=================start  mock fiber ==================")
             return self.start_new_mock_fiber(account_private_key, config)
         update_config = config
         if config is None:
@@ -257,9 +260,9 @@ class FiberTest(CkbTest):
                 time.sleep(1)
                 continue
             if channels["channels"][0]["state"]["state_name"] == expected_state:
-                print(f"Channel reached expected state: {expected_state}")
+                self.logger.debug(f"Channel reached expected state: {expected_state}")
                 return channels["channels"][0]["channel_id"]
-            print(
+            self.logger.debug(
                 f"Waiting for channel state: {expected_state}, current state: {channels['channels'][0]['state']['state_name']}"
             )
             time.sleep(1)
@@ -342,11 +345,11 @@ class FiberTest(CkbTest):
         )
 
     def get_fiber_env(self, new_fiber_count=0):
-        # print ckb tip number
+        # self.logger.debug ckb tip number
         for i in range(new_fiber_count):
             self.start_new_mock_fiber("")
         node_tip_number = self.node.getClient().get_tip_block_number()
-        # print fiber data
+        # self.logger.debug fiber data
         fibers_data = []
 
         for i in range(len(self.fibers)):
@@ -369,26 +372,34 @@ class FiberTest(CkbTest):
                     "channels": channels["channels"],
                 }
             )
-        print("============================================================")
-        print("======================== Fiber Env =========================")
-        print("============================================================")
-        print(f"ckb node url: {self.node.rpcUrl}, tip number: {node_tip_number}")
+        self.logger.debug(
+            "============================================================"
+        )
+        self.logger.debug(
+            "======================== Fiber Env ========================="
+        )
+        self.logger.debug(
+            "============================================================"
+        )
+        self.logger.debug(
+            f"ckb node url: {self.node.rpcUrl}, tip number: {node_tip_number}"
+        )
         for i in range(len(self.fibers)):
-            print(f"--- current fiber: {i}----")
-            print(f"url:{self.fibers[i].client.url}")
-            print(
+            self.logger.debug(f"--- current fiber: {i}----")
+            self.logger.debug(f"url:{self.fibers[i].client.url}")
+            self.logger.debug(
                 f"account private key: {self.fibers[i].account_private}, ckb balance: {fibers_data[i]['account_capacity']} ,udt balance: {fibers_data[i]['udt_cell']}"
             )
-            print(f"path:{self.fibers[i].tmp_path}")
+            self.logger.debug(f"path:{self.fibers[i].tmp_path}")
             node_info = fibers_data[i]["node_info"]
-            print(
+            self.logger.debug(
                 f"commit_hash:{node_info['commit_hash']}",
             )
-            print(f"public_key:{node_info['public_key']}")
-            print(f"peer_id:{node_info['peer_id']}")
-            print(f"channel_count:{int(node_info['channel_count'], 16)}")
-            print(f"peers_count:{int(node_info['peers_count'], 16)}")
-            print(
+            self.logger.debug(f"public_key:{node_info['public_key']}")
+            self.logger.debug(f"peer_id:{node_info['peer_id']}")
+            self.logger.debug(f"channel_count:{int(node_info['channel_count'], 16)}")
+            self.logger.debug(f"peers_count:{int(node_info['peers_count'], 16)}")
+            self.logger.debug(
                 f"pending_channel_count:{int(node_info['pending_channel_count'], 16)}"
             )
             channels = fibers_data[i]["channels"]
@@ -404,21 +415,21 @@ class FiberTest(CkbTest):
                 received_tlc_balance = (
                     int(channel["received_tlc_balance"], 16) / 100000000
                 )
-                created_at_hex = int(channel["created_at"], 16) / 1000000
+                created_at_hex = int(channel["created_at"], 16) / 1000
                 created_at = datetime.datetime.fromtimestamp(created_at_hex).strftime(
                     "%Y-%m-%d %H:%M:%S"
                 )
 
                 # 打印结果
-                print(f"-----Channel ID: {channel_id}-------")
-                print(f"Peer ID: {peer_id}")
-                print(f"State: {state_name}")
-                print(f"Local Balance: {local_balance}")
-                print(f"Offered TLC Balance: {offered_tlc_balance}")
-                print(f"Remote Balance: {remote_balance}")
-                print(f"Received TLC Balance: {received_tlc_balance}")
-                print(f"Created At: {created_at}")
-                print("-" * 40)
+                self.logger.debug(f"-----Channel ID: {channel_id}-------")
+                self.logger.debug(f"Peer ID: {peer_id}")
+                self.logger.debug(f"State: {state_name}")
+                self.logger.debug(f"Local Balance: {local_balance}")
+                self.logger.debug(f"Offered TLC Balance: {offered_tlc_balance}")
+                self.logger.debug(f"Remote Balance: {remote_balance}")
+                self.logger.debug(f"Received TLC Balance: {received_tlc_balance}")
+                self.logger.debug(f"Created At: {created_at}")
+                self.logger.debug("-" * 40)
 
     def get_fiber_message(self, fiber):
         channels = fiber.get_client().list_channels({})
@@ -426,15 +437,17 @@ class FiberTest(CkbTest):
         node_info = fiber.get_client().node_info()
         graph_channels = fiber.get_client().graph_channels()
         graph_nodes = fiber.get_client().graph_nodes()
-        print(
+        self.logger.debug(
             f"commit_hash:{node_info['commit_hash']}",
         )
-        print(f"public_key:{node_info['public_key']}")
-        print(f"peer_id:{node_info['peer_id']}")
-        print(f"channel_count:{int(node_info['channel_count'], 16)}")
-        print(f"peers_count:{int(node_info['peers_count'], 16)}")
-        print(f"pending_channel_count:{int(node_info['pending_channel_count'], 16)}")
-        print("---------channel------")
+        self.logger.debug(f"public_key:{node_info['public_key']}")
+        self.logger.debug(f"peer_id:{node_info['peer_id']}")
+        self.logger.debug(f"channel_count:{int(node_info['channel_count'], 16)}")
+        self.logger.debug(f"peers_count:{int(node_info['peers_count'], 16)}")
+        self.logger.debug(
+            f"pending_channel_count:{int(node_info['pending_channel_count'], 16)}"
+        )
+        self.logger.debug("---------channel------")
         # 处理每个通道
         for channel in channels:
             channel_id = channel["channel_id"]
@@ -450,15 +463,15 @@ class FiberTest(CkbTest):
             )
 
             # 打印结果
-            print(f"Channel ID: {channel_id}")
-            print(f"Peer ID: {peer_id}")
-            print(f"State: {state_name}")
-            print(f"Local Balance: {local_balance}")
-            print(f"Offered TLC Balance: {offered_tlc_balance}")
-            print(f"Remote Balance: {remote_balance}")
-            print(f"Received TLC Balance: {received_tlc_balance}")
-            print(f"Created At: {created_at}")
-            print("-" * 40)
+            self.logger.debug(f"Channel ID: {channel_id}")
+            self.logger.debug(f"Peer ID: {peer_id}")
+            self.logger.debug(f"State: {state_name}")
+            self.logger.debug(f"Local Balance: {local_balance}")
+            self.logger.debug(f"Offered TLC Balance: {offered_tlc_balance}")
+            self.logger.debug(f"Remote Balance: {remote_balance}")
+            self.logger.debug(f"Received TLC Balance: {received_tlc_balance}")
+            self.logger.debug(f"Created At: {created_at}")
+            self.logger.debug("-" * 40)
 
     def generate_random_preimage(self):
         hash_str = "0x"
