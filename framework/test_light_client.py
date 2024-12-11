@@ -39,9 +39,14 @@ class CkbLightClientConfigPath(Enum):
         "download/0.3.6/ckb-light-client",
     )
 
+    V0_4_1 = (
+        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
+        "download/0.4.2/ckb-light-client",
+    )
+
     CURRENT_TEST = (
         "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.6/ckb-light-client",
+        "download/0.4.1/ckb-light-client",
     )
 
     def __init__(self, ckb_light_client_config_path, ckb_light_bin_path):

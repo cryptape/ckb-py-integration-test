@@ -18,27 +18,34 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/v118/specs/dev.toml",
-        "download/0.119.0",
+        "download/0.120.0",
     )
     TESTNET = (
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/specs/testnet.toml.j2",
-        "download/0.119.0",
+        "download/0.120.0",
     )
 
     CURRENT_MAIN = (
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.119.0",
+        "download/0.120.0",
     )
 
     PREVIEW_DUMMY = (
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/specs/preview_dev.toml",
-        "download/0.119.0",
+        "download/0.120.0",
+    )
+
+    v120 = (
+        "source/template/ckb/v118/ckb.toml.j2",
+        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/ckb/v118/specs/dev.toml",
+        "download/0.120.0",
     )
 
     v119 = (
@@ -261,6 +268,9 @@ class CkbNode:
         run_command(f"kill $(lsof -t -i:{port})", check_exit_code=False)
         self.ckb_pid = -1
         time.sleep(3)
+
+    def rmLockFile(self):
+        run_command(f"cd {self.ckb_dir} && rm -rf data/db/LOCK")
 
     def prepare(
         self,
