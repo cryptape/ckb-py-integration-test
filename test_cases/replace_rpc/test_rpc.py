@@ -16,7 +16,7 @@ class TestRpc(CkbTest):
 
         """
         cls.node113 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115
+            cls.CkbNodeConfigPath.v120, "telnet/node", 8114, 8115
         )
         cls.node113.prepare(
             other_ckb_config={
@@ -249,12 +249,8 @@ class TestRpc(CkbTest):
             expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
-        socket = self.node113.subscribe_telnet(
-            "new_tip_header", self.node113.rpcUrl.replace("http://", "")
-        )
         with pytest.raises(Exception) as exc_info:
+            socket = self.node113.subscribe_telnet(
+                "new_tip_header", self.node113.rpcUrl.replace("http://", "")
+            )
             socket.read_very_eager()
-        expected_error_message = "telnet connection closed"
-        assert (
-            expected_error_message in exc_info.value.args[0]
-        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"

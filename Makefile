@@ -40,7 +40,8 @@ test_cases := \
     test_cases/feature \
     test_cases/config \
     test_cases/miner \
-    test_cases/get_fee_rate_statistics
+    test_cases/get_fee_rate_statistics \
+	test_cases/ws
 
 
 test:
