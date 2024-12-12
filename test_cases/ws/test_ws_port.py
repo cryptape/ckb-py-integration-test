@@ -116,7 +116,7 @@ class TestWs(CkbTest):
 
         # 1. new_node start with tcp
         new_node = self.CkbNode.init_dev_by_port(
-            self.CkbNodeConfigPath.CURRENT_TEST, "cluster1/node_new", 8134, 8236
+            self.CkbNodeConfigPath.CURRENT_TEST, "cluster1/node_new1", 8134, 8236
         )
         new_node.prepare(
             other_ckb_config={
