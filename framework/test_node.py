@@ -152,7 +152,7 @@ class CkbNodeConfigPath(Enum):
     v108 = ("", "", "", "")
 
     def __init__(
-            self, ckb_config_path, ckb_miner_config_path, ckb_spec_path, ckb_bin_path
+        self, ckb_config_path, ckb_miner_config_path, ckb_spec_path, ckb_bin_path
     ):
         self.ckb_config_path = ckb_config_path
         self.ckb_miner_config_path = ckb_miner_config_path
@@ -166,7 +166,7 @@ class CkbNodeConfigPath(Enum):
 class CkbNode:
     @classmethod
     def init_dev_by_port(
-            cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port
+        cls, ckb_node_path_enum: CkbNodeConfigPath, dec_dir, rpc_port, p2p_port
     ):
         ckb_config, ckb_miner_config, ckb_specs_config = get_ckb_configs(
             p2p_port, rpc_port
@@ -176,12 +176,12 @@ class CkbNode:
         )
 
     def __init__(
-            self,
-            ckb_node_path_enum: CkbNodeConfigPath,
-            dec_dir,
-            ckb_config=CKB_DEFAULT_CONFIG,
-            ckb_miner_config=CKB_MINER_CONFIG,
-            ckb_specs_config={},
+        self,
+        ckb_node_path_enum: CkbNodeConfigPath,
+        dec_dir,
+        ckb_config=CKB_DEFAULT_CONFIG,
+        ckb_miner_config=CKB_MINER_CONFIG,
+        ckb_specs_config={},
     ):
         self.ckb_config_path = ckb_node_path_enum
         self.dec_path = ckb_config
@@ -289,11 +289,11 @@ class CkbNode:
         run_command(f"cd {self.ckb_dir} && rm -rf data/db/LOCK")
 
     def prepare(
-            self,
-            other_ckb_config={},
-            other_ckb_miner_config={},
-            other_ckb_spec_config={},
-            check_file=False,
+        self,
+        other_ckb_config={},
+        other_ckb_miner_config={},
+        other_ckb_spec_config={},
+        check_file=False,
     ):
         self.ckb_config.update(other_ckb_config)
         self.ckb_miner_config.update(other_ckb_miner_config)
@@ -387,9 +387,9 @@ class CkbNode:
         tn = telnetlib.Telnet(host, int(port))
         print("----")
         topic_str = (
-                '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
-                + topic
-                + '"]}'
+            '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
+            + topic
+            + '"]}'
         )
         print(f"host:{host},port:{port},topic_str:{topic_str}")
         tn.write(topic_str.encode("utf-8") + b"\n")
@@ -410,9 +410,9 @@ class CkbNode:
         print(ckb_ws_listen_address)
         ws = create_connection(f"ws://{ckb_ws_listen_address}")
         topic_str = (
-                '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
-                + topic
-                + '"]}'
+            '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
+            + topic
+            + '"]}'
         )
         ws.send(topic_str)
         print("Sent")
