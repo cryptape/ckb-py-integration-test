@@ -15,30 +15,37 @@ from websocket import create_connection, WebSocket
 
 class CkbNodeConfigPath(Enum):
     CURRENT_TEST = (
-        "source/template/ckb/v118/ckb.toml.j2",
-        "source/template/ckb/v118/ckb-miner.toml.j2",
-        "source/template/ckb/v118/specs/dev.toml",
-        "download/0.119.0",
+        "source/template/ckb/v120/ckb.toml.j2",
+        "source/template/ckb/v120/ckb-miner.toml.j2",
+        "source/template/ckb/v120/specs/dev.toml",
+        "download/0.120.0",
     )
     TESTNET = (
-        "source/template/ckb/v118/ckb.toml.j2",
-        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/ckb/v120/ckb.toml.j2",
+        "source/template/ckb/v120/ckb-miner.toml.j2",
         "source/template/specs/testnet.toml.j2",
-        "download/0.119.0",
+        "download/0.120.0",
     )
 
     CURRENT_MAIN = (
-        "source/template/ckb/v118/ckb.toml.j2",
-        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/ckb/v120/ckb.toml.j2",
+        "source/template/ckb/v120/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.119.0",
+        "download/0.120.0",
     )
 
     PREVIEW_DUMMY = (
-        "source/template/ckb/v118/ckb.toml.j2",
-        "source/template/ckb/v118/ckb-miner.toml.j2",
+        "source/template/ckb/v120/ckb.toml.j2",
+        "source/template/ckb/v120/ckb-miner.toml.j2",
         "source/template/specs/preview_dev.toml",
-        "download/0.119.0",
+        "download/0.120.0",
+    )
+
+    v120 = (
+        "source/template/ckb/v120/ckb.toml.j2",
+        "source/template/ckb/v120/ckb-miner.toml.j2",
+        "source/template/ckb/v120/specs/dev.toml",
+        "download/0.120.0",
     )
 
     v119 = (
@@ -211,6 +218,22 @@ class CkbNode:
         peer_address = node.get_peer_address()
         print("add node response:", self.getClient().add_node(peer_id, peer_address))
 
+    def connected_ws(self, node):
+        peer_id = node.get_peer_id()
+        peer_address = node.get_peer_address()
+        if "ws" not in peer_address:
+            peer_address = peer_address + "/ws"
+        print("add node response:", self.getClient().add_node(peer_id, peer_address))
+
+    def connected_all_address(self, node):
+        peer_id = node.get_peer_id()
+        node_info = node.client.local_node_info()
+        for address in node_info["addresses"]:
+            peer_address = address["address"].replace("0.0.0.0", "127.0.0.1")
+            print(
+                "add node response:", self.getClient().add_node(peer_id, peer_address)
+            )
+
     def getClient(self) -> RPCClient:
         return self.client
 
@@ -261,6 +284,9 @@ class CkbNode:
         run_command(f"kill $(lsof -t -i:{port})", check_exit_code=False)
         self.ckb_pid = -1
         time.sleep(3)
+
+    def rmLockFile(self):
+        run_command(f"cd {self.ckb_dir} && rm -rf data/db/LOCK")
 
     def prepare(
         self,
@@ -365,6 +391,7 @@ class CkbNode:
             + topic
             + '"]}'
         )
+        print(f"host:{host},port:{port},topic_str:{topic_str}")
         tn.write(topic_str.encode("utf-8") + b"\n")
         data = tn.read_until(b"}\n")
         if data:
