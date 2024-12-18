@@ -8,6 +8,10 @@ from framework.test_node import CkbNodeConfigPath
 from framework.util import get_project_root
 from framework.util import run_command
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 # cli_path = "cd {root_path}/{cli_path} && ./ckb-cli".format(root_path=get_project_root(),
 #                                                            cli_path=CkbNodeConfigPath.CURRENT_TEST.ckb_bin_path)
 cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
@@ -23,7 +27,7 @@ def exception_use_old_ckb():
                 if "SoftFork" in str(e):
                     global cli_path
                     cli_path = f"cd {get_project_root()}/source && ./ckb-cli-old"
-                    print("------ change use old ckb-cli -------")
+                    LOGGER.debug("------ change use old ckb-cli -------")
                     try:
                         ret = func(*args, **kwargs)
                         cli_path = f"cd {get_project_root()}/source && ./ckb-cli"

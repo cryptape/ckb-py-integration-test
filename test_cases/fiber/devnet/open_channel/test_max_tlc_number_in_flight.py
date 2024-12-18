@@ -33,7 +33,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
             "channel_id"
         ]
         add_tlc_list = []
-        invoice_count = 30
+        invoice_count = 125
         # 获取当前时间戳
         invoice_balance = 10 * 100000000
         invoice = self.fiber2.get_client().new_invoice(
@@ -47,7 +47,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
-        time.sleep(1)
+        time.sleep(0.3)
         payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
@@ -83,7 +83,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
                     "hash_algorithm": "sha256",
                 }
             )
-        expected_error_message = "TlcErrPacket"
+        expected_error_message = "TemporaryChannelFailure"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -267,7 +267,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
                     "hash_algorithm": "sha256",
                 }
             )
-        expected_error_message = "TlcErrPacket"
+        expected_error_message = "TemporaryChannelFailure"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -275,7 +275,6 @@ class TestMaxTlcNumberInFlight(FiberTest):
         self.fiber1.get_client().list_channels({})
         self.fiber2.get_client().list_channels({})
 
-    @pytest.mark.skip("影响2个节点")
     def test_max_tlc_number_in_flight_not_eq_default_other_node(self):
         """
         max_tlc_number_in_flight != default
@@ -303,8 +302,6 @@ class TestMaxTlcNumberInFlight(FiberTest):
         channel_id = self.fiber1.get_client().list_channels({})["channels"][0][
             "channel_id"
         ]
-        add_tlc_list = []
-        invoice_count = 16
         # 获取当前时间戳
         invoice_balance = 10 * 100000000
         invoice = self.fiber2.get_client().new_invoice(
@@ -340,3 +337,4 @@ class TestMaxTlcNumberInFlight(FiberTest):
                     "hash_algorithm": "sha256",
                 }
             )
+            time.sleep(0.3)

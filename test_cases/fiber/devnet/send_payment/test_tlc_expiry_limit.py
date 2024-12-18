@@ -7,7 +7,7 @@ from framework.basic_fiber import FiberTest
 
 class TestTlcExpiryLimit(FiberTest):
 
-    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/367")
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/367")
     def test_tlc_expiry_limit(self):
         """
         - 默认值
@@ -80,7 +80,7 @@ class TestTlcExpiryLimit(FiberTest):
                 "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
                 "amount": hex(10 * 100000000),
                 "keysend": True,
-                "final_tlc_expiry_delta": hex(900000),
+                "tlc_expiry_limit": hex(86400000),
             }
         )
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")

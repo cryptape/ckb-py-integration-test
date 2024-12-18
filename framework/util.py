@@ -14,7 +14,6 @@ U128_MIN_COMPATIBLE = 0  # Adjust according to your definition
 U128_MAX_COMPATIBLE = 2**128 - 1
 import random
 
-
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -90,10 +89,10 @@ def run_command(cmd, check_exit_code=True, env=None):
 
         process = subprocess.Popen(cmd1, shell=True, env=env)
         time.sleep(1)
-        LOGGER.debug("process PID:", process.pid)
+        LOGGER.debug(f"process PID:{process.pid}")
         with open("pid.txt", "r") as f:
             pid = int(f.read().strip())
-            LOGGER.debug("PID:", pid)
+            LOGGER.debug(f"PID:{pid}")
             # pid is new shell
             # pid+1 = run cmd
             # result:       55456  13.6  0.2 409387712  34448   ??  R     4:22PM   0:00.05 ./ckb run --indexer
@@ -112,9 +111,9 @@ def run_command(cmd, check_exit_code=True, env=None):
     exit_code = process.returncode
 
     if exit_code != 0:
-        LOGGER.debug("Command failed with exit code:", exit_code)
+        LOGGER.debug(f"Command failed with exit code: {exit_code}")
         if stderr:
-            LOGGER.debug("Error:", stderr.decode("utf-8"))
+            LOGGER.debug(f'Error:{stderr.decode("utf-8")}')
         if not check_exit_code:
             return exit_code
         raise Exception(stderr.decode("utf-8"))
@@ -176,7 +175,6 @@ def to_int_from_big_uint128_le(hex_str):
 
     # Convert the byte array into an integer
     result = int.from_bytes(buf, byteorder="big")
-    LOGGER.debug("to_int_from_big_uint128_le:", hex_str, " result ", result)
 
     return result
 

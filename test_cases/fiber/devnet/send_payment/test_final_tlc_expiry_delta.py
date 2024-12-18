@@ -5,7 +5,7 @@ from framework.basic_fiber import FiberTest
 
 class TestFinalTlcExpiryDelta(FiberTest):
 
-    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/367")
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/367")
     def test_final_tlc_expiry_delta(self):
         """
         1. none

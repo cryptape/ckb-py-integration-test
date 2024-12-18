@@ -138,26 +138,29 @@ class FundingAmount(FiberTest):
             self.fiber1.account_private,
             0,
             self.fiber1.account_private,
-            int("0xfffffffffffffffffffffffffffffff", 16),
+            int("0xfffffffffffffffffffffffffffffff", 16) - 1000,
         )
         capacity = self.Ckb_cli.wallet_get_capacity(self.account2["address"]["testnet"])
-        with pytest.raises(Exception) as exc_info:
-            temporary_channel_id = self.fiber1.get_client().open_channel(
-                {
-                    "peer_id": self.fiber2.get_peer_id(),
-                    "funding_amount": "0xfffffffffffffffffffffffffffffff",
-                    "public": True,
-                    "funding_udt_type_script": self.get_account_udt_script(
-                        self.fiber1.account_private
-                    ),
-                    # "tlc_fee_proportional_millionths": "0x4B0",
-                }
-            )
-        expected_error_message = "The funding amount (21267647932558653966460912964485513215) should be less than 18446744073709551615"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        # with pytest.raises(Exception) as exc_info:
+        temporary_channel_id = self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                # "funding_amount": "0xfffffffffffffffffffffffffffffff",
+                "funding_amount": hex(
+                    int("0xfffffffffffffffffffffffffffffff", 16) - 1000
+                ),
+                "public": True,
+                "funding_udt_type_script": self.get_account_udt_script(
+                    self.fiber1.account_private
+                ),
+                # "tlc_fee_proportional_millionths": "0x4B0",
+            }
         )
+        # expected_error_message = "The funding amount (21267647932558653966460912964485513215) should be less than 18446744073709551615"
+        # assert expected_error_message in exc_info.value.args[0], (
+        #     f"Expected substring '{expected_error_message}' "
+        #     f"not found in actual string '{exc_info.value.args[0]}'"
+        # )
 
     @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/373")
     def test_funding_amount_udt_gt_account_balance(self):

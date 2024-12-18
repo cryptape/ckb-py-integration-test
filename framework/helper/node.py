@@ -4,6 +4,22 @@ import time
 from functools import wraps
 
 
+def tx_message(client, tx_hash):
+    tx = client.get_transaction(tx_hash)
+    inputs = []
+    for i in range(len(tx["transaction"]["inputs"])):
+        pre_cell = client.get_transaction(
+            tx["transaction"]["inputs"][i]["previous_output"]["tx_hash"]
+        )["transaction"]["outputs"][
+            int(tx["transaction"]["inputs"][i]["previous_output"]["index"], 16)
+        ]
+        intput_cells.append(
+            {"arg": pre_cell["lock"]["args"], "capacity": int(pre_cell["capacity"], 16)}
+        )
+    outputs = []
+    return {"inputs": [], "outputs": []}
+
+
 def wait_until_timeout(wait_times):
     def decorator(func):
         @wraps(func)

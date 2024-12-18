@@ -62,7 +62,6 @@ class TestPaymentHash(FiberTest):
             }
         )
 
-    @pytest.mark.skip("不匹配的payment_hash will cause node3 Musig2VerifyError")
     def test_rand_hash_Musig2VerifyError(self):
         account_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account_private)
@@ -127,7 +126,7 @@ class TestPaymentHash(FiberTest):
         )
         self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Failed")
         channels = self.fiber1.get_client().list_channels({})
-        assert channels["channels"][0]["state"] == "CHANNEL_READY"
+        assert channels["channels"][0]["state"]["state_name"] == "CHANNEL_READY"
         assert channels["channels"][0]["offered_tlc_balance"] == "0x0"
 
     def test_paid_hash(self):

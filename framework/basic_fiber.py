@@ -7,7 +7,9 @@ from framework.util import generate_account_privakey
 import time
 import random
 import datetime
-
+from framework.util import (
+    to_int_from_big_uint128_le,
+)
 import logging
 
 
@@ -137,10 +139,10 @@ class FiberTest(CkbTest):
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
-        cls.logger.debug("before_balance1:", before_balance1)
+        cls.logger.debug(f"before_balance1:{before_balance1}")
         cls.fiber1.connect_peer(cls.fiber2)
         time.sleep(1)
-        cls.logger.debug("\nSetting up method", method.__name__)
+        cls.logger.debug(f"\nSetting up method:{method.__name__}")
 
     def teardown_method(self, method):
         if self.debug:
@@ -308,8 +310,8 @@ class FiberTest(CkbTest):
             f"status did not reach state {expected_state} within timeout period."
         )
 
-    def wait_and_check_tx_pool_fee(self, fee_rate, check=True):
-        self.wait_tx_pool(1)
+    def wait_and_check_tx_pool_fee(self, fee_rate, check=True, try_size=120):
+        self.wait_tx_pool(1, try_size)
         pool = self.node.getClient().get_raw_tx_pool()
         pool_tx_detail_info = self.node.getClient().get_pool_tx_detail_info(
             pool["pending"][0]
@@ -343,6 +345,64 @@ class FiberTest(CkbTest):
         raise TimeoutError(
             f"status did not reach state {expected_state} within timeout period."
         )
+
+    def get_tx_message(self, tx_hash):
+        tx = self.node.getClient().get_transaction(tx_hash)
+        input_cells = []
+        output_cells = []
+
+        # self.node.getClient().get_transaction(tx['transaction']['inputs'][])
+        for i in range(len(tx["transaction"]["inputs"])):
+            pre_cell = self.node.getClient().get_transaction(
+                tx["transaction"]["inputs"][i]["previous_output"]["tx_hash"]
+            )["transaction"]["outputs"][
+                int(tx["transaction"]["inputs"][i]["previous_output"]["index"], 16)
+            ]
+            pre_cell_outputs_data = self.node.getClient().get_transaction(
+                tx["transaction"]["inputs"][i]["previous_output"]["tx_hash"]
+            )["transaction"]["outputs_data"][
+                int(tx["transaction"]["inputs"][i]["previous_output"]["index"], 16)
+            ]
+            if pre_cell["type"] is None:
+                input_cells.append(
+                    {
+                        "args": pre_cell["lock"]["args"],
+                        "capacity": int(pre_cell["capacity"], 16),
+                    }
+                )
+                continue
+            input_cells.append(
+                {
+                    "args": pre_cell["lock"]["args"],
+                    "capacity": int(pre_cell["capacity"], 16),
+                    "udt_args": pre_cell["type"]["args"],
+                    "udt_capacity": to_int_from_big_uint128_le(pre_cell_outputs_data),
+                }
+            )
+
+        for i in range(len(tx["transaction"]["outputs"])):
+            if tx["transaction"]["outputs"][i]["type"] is None:
+                output_cells.append(
+                    {
+                        "args": tx["transaction"]["outputs"][i]["lock"]["args"],
+                        "capacity": int(
+                            tx["transaction"]["outputs"][i]["capacity"], 16
+                        ),
+                    }
+                )
+                continue
+            output_cells.append(
+                {
+                    "args": tx["transaction"]["outputs"][i]["lock"]["args"],
+                    "capacity": int(tx["transaction"]["outputs"][i]["capacity"], 16),
+                    "udt_args": tx["transaction"]["outputs"][i]["type"]["args"],
+                    "udt_capacity": to_int_from_big_uint128_le(
+                        tx["transaction"]["outputs_data"][i]
+                    ),
+                }
+            )
+        print({"input_cells": input_cells, "output_cells": output_cells})
+        return {"input_cells": input_cells, "output_cells": output_cells}
 
     def get_fiber_env(self, new_fiber_count=0):
         # self.logger.debug ckb tip number
@@ -385,7 +445,7 @@ class FiberTest(CkbTest):
             f"ckb node url: {self.node.rpcUrl}, tip number: {node_tip_number}"
         )
         for i in range(len(self.fibers)):
-            self.logger.debug(f"--- current fiber: {i}----")
+            self.logger.info(f"--- current fiber: {i}----")
             self.logger.debug(f"url:{self.fibers[i].client.url}")
             self.logger.debug(
                 f"account private key: {self.fibers[i].account_private}, ckb balance: {fibers_data[i]['account_capacity']} ,udt balance: {fibers_data[i]['udt_cell']}"

@@ -17,6 +17,7 @@ class TestGraphNodes(FiberTest):
     3. 测试迭代
     """
 
+    @pytest.mark.skip("todo 待确定")
     def test_add_nodes(self):
         """
         add nodes

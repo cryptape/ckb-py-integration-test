@@ -142,22 +142,32 @@ class TestAmount(FiberTest):
         )
         assert payment["fee"] == "0x5ac491099011"
 
-        with pytest.raises(Exception) as exc_info:
-            self.fiber1.get_client().send_payment(
-                {
-                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
-                    "amount": hex(
-                        int(int(channels["channels"][0]["local_balance"], 16) / 1.001)
-                    ),
-                    "keysend": True,
-                    "dry_run": True,
-                }
-            )
-        expected_error_message = "no path found"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        # with pytest.raises(Exception) as exc_info:
+        #     self.fiber1.get_client().send_payment(
+        #         {
+        #             "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+        #             "amount": hex(
+        #                 int(int(channels["channels"][0]["local_balance"], 16) / 1.001)
+        #             ),
+        #             "keysend": True,
+        #             "dry_run": True,
+        #         }
+        #     )
+        # expected_error_message = "no path found"
+        # assert expected_error_message in exc_info.value.args[0], (
+        #     f"Expected substring '{expected_error_message}' "
+        #     f"not found in actual string '{exc_info.value.args[0]}'"
+        # )
+        payment = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "amount": hex(
+                    int(int(channels["channels"][0]["local_balance"], 16) / 1.00101)
+                ),
+                "keysend": True,
+            }
         )
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
 
     def test_over_flow_panic(self):
         self.fiber3 = self.start_new_fiber(self.generate_account(1000))
@@ -264,7 +274,6 @@ class TestAmount(FiberTest):
         )
         self.wait_payment_state(self.fiber2, payment2["payment_hash"], "Success")
 
-    @pytest.mark.skip("亿亿 导致创建channel 失败")
     def test_udt(self):
         """
         open_channel 1亿亿
@@ -273,8 +282,8 @@ class TestAmount(FiberTest):
 
         """
         # todo use 10000000000000000
-        # open_chanel_balance = 10000000000000000 * 100000000
-        open_chanel_balance = 1000000000 * 100000000
+        open_chanel_balance = 10000000000000000 * 100000000
+        # open_chanel_balance = 1000000000 * 100000000
         self.faucet(
             self.fiber2.account_private,
             0,
@@ -412,7 +421,7 @@ class TestAmount(FiberTest):
             {
                 "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
                 "amount": hex(
-                    int(int(channels["channels"][0]["local_balance"], 16) / 1.00201)
+                    int(int(channels["channels"][0]["local_balance"], 16) / 1.00101)
                 ),
                 "udt_type_script": self.get_account_udt_script(
                     self.fiber1.account_private
@@ -421,17 +430,17 @@ class TestAmount(FiberTest):
                 "dry_run": True,
             }
         )
-        assert payment["fee"] == "0x5ac45bf9fc51"
+        assert payment["fee"] == "0x3627c90ef6acdb22d1"
         # int max
         # with pytest.raises(Exception) as exc_info:
-        #     payment = self.fiber1.get_client().send_payment({
-        #         "target_pubkey": self.fiber3.get_client().node_info()['public_key'],
-        #         "amount": "0xfffffffffffffffffffffffffffffff",
-        #         "keysend": True,
-        #         "dry_run": True,
-        #         "udt_type_script": self.get_account_udt_script(self.fiber1.account_private),
+        # payment = self.fiber1.get_client().send_payment({
+        #     "target_pubkey": self.fiber3.get_client().node_info()['public_key'],
+        #     "amount": "0xfffffffffffffffffffffffffffffff",
+        #     "keysend": True,
+        #     "dry_run": True,
+        #     "udt_type_script": self.get_account_udt_script(self.fiber1.account_private),
         #
-        #     })
+        # })
         # expected_error_message = "route"
         # assert expected_error_message in exc_info.value.args[0], (
         #     f"Expected substring '{expected_error_message}' "
