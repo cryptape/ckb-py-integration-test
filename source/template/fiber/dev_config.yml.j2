@@ -3,6 +3,9 @@ fiber:
   chain: dev.toml
   announce_listening_addr: true
   announce_private_addr: true
+  gossip_store_maintenance_interval_ms: 1000
+  gossip_network_maintenance_interval_ms: 1000
+
 rpc:
   listening_addr: {{ rpc_listening_addr | default("127.0.0.1:8227") }}
 

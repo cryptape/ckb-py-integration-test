@@ -164,11 +164,11 @@ class FiberTest(CkbTest):
         cls.node.clean()
 
     def faucet(
-        self,
-        account_private_key,
-        ckb_balance,
-        udt_owner_private_key=None,
-        udt_balance=1000 * 1000000000,
+            self,
+            account_private_key,
+            ckb_balance,
+            udt_owner_private_key=None,
+            udt_balance=1000 * 1000000000,
     ):
         if ckb_balance > 60:
             account = self.Ckb_cli.util_key_info_by_private_key(account_private_key)
@@ -192,7 +192,7 @@ class FiberTest(CkbTest):
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
     def generate_account(
-        self, ckb_balance, udt_owner_private_key=None, udt_balance=1000 * 1000000000
+            self, ckb_balance, udt_owner_private_key=None, udt_balance=1000 * 1000000000
     ):
         # error
         # if self.debug:
@@ -263,6 +263,8 @@ class FiberTest(CkbTest):
                 continue
             if channels["channels"][0]["state"]["state_name"] == expected_state:
                 self.logger.debug(f"Channel reached expected state: {expected_state}")
+                # todo wait broading
+                time.sleep(2)
                 return channels["channels"][0]["channel_id"]
             self.logger.debug(
                 f"Waiting for channel state: {expected_state}, current state: {channels['channels'][0]['state']['state_name']}"
@@ -279,6 +281,32 @@ class FiberTest(CkbTest):
             "hash_type": "type",
             "args": self.udtContract.get_owner_arg_by_lock_arg(account1["lock_arg"]),
         }
+
+    def open_channel(self, fiber1: Fiber, fiber2: Fiber, fiber1_balance, fiber2_balance, fiber1_fee=1000,
+                     fiber2_fee=1000):
+        fiber1.get_client().open_channel({
+            "peer_id": fiber2.get_peer_id(),
+            "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
+            "tlc_fee_proportional_millionths": hex(fiber1_fee),
+            "public": True,
+        })
+        self.wait_for_channel_state(fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY")
+        channels = fiber1.get_client().list_channels(
+            {"peer_id": fiber2.get_peer_id()}
+        )
+        payment = fiber1.get_client().send_payment({
+            "target_pubkey": fiber2.get_client().node_info()["public_key"],
+            "amount": hex(fiber2_balance),
+            "keysend": True,
+        })
+        fiber2.get_client().update_channel({
+            "channel_id": channels["channels"][0]["channel_id"],
+            "tlc_fee_proportional_millionths": hex(fiber2_fee),
+        })
+        self.wait_payment_state(fiber1, payment['payment_hash'], "Success")
+        # channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
+        # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
+        # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
 
     def get_account_script(self, account_private_key):
         account1 = self.Ckb_cli.util_key_info_by_private_key(account_private_key)
@@ -318,15 +346,15 @@ class FiberTest(CkbTest):
         )
         if check:
             assert (
-                int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
-                * 1000
-                / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
-                == fee_rate
+                    int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
+                    * 1000
+                    / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
+                    == fee_rate
             )
         return pool["pending"][0]
 
     def wait_invoice_state(
-        self, client, payment_hash, status="Paid", timeout=120, interval=1
+            self, client, payment_hash, status="Paid", timeout=120, interval=1
     ):
         """
         status:
@@ -469,11 +497,11 @@ class FiberTest(CkbTest):
                 state_name = channel["state"]["state_name"]
                 local_balance = int(channel["local_balance"], 16) / 100000000
                 offered_tlc_balance = (
-                    int(channel["offered_tlc_balance"], 16) / 100000000
+                        int(channel["offered_tlc_balance"], 16) / 100000000
                 )
                 remote_balance = int(channel["remote_balance"], 16) / 100000000
                 received_tlc_balance = (
-                    int(channel["received_tlc_balance"], 16) / 100000000
+                        int(channel["received_tlc_balance"], 16) / 100000000
                 )
                 created_at_hex = int(channel["created_at"], 16) / 1000
                 created_at = datetime.datetime.fromtimestamp(created_at_hex).strftime(
