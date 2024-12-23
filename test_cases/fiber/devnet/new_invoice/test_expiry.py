@@ -102,21 +102,21 @@ class TestExpiry(FiberTest):
             == int(after_channel["channels"][0]["local_balance"], 16) + amount
         )
 
-    @pytest.mark.skip("wait https://github.com/chenyukang/fiber/pull/2")
+    # @pytest.mark.skip("wait https://github.com/chenyukang/fiber/pull/2")
     def test_0x1(self):
         # 1. Open a channel between fiber1 and fiber2
-        # temporary_channel = self.fiber1.get_client().open_channel(
-        #     {
-        #         "peer_id": self.fiber2.get_peer_id(),
-        #         "funding_amount": hex(1000 * 100000000),
-        #         "public": True,
-        #     }
-        # )
-        #
-        # # 2. Check the channel state to ensure it is ready
-        # self.wait_for_channel_state(
-        #     self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
-        # )
+        temporary_channel = self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+            }
+        )
+
+        # 2. Check the channel state to ensure it is ready
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
 
         # 3. Create a new invoice with a normal amount
         invoice = self.fiber2.get_client().new_invoice(
@@ -145,7 +145,7 @@ class TestExpiry(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
 
     def test_overflow(self):
         with pytest.raises(Exception) as exc_info:

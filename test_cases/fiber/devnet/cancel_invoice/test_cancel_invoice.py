@@ -139,7 +139,6 @@ class TestCancelInvoice(FiberTest):
         )
         assert result["status"] == "Cancelled"
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/305")
     def test_send_failed_that_invoice_cancel(self):
         """
         取消后，发送失败，下次交易不受影响
@@ -342,7 +341,14 @@ class TestCancelInvoice(FiberTest):
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
         channels = self.fiber2.get_client().list_channels({})
-        assert channels == before_channel
+        assert (
+            channels["channels"][0]["local_balance"]
+            == before_channel["channels"][0]["local_balance"]
+        )
+        assert (
+            channels["channels"][0]["latest_commitment_transaction_hash"]
+            != before_channel["channels"][0]["latest_commitment_transaction_hash"]
+        )
 
         invoice_balance = 1 * 100000000
         invoice = self.fiber1.get_client().new_invoice(

@@ -11,7 +11,7 @@ class TestDryRun(FiberTest):
     test dry_run
     """
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/360")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/360")
     def test_dry_run(self):
         """
         Returns:
@@ -80,7 +80,7 @@ class TestDryRun(FiberTest):
             payment1 = self.fiber1.get_client().send_payment(
                 {
                     "invoice": invoice["invoice_address"],
-                    "max_fee_amount": payment1["fee"],
+                    "max_fee_amount": hex(int(payment1["fee"], 16) - 1),
                 }
             )
         expected_error_message = "no path found"
@@ -97,9 +97,9 @@ class TestDryRun(FiberTest):
         )
         self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
 
-    @pytest.mark.skip(
-        "https://github.com/nervosnetwork/fiber/issues/362#issuecomment-2510654848"
-    )
+    # @pytest.mark.skip(
+    #     "https://github.com/nervosnetwork/fiber/issues/362#issuecomment-2510654848"
+    # )
     def test_mutil_channel(self):
         """
         node1(500)-node2(0) node2.fee = 2000

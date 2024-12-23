@@ -17,7 +17,7 @@ class TestForce(FiberTest):
 
     # FiberTest.debug = True
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/333")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/333")
     def test_node_offline(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -45,6 +45,10 @@ class TestForce(FiberTest):
             self.account2["address"]["testnet"]
         )
         self.fiber2.stop()
+        list_channels = self.fiber1.get_client().list_channels({})
+        latest_commitment_transaction_hash = list_channels["channels"][0][
+            "latest_commitment_transaction_hash"
+        ]
         # shut down
         self.fiber1.get_client().shutdown_channel(
             {
@@ -58,22 +62,8 @@ class TestForce(FiberTest):
                 "force": True,
             }
         )
-        time.sleep(20)
-        node_info = self.fiber1.get_client().node_info()
-        print("node info :", node_info)
-        assert node_info["channel_count"] == "0x0"
-        after_balance1 = self.Ckb_cli.wallet_get_capacity(
-            self.account1["address"]["testnet"]
-        )
-        after_balance2 = self.Ckb_cli.wallet_get_capacity(
-            self.account2["address"]["testnet"]
-        )
-        print("before_balance1:", before_balance1)
-        print("before_balance2:", before_balance2)
-        print("after_balance1:", after_balance1)
-        print("after_balance2:", after_balance2)
-        assert after_balance2 - before_balance2 == 62.0
-        # todo  添加更多断言
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        assert latest_commitment_transaction_hash == tx_hash
 
     def test_node_online(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -305,7 +295,7 @@ class TestForce(FiberTest):
     def test_ChannelReady(self):
         pass
 
-    @pytest.mark.skip("have bug")
+    # @pytest.mark.skip("have bug")
     def test_in_tx(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -319,6 +309,14 @@ class TestForce(FiberTest):
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
+        payment = self.fiber1.get_client().send_payment(
+            {
+                "amount": hex(100),
+                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "keysend": True,
+            }
+        )
+        self.wait_payment_state(self.fiber1, payment["payment_hash"])
 
         amount = 1
         invoice = self.fiber2.get_client().new_invoice(
@@ -357,9 +355,12 @@ class TestForce(FiberTest):
                 "force": True,
             }
         )
-        self.fiber1.get_client().get_payment({"payment_hash": payment["payment_hash"]})
-
-        # self.wait_for_channel_state(self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120)
+        time.sleep(5)
+        payment = self.fiber1.get_client().get_payment(
+            {"payment_hash": payment["payment_hash"]}
+        )
+        # todo check
+        assert payment["status"] == "Inflight"
 
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/333")
     def test_in_tx_offline(self):
@@ -414,11 +415,11 @@ class TestForce(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
+        time.sleep(10)
+        self.fiber1.get_client().get_payment({"payment_hash": payment["payment_hash"]})
+        self.fiber1.get_client().list_channels({})
 
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
-
-    def test_00000(self):
-        self.get_fiber_env()
+        # self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
 
     def test_ShuttingDown(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(

@@ -5,17 +5,17 @@ from framework.basic_fiber import FiberTest
 
 class TestFinalTlcExpiryDelta(FiberTest):
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/367")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/367")
     def test_final_tlc_expiry_delta(self):
         """
         1. none
             12h
         2. 0x0
-            invalid final_tlc_expiry_delta, expect between 900000 and 1209600000\
-        4. 900000
+            invalid final_tlc_expiry_delta, expect between 24 * 60 * 60 * 1000  and 1209600000\
+        4. 24 * 60 * 60 * 1000
         5. 172800000
         6. 172800001
-            invalid final_tlc_expiry_delta, expect between 900000 and 1209600000\
+            invalid final_tlc_expiry_delta, expect between 24 * 60 * 60 * 1000  and 1209600000\
         7. todo 测试超时
         Returns:
 
@@ -78,13 +78,13 @@ class TestFinalTlcExpiryDelta(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-        # final_tlc_expiry_delta: 900000
+        # final_tlc_expiry_delta: 24 * 60 * 60 * 1000
         payment = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
                 "amount": hex(10 * 100000000),
                 "keysend": True,
-                "final_tlc_expiry_delta": hex(900000),
+                "final_tlc_expiry_delta": hex(24 * 60 * 60 * 1000),
             }
         )
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")

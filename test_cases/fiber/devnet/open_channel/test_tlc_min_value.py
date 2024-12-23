@@ -98,7 +98,7 @@ class TlcMinValue(FiberTest):
     def test_tlc_min_value_is_not_zero(self):
         """
         tlc_min_value != 0
-        tlc_min_value limit: fee+ amount
+        tlc_min_value limit: amount
         Returns:
 
         """
@@ -165,12 +165,13 @@ class TlcMinValue(FiberTest):
         )
         before_channel = self.fiber2.get_client().list_channels({})
 
-        self.fiber2.get_client().send_payment(
+        payment = self.fiber2.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber2, payment["payment_hash"], "Success")
+
         after_channel = self.fiber2.get_client().list_channels({})
         assert int(before_channel["channels"][0]["local_balance"], 16) - int(
             after_channel["channels"][0]["local_balance"], 16
@@ -178,7 +179,7 @@ class TlcMinValue(FiberTest):
 
         # node2 send 1 ckb
 
-        invoice_balance = hex(2 * 100000000 - 1 - 200000)
+        invoice_balance = hex(2 * 100000000 - 1)
         payment_preimage = self.generate_random_preimage()
         invoice = self.fiber1.get_client().new_invoice(
             {

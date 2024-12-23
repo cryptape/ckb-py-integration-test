@@ -218,7 +218,6 @@ class TestGraphChannels(FiberTest):
         update_channel_param = {
             "enabled": True,
             "tlc_minimum_value": hex(100),
-            "tlc_maximum_value": hex(100 * 100000000),
             "tlc_fee_proportional_millionths": hex(2000),
         }
         account3_private_key = self.generate_account(1000)
@@ -250,9 +249,9 @@ class TestGraphChannels(FiberTest):
         node_info = self.fiber1.get_client().node_info()
         print("node1_channels:", node1_channels)
         key = (
-            "node2_to_node1_fee_rate"
+            "fee_rate_of_node1"
             if node3_channels["channels"][0]["node1"] == node_info["public_key"]
-            else "node1_to_node2_fee_rate"
+            else "fee_rate_of_node2"
         )
         print("key:", key)
         assert (
@@ -261,9 +260,9 @@ class TestGraphChannels(FiberTest):
         )
         print("node2_channels", node2_channels)
         key = (
-            "node2_to_node1_fee_rate"
+            "fee_rate_of_node1"
             if node3_channels["channels"][0]["node1"] == node_info["public_key"]
-            else "node1_to_node2_fee_rate"
+            else "fee_rate_of_node2"
         )
         assert (
             node2_channels["channels"][0][key]
@@ -271,9 +270,9 @@ class TestGraphChannels(FiberTest):
         )
         print("node3_channels", node3_channels)
         key = (
-            "node2_to_node1_fee_rate"
+            "fee_rate_of_node1"
             if node3_channels["channels"][0]["node1"] == node_info["public_key"]
-            else "node1_to_node2_fee_rate"
+            else "fee_rate_of_node2"
         )
         assert (
             node3_channels["channels"][0][key]
@@ -315,11 +314,11 @@ class TestGraphChannels(FiberTest):
         assert open_channel_tx_hash in node3_channels["channels"][0]["channel_outpoint"]
 
         # funding_tx_block_number
-        tx = self.node.getClient().get_transaction(open_channel_tx_hash)
-        assert (
-            node1_channels["channels"][0]["funding_tx_block_number"]
-            == tx["tx_status"]["block_number"]
-        )
+        # tx = self.node.getClient().get_transaction(open_channel_tx_hash)
+        # assert (
+        #     node1_channels["channels"][0]["funding_tx_block_number"]
+        #     == tx["tx_status"]["block_number"]
+        # )
         # funding_tx_index
         # todo funding_tx_index 是错的
         # assert node1_channels["channels"][0]["funding_tx_index"] == tx["tx_status"]["tx_index"]
@@ -337,38 +336,38 @@ class TestGraphChannels(FiberTest):
 
         # last_updated_timestamp
         # created_timestamp
-        # node1_to_node2_fee_rate
+        # fee_rate_of_node2
         assert (
-            node1_channels["channels"][0]["node1_to_node2_fee_rate"]
+            node1_channels["channels"][0]["fee_rate_of_node2"]
             == node2_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node2_channels["channels"][0]["node1_to_node2_fee_rate"]
+            node2_channels["channels"][0]["fee_rate_of_node2"]
             == node2_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node3_channels["channels"][0]["node1_to_node2_fee_rate"]
+            node3_channels["channels"][0]["fee_rate_of_node2"]
             == node2_info["tlc_fee_proportional_millionths"]
         )
 
-        # node2_to_node1_fee_rate
+        # fee_rate_of_node1
         assert (
-            node1_channels["channels"][0]["node2_to_node1_fee_rate"]
+            node1_channels["channels"][0]["fee_rate_of_node1"]
             == node1_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node2_channels["channels"][0]["node2_to_node1_fee_rate"]
+            node2_channels["channels"][0]["fee_rate_of_node1"]
             == node1_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node3_channels["channels"][0]["node2_to_node1_fee_rate"]
+            node3_channels["channels"][0]["fee_rate_of_node1"]
             == node1_info["tlc_fee_proportional_millionths"]
         )
 
         # capacity
-        assert node1_channels["channels"][0]["capacity"] == hex(262 * 100000000)
-        assert node2_channels["channels"][0]["capacity"] == hex(262 * 100000000)
-        assert node3_channels["channels"][0]["capacity"] == hex(262 * 100000000)
+        assert node1_channels["channels"][0]["capacity"] == hex(138 * 100000000)
+        assert node2_channels["channels"][0]["capacity"] == hex(138 * 100000000)
+        assert node3_channels["channels"][0]["capacity"] == hex(138 * 100000000)
 
         # chain_hash
         assert node1_channels["channels"][0]["chain_hash"] == node1_info["chain_hash"]

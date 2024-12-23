@@ -59,7 +59,7 @@ class TestAcceptMutilChannelsSameTime(FiberTest):
             self.fiber2.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY"
         )
 
-    @pytest.mark.skip("检查是否有问题")
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/246")
     def test_accept_channel_diff_channel_same_time(self):
         """
         accept channel: Accept multiple different channels at the same time

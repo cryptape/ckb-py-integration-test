@@ -102,7 +102,7 @@ class TestGraphNodes(FiberTest):
         self.fiber1.stop()
         self.fiber1.prepare({"fiber_auto_accept_amount": "100000001"})
         self.fiber1.start()
-        time.sleep(1)
+        time.sleep(3)
         node_info = self.fiber1.get_client().node_info()
         print("before_node_info:", before_node_info)
         print("after_node_info:", node_info)

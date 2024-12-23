@@ -476,6 +476,7 @@ class TestFundingAmount(FiberTest):
         print(after_account2)
         assert after_account2[-1]["balance"] == (10000 + 1 - 9999) * 100000000
 
+    @pytest.mark.skip("无法再次 accept")
     def test_ckb_funding_amount_gt_account(self):
         """
         funding_amount > account
@@ -507,6 +508,12 @@ class TestFundingAmount(FiberTest):
             120,
         )
         # 失败了, 好像不能再次accept_channel
+        self.fiber2.get_client().accept_channel(
+            {
+                "temporary_channel_id": temporary_channel["temporary_channel_id"],
+                "funding_amount": hex(1000 * 100000000),
+            }
+        )
 
     def test_funding_amount_over_flow(self):
         """

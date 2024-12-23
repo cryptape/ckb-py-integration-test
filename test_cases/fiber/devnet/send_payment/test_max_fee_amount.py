@@ -6,7 +6,7 @@ from framework.basic_fiber import FiberTest
 class TestMaxFeeAmount(FiberTest):
     # FiberTest.debug = True
 
-    @pytest.mark.skip("send to node1 -> node2 no fee 设置 max_fee = 0 会报错")
+    # @pytest.mark.skip("send to node1 -> node2 no fee 设置 max_fee = 0 会报错")
     def test_fee(self):
         account_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account_private)

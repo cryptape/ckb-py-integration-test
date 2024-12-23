@@ -6,6 +6,7 @@ from framework.basic_fiber import FiberTest
 
 
 class TestWatchTower(FiberTest):
+
     def test_node1_shutdown_when_open_and_node2_split_tx(self):
         """
         node1 shuts down after opening a channel and node2 splits the transaction.
@@ -62,7 +63,7 @@ class TestWatchTower(FiberTest):
         # Step 5: Mine additional blocks
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
-
+        force_shutdown_node_info = self.fiber1.get_client().node_info()
         # Step 6: Check the list of channels for both nodes
         node1_channel = self.fiber1.get_client().list_channels({})
         node2_channel = self.fiber2.get_client().list_channels({})
@@ -109,6 +110,8 @@ class TestWatchTower(FiberTest):
         # todo assert node_info
 
         # todo assert graph_channels
+        # 强制shutdown 后，非shutdown节点会显示为ready状态, graph_channels 数据没有删除
+        # 2.
 
     def test_node2_shutdown_when_open_and_node2_split_tx(self):
         """
@@ -360,7 +363,7 @@ class TestWatchTower(FiberTest):
         # Step 5: Mine additional blocks
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
-
+        force_shutdown_node_info = self.fiber1.get_client().node_info()
         # Step 6: Check the list of channels for both nodes
         node1_channel = self.fiber1.get_client().list_channels({})
         node2_channel = self.fiber2.get_client().list_channels({})
@@ -401,6 +404,9 @@ class TestWatchTower(FiberTest):
             == self.get_account_script(self.fiber1.account_private)["args"]
         )
         assert tx_message["output_cells"][1]["capacity"] == 19999999545
+        node_info = self.fiber1.get_client().node_info()
+        assert node_info["channel_count"] == "0x0"
+        assert force_shutdown_node_info["channel_count"] == "0x1"
 
     def test_node1_shutdown_after_send_tx1_and_node1_split_tx(self):
         """
@@ -872,7 +878,7 @@ class TestWatchTower(FiberTest):
         # Step 6: Mine additional blocks
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
-
+        self.get_fiber_env()
         # Step 7: Check the list of channels for both nodes
         node1_channel = self.fiber1.get_client().list_channels({})
         node2_channel = self.fiber2.get_client().list_channels({})
@@ -916,6 +922,7 @@ class TestWatchTower(FiberTest):
             == self.get_account_script(self.fiber1.account_private)["args"]
         )
         assert tx_message["output_cells"][1]["capacity"] == 19999999545
+        self.get_fiber_env()
 
     @pytest.mark.skip("commit tx err")
     def test_node1_shutdown_after_send_tx2_and_node2_split_tx(self):

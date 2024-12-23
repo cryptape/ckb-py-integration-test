@@ -73,7 +73,6 @@ class TestCloseScript(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 62.0
 
-    @pytest.mark.skip("应该报错，")
     def test_not_secp256k1_blake160_sighash_all(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {

@@ -127,7 +127,6 @@ class FundingAmount(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/346")
     def test_funding_amount_udt_0xfffffffffffffffffffffffffffffff(self):
         """
         1. funding_udt_type_script is None ,funding_amount > account balance
@@ -156,13 +155,10 @@ class FundingAmount(FiberTest):
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
-        # expected_error_message = "The funding amount (21267647932558653966460912964485513215) should be less than 18446744073709551615"
-        # assert expected_error_message in exc_info.value.args[0], (
-        #     f"Expected substring '{expected_error_message}' "
-        #     f"not found in actual string '{exc_info.value.args[0]}'"
-        # )
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/373")
     def test_funding_amount_udt_gt_account_balance(self):
         account3_private = self.generate_account(
             1000, self.fiber1.account_private, 1000 * 100000000

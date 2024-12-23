@@ -163,7 +163,7 @@ class TestUpdateChannel(FiberTest):
 
         # 5. todo check tlc_expiry_delta
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/353")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/353")
     def test_m(self):
         router_length = 2
         for i in range(router_length):

@@ -213,7 +213,7 @@ class TestAmount(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/359")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/359")
     def test_send_mutil_channel(self):
         # open channel a1-b1
         self.fiber1.get_client().open_channel(

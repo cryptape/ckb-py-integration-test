@@ -150,7 +150,7 @@ class TestAllowSelfPaymnent(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/355")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/355")
     def test_a1_to_b1_to_a2(self):
         """
         a1(1000)-b1(0) a2(0)-b2(1000)
@@ -258,8 +258,64 @@ class TestAllowSelfPaymnent(FiberTest):
         # todo check channel balance
         # todo a1(1000 )->b1(100)  a1 send payment with self pay
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/362")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/362")
     def test_a1_to_b1_to_c1_a2(self):
+        """
+
+        Returns:
+
+        """
+        self.fiber3 = self.start_new_fiber(self.generate_account(10000))
+        self.fiber3.connect_peer(self.fiber2)
+        self.fiber3.connect_peer(self.fiber1)
+        self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        self.fiber2.get_client().open_channel(
+            {
+                "peer_id": self.fiber3.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY"
+        )
+        self.wait_for_channel_state(
+            self.fiber3.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        self.fiber3.get_client().open_channel(
+            {
+                "peer_id": self.fiber1.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber3.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY"
+        )
+        # node1 send to self
+        time.sleep(1)
+        for i in range(3):
+            payment1 = self.fiber1.get_client().send_payment(
+                {
+                    "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                    "amount": hex(6 * 10000000),
+                    "keysend": True,
+                    "allow_self_payment": True,
+                }
+            )
+            self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+        # after fix todo add check
+
+    def test_a1_to_b1_to_c1_a2_2(self):
         """
 
         Returns:
@@ -308,8 +364,8 @@ class TestAllowSelfPaymnent(FiberTest):
                 "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
                 "amount": hex(6 * 10000000),
                 "keysend": True,
-                "dry_run": True,
                 "allow_self_payment": True,
             }
         )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
         # after fix todo add check

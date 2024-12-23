@@ -86,12 +86,18 @@ class TestAmount(FiberTest):
         time.sleep(1)
 
         # 4. send_payment return Failed to build route
-        payment = self.fiber1.get_client().send_payment(
-            {
-                "invoice": invoice["invoice_address"],
-            }
+        with pytest.raises(Exception) as exc_info:
+            payment = self.fiber1.get_client().send_payment(
+                {
+                    "invoice": invoice["invoice_address"],
+                }
+            )
+        expected_error_message = "no path found"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
+
         amount = int(channels["channels"][0]["local_balance"], 16)
         invoice = self.fiber2.get_client().new_invoice(
             {

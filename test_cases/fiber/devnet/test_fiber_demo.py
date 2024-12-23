@@ -11,9 +11,6 @@ class TestFiberDemo(FiberTest):
     # pkill fnn
     # rm -rf tmp
 
-    def test_get_fiber_env(self):
-        self.get_fiber_env()
-
     def test_udt(self):
         """
         1. 建立 udt channel

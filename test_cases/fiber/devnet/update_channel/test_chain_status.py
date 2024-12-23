@@ -5,7 +5,6 @@ from framework.basic_fiber import FiberTest
 
 class TestChainStatus(FiberTest):
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/352")
     def test_chain_status_pending(self):
         self.fiber1.get_client().open_channel(
             {
@@ -36,3 +35,4 @@ class TestChainStatus(FiberTest):
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
         )
+        # node2 add channel with node3

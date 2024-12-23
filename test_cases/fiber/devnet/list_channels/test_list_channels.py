@@ -258,7 +258,22 @@ class TestListChannels(FiberTest):
         assert int(channels["channels"][0]["created_at"], 16) / 1000 > begin_time
         assert int(channels["channels"][0]["created_at"], 16) / 1000 < time.time()
 
-    @pytest.mark.skip("close channels can't found")
+        # force shutdown latest_commitment_transaction_hash == hash
+        self.fiber1.get_client().shutdown_channel(
+            {
+                "channel_id": channels["channels"][0]["channel_id"],
+                "close_script": {
+                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                    "hash_type": "type",
+                    "args": self.account1["lock_arg"],
+                },
+                "fee_rate": "0x3FC",
+                "force": True,
+            }
+        )
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        assert tx_hash == channels["channels"][0]["latest_commitment_transaction_hash"]
+
     def test_close_channels(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -285,7 +300,6 @@ class TestListChannels(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo query shutdown_channel
-        # self.wait_for_channel_state(self.fiber1.get_client(), self.fiber2.get_peer_id(), "Closed")
-        # time.sleep(5)
-        # self.fiber1.get_client().list_channels({})
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CLOSED", 120, True
+        )

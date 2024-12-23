@@ -232,7 +232,7 @@ class TestCommitmentFeeRate(FiberTest):
         验证对方的commit fee
         Returns:
         """
-        commitment_fee_rate = 1000
+        commitment_fee_rate = 21978021
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),

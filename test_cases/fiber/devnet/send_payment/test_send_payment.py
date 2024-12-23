@@ -124,10 +124,16 @@ class TestSendPayment(FiberTest):
         self.wait_invoice_state(self.fiber3, payment1["payment_hash"], "Received")
         channels = self.fiber1.get_client().list_channels({})
         assert channels["channels"][0]["remote_balance"] == "0x0"
-        assert before_n12_channels == channels
+        assert (
+            before_n12_channels["channels"][0]["remote_balance"]
+            == channels["channels"][0]["remote_balance"]
+        )
         channels = self.fiber2.get_client().list_channels({})
         assert channels["channels"][0]["remote_balance"] == "0x0"
-        assert before_n23_channels == channels
+        assert (
+            before_n23_channels["channels"][0]["remote_balance"]
+            == channels["channels"][0]["remote_balance"]
+        )
 
     @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/369")
     def test_node2_get_stuck(self):

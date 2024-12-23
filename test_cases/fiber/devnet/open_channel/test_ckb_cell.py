@@ -83,7 +83,7 @@ class TestCkbCell(FiberTest):
         )
         channels = new_fiber.get_client().graph_channels()
         assert len(channels["channels"]) == 1
-        assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+        assert channels["channels"][0]["capacity"] == hex(928 * 100000000)
 
     def test_account_mutil_cell_gt_funding_amount_2(self):
         """
@@ -126,7 +126,7 @@ class TestCkbCell(FiberTest):
         )
         channels = new_fiber.get_client().graph_channels()
         assert len(channels["channels"]) == 1
-        assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+        assert channels["channels"][0]["capacity"] == hex(928 * 100000000)
 
     # FiberTest.debug = True
 
@@ -163,7 +163,7 @@ class TestCkbCell(FiberTest):
         )
         channels = new_fiber.get_client().graph_channels()
         assert len(channels["channels"]) == 1
-        assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+        assert channels["channels"][0]["capacity"] == hex(928 * 100000000)
         node3_info = new_fiber.get_client().node_info()
         fiber3_pub = node3_info["public_key"]
         payment = self.fiber2.get_client().send_payment(
@@ -196,7 +196,7 @@ class TestCkbCell(FiberTest):
         )
         channels = new_fiber.get_client().graph_channels()
         assert len(channels["channels"]) == 1
-        assert channels["channels"][0]["capacity"] == hex(1052 * 100000000)
+        assert channels["channels"][0]["capacity"] == hex(928 * 100000000)
         node3_info = new_fiber.get_client().node_info()
         fiber3_pub = node3_info["public_key"]
         payment = self.fiber2.get_client().send_payment(
