@@ -164,11 +164,11 @@ class FiberTest(CkbTest):
         cls.node.clean()
 
     def faucet(
-            self,
-            account_private_key,
-            ckb_balance,
-            udt_owner_private_key=None,
-            udt_balance=1000 * 1000000000,
+        self,
+        account_private_key,
+        ckb_balance,
+        udt_owner_private_key=None,
+        udt_balance=1000 * 1000000000,
     ):
         if ckb_balance > 60:
             account = self.Ckb_cli.util_key_info_by_private_key(account_private_key)
@@ -192,7 +192,7 @@ class FiberTest(CkbTest):
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
     def generate_account(
-            self, ckb_balance, udt_owner_private_key=None, udt_balance=1000 * 1000000000
+        self, ckb_balance, udt_owner_private_key=None, udt_balance=1000 * 1000000000
     ):
         # error
         # if self.debug:
@@ -249,15 +249,19 @@ class FiberTest(CkbTest):
         fiber.start(self.node)
         return fiber
 
-    def wait_for_channel_state(self, client, peer_id, expected_state, timeout=120):
+    def wait_for_channel_state(
+        self, client, peer_id, expected_state, timeout=120, include_closed=False
+    ):
         """Wait for a channel to reach a specific state.
         1. NEGOTIATING_FUNDING
         2. CHANNEL_READY
-        3. Closed
+        3. CLOSED
 
         """
         for _ in range(timeout):
-            channels = client.list_channels({"peer_id": peer_id})
+            channels = client.list_channels(
+                {"peer_id": peer_id, "include_closed": include_closed}
+            )
             if len(channels["channels"]) == 0:
                 time.sleep(1)
                 continue
@@ -282,28 +286,41 @@ class FiberTest(CkbTest):
             "args": self.udtContract.get_owner_arg_by_lock_arg(account1["lock_arg"]),
         }
 
-    def open_channel(self, fiber1: Fiber, fiber2: Fiber, fiber1_balance, fiber2_balance, fiber1_fee=1000,
-                     fiber2_fee=1000):
-        fiber1.get_client().open_channel({
-            "peer_id": fiber2.get_peer_id(),
-            "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
-            "tlc_fee_proportional_millionths": hex(fiber1_fee),
-            "public": True,
-        })
-        self.wait_for_channel_state(fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY")
-        channels = fiber1.get_client().list_channels(
-            {"peer_id": fiber2.get_peer_id()}
+    def open_channel(
+        self,
+        fiber1: Fiber,
+        fiber2: Fiber,
+        fiber1_balance,
+        fiber2_balance,
+        fiber1_fee=1000,
+        fiber2_fee=1000,
+    ):
+        fiber1.get_client().open_channel(
+            {
+                "peer_id": fiber2.get_peer_id(),
+                "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
+                "tlc_fee_proportional_millionths": hex(fiber1_fee),
+                "public": True,
+            }
         )
-        payment = fiber1.get_client().send_payment({
-            "target_pubkey": fiber2.get_client().node_info()["public_key"],
-            "amount": hex(fiber2_balance),
-            "keysend": True,
-        })
-        fiber2.get_client().update_channel({
-            "channel_id": channels["channels"][0]["channel_id"],
-            "tlc_fee_proportional_millionths": hex(fiber2_fee),
-        })
-        self.wait_payment_state(fiber1, payment['payment_hash'], "Success")
+        self.wait_for_channel_state(
+            fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
+        payment = fiber1.get_client().send_payment(
+            {
+                "target_pubkey": fiber2.get_client().node_info()["public_key"],
+                "amount": hex(fiber2_balance),
+                "keysend": True,
+            }
+        )
+        fiber2.get_client().update_channel(
+            {
+                "channel_id": channels["channels"][0]["channel_id"],
+                "tlc_fee_proportional_millionths": hex(fiber2_fee),
+            }
+        )
+        self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
         # channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
@@ -346,15 +363,15 @@ class FiberTest(CkbTest):
         )
         if check:
             assert (
-                    int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
-                    * 1000
-                    / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
-                    == fee_rate
+                int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
+                * 1000
+                / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
+                == fee_rate
             )
         return pool["pending"][0]
 
     def wait_invoice_state(
-            self, client, payment_hash, status="Paid", timeout=120, interval=1
+        self, client, payment_hash, status="Paid", timeout=120, interval=1
     ):
         """
         status:
@@ -497,11 +514,11 @@ class FiberTest(CkbTest):
                 state_name = channel["state"]["state_name"]
                 local_balance = int(channel["local_balance"], 16) / 100000000
                 offered_tlc_balance = (
-                        int(channel["offered_tlc_balance"], 16) / 100000000
+                    int(channel["offered_tlc_balance"], 16) / 100000000
                 )
                 remote_balance = int(channel["remote_balance"], 16) / 100000000
                 received_tlc_balance = (
-                        int(channel["received_tlc_balance"], 16) / 100000000
+                    int(channel["received_tlc_balance"], 16) / 100000000
                 )
                 created_at_hex = int(channel["created_at"], 16) / 1000
                 created_at = datetime.datetime.fromtimestamp(created_at_hex).strftime(
