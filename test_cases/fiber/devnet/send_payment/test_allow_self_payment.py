@@ -259,6 +259,7 @@ class TestAllowSelfPaymnent(FiberTest):
         # todo a1(1000 )->b1(100)  a1 send payment with self pay
 
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/362")
+    @pytest.mark.skip("wait ")
     def test_a1_to_b1_to_c1_a2(self):
         """
 

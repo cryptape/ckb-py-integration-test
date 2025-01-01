@@ -295,6 +295,34 @@ class FiberTest(CkbTest):
         fiber1_fee=1000,
         fiber2_fee=1000,
     ):
+        fiber1.connect_peer(fiber2)
+        time.sleep(1)
+        if fiber1_balance <= int(
+            fiber2.get_client().node_info()[
+                "open_channel_auto_accept_min_ckb_funding_amount"
+            ],
+            16,
+        ):
+            temporary_channel = fiber1.get_client().open_channel(
+                {
+                    "peer_id": fiber2.get_peer_id(),
+                    "funding_amount": hex(fiber1_balance + 62 * 100000000),
+                    "tlc_fee_proportional_millionths": hex(fiber1_fee),
+                    "public": True,
+                }
+            )
+            fiber2.get_client().accept_channel(
+                {
+                    "temporary_channel_id": temporary_channel["temporary_channel_id"],
+                    "funding_amount": hex(fiber2_balance + 62 * 100000000),
+                    "tlc_fee_proportional_millionths": hex(fiber2_fee),
+                }
+            )
+            time.sleep(1)
+            self.wait_for_channel_state(
+                fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
+            )
+            return
         fiber1.get_client().open_channel(
             {
                 "peer_id": fiber2.get_peer_id(),

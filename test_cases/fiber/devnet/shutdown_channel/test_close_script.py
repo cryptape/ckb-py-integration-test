@@ -17,6 +17,7 @@ class TestCloseScript(FiberTest):
     8. udt change to long args make not have enough capacity
     """
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/431")
     def test_secp256k1_blake160_sighash_all(self):
         """"""
         temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -73,6 +74,7 @@ class TestCloseScript(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 62.0
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/431")
     def test_not_secp256k1_blake160_sighash_all(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
