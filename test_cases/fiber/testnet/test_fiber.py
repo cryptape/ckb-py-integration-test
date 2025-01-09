@@ -10,8 +10,12 @@ class TestFiber(CkbTest):
     cryptapeFiber1 = FiberRPCClient("http://18.163.221.211:8227")
     cryptapeFiber2 = FiberRPCClient("http://18.162.235.225:8227")
 
-    ACCOUNT_PRIVATE_1 = "0xaae4515b745efcd6f00c1b40aaeef3dd66c82d75f8f43d0f18e1a1eecb90ada4"
-    ACCOUNT_PRIVATE_2 = "0x518d76bbfe5ffe3a8ef3ad486e784ec333749575fb3c697126cdaa8084d42532"
+    ACCOUNT_PRIVATE_1 = (
+        "0xaae4515b745efcd6f00c1b40aaeef3dd66c82d75f8f43d0f18e1a1eecb90ada4"
+    )
+    ACCOUNT_PRIVATE_2 = (
+        "0x518d76bbfe5ffe3a8ef3ad486e784ec333749575fb3c697126cdaa8084d42532"
+    )
     fiber1: Fiber
     fiber2: Fiber
 
@@ -36,15 +40,16 @@ class TestFiber(CkbTest):
 
         # cls.fiber1.prepare()
         # cls.fiber1.start()
-        cls.fiber1.get_client().connect_peer({
-            "address": cls.cryptapeFiber1.node_info()["addresses"][0]})
+        cls.fiber1.get_client().connect_peer(
+            {"address": cls.cryptapeFiber1.node_info()["addresses"][0]}
+        )
 
         # cls.fiber2.prepare()
         # cls.fiber2.start()
-        cls.fiber2.get_client().connect_peer({
-            "address": cls.cryptapeFiber2.node_info()["addresses"][0]})
+        cls.fiber2.get_client().connect_peer(
+            {"address": cls.cryptapeFiber2.node_info()["addresses"][0]}
+        )
         time.sleep(1)
-
 
     def test_ckb(self):
         # open_channel
@@ -66,11 +71,17 @@ class TestFiber(CkbTest):
             }
         )
         wait_for_channel_state(
-            self.fiber1.get_client(), self.cryptapeFiber1.get_peer_id(), "CHANNEL_READY", 120
+            self.fiber1.get_client(),
+            self.cryptapeFiber1.get_peer_id(),
+            "CHANNEL_READY",
+            120,
         )
 
         wait_for_channel_state(
-            self.fiber2.get_client(), self.cryptapeFiber1.get_peer_id(), "CHANNEL_READY", 120
+            self.fiber2.get_client(),
+            self.cryptapeFiber1.get_peer_id(),
+            "CHANNEL_READY",
+            120,
         )
 
         # wait dry_run success
@@ -79,6 +90,7 @@ class TestFiber(CkbTest):
 
     def test_udt(self):
         pass
+
     def test_03(self):
         account = self.Ckb_cli.util_key_info_by_private_key(
             self.Config.ACCOUNT_PRIVATE_1
@@ -170,9 +182,9 @@ class TestFiber(CkbTest):
         time.sleep(10)
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
-                int(before_channel["channels"][0]["local_balance"], 16)
-                - int(after_channel["channels"][0]["local_balance"], 16)
-                == invoice_balance
+            int(before_channel["channels"][0]["local_balance"], 16)
+            - int(after_channel["channels"][0]["local_balance"], 16)
+            == invoice_balance
         )
 
         channels = self.fiber1.get_client().list_channels(
@@ -194,17 +206,21 @@ class TestFiber(CkbTest):
         )
 
 
-def send_payment(fiber1: FiberRPCClient, fiber2: FiberRPCClient, amount, udt=None, wait_times=300):
+def send_payment(
+    fiber1: FiberRPCClient, fiber2: FiberRPCClient, amount, udt=None, wait_times=300
+):
     try_times = 0
     payment = None
     for i in range(try_times):
         try:
-            payment = fiber1.get_client().send_payment({
-                "amount": hex(amount),
-                "target_pubkey": fiber2.get_client().node_info()["node_id"],
-                "keysend": True,
-                "udt_type_script": udt
-            })
+            payment = fiber1.get_client().send_payment(
+                {
+                    "amount": hex(amount),
+                    "target_pubkey": fiber2.get_client().node_info()["node_id"],
+                    "keysend": True,
+                    "udt_type_script": udt,
+                }
+            )
             break
         except Exception as e:
             print(e)
