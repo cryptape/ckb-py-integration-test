@@ -177,7 +177,7 @@ class FindPath(FiberTest):
         payment = src_fiber.get_client().send_payment(
             {
                 "amount": hex(amount),
-                "target_pubkey": to_fiber.get_client().node_info()["public_key"],
+                "target_pubkey": to_fiber.get_client().node_info()["node_id"],
                 "keysend": True,
             }
         )

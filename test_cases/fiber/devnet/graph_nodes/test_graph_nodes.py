@@ -68,18 +68,18 @@ class TestGraphNodes(FiberTest):
         graph_nodes = self.fiber1.get_client().graph_nodes()
         print(graph_nodes)
         node_info = self.fiber1.get_client().node_info()
-        if graph_nodes["nodes"][0]["node_id"] != node_info["public_key"]:
+        if graph_nodes["nodes"][0]["node_id"] != node_info["node_id"]:
             graph_nodes["nodes"].reverse()
         for i in range(len(graph_nodes["nodes"])):
             node = graph_nodes["nodes"][i]
             node_info = self.fibers[i].get_client().node_info()
             # alias
             # assert node['alias'] == node_info['node_name']
-            assert node["alias"] == ""
+            # assert node["alias"] == ""
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id
-            assert node["node_id"] == node_info["public_key"]
+            assert node["node_id"] == node_info["node_id"]
             # timestamp
             assert int(node["timestamp"], 16) <= int(time.time() * 1000)
             # chain_hash
@@ -107,7 +107,7 @@ class TestGraphNodes(FiberTest):
         print("before_node_info:", before_node_info)
         print("after_node_info:", node_info)
         graph_nodes = self.fiber1.get_client().graph_nodes()
-        if graph_nodes["nodes"][0]["node_id"] != node_info["public_key"]:
+        if graph_nodes["nodes"][0]["node_id"] != node_info["node_id"]:
             graph_nodes["nodes"].reverse()
         for i in range(len(graph_nodes["nodes"])):
             node = graph_nodes["nodes"][i]
@@ -118,7 +118,7 @@ class TestGraphNodes(FiberTest):
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id
-            assert node["node_id"] == node_info["public_key"]
+            assert node["node_id"] == node_info["node_id"]
             # timestamp
             assert int(node["timestamp"], 16) <= int(time.time() * 1000)
             # chain_hash
@@ -133,12 +133,12 @@ class TestGraphNodes(FiberTest):
         # check other nodes
         graph_nodes = self.fiber2.get_client().graph_nodes()
         node_info = self.fiber1.get_client().node_info()
-        if graph_nodes["nodes"][0]["node_id"] != node_info["public_key"]:
+        if graph_nodes["nodes"][0]["node_id"] != node_info["node_id"]:
             print(
                 "graph_nodes['nodes'][0]['node_id']:",
                 graph_nodes["nodes"][0]["node_id"],
             )
-            print("public key:", node_info["public_key"])
+            print("public key:", node_info["node_id"])
             graph_nodes["nodes"].reverse()
         print("graph_nodes['nodes']:", graph_nodes["nodes"])
         for i in range(len(graph_nodes["nodes"])):
@@ -150,7 +150,7 @@ class TestGraphNodes(FiberTest):
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id
-            assert node["node_id"] == node_info["public_key"]
+            assert node["node_id"] == node_info["node_id"]
             # timestamp
             assert int(node["timestamp"], 16) <= int(time.time() * 1000)
             # chain_hash

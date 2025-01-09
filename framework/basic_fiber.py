@@ -143,6 +143,9 @@ class FiberTest(CkbTest):
         cls.fiber1.connect_peer(cls.fiber2)
         time.sleep(1)
         cls.logger.debug(f"\nSetting up method:{method.__name__}")
+        cls.node.getClient().clear_tx_pool()
+        for i in range(5):
+            cls.Miner.miner_with_version(cls.node, "0x0")
 
     def teardown_method(self, method):
         if self.debug:
@@ -337,7 +340,7 @@ class FiberTest(CkbTest):
         channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
         payment = fiber1.get_client().send_payment(
             {
-                "target_pubkey": fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": fiber2.get_client().node_info()["node_id"],
                 "amount": hex(fiber2_balance),
                 "keysend": True,
             }
@@ -528,8 +531,7 @@ class FiberTest(CkbTest):
             self.logger.debug(
                 f"commit_hash:{node_info['commit_hash']}",
             )
-            self.logger.debug(f"public_key:{node_info['public_key']}")
-            self.logger.debug(f"peer_id:{node_info['peer_id']}")
+            self.logger.debug(f"public_key:{node_info['node_id']}")
             self.logger.debug(f"channel_count:{int(node_info['channel_count'], 16)}")
             self.logger.debug(f"peers_count:{int(node_info['peers_count'], 16)}")
             self.logger.debug(
@@ -538,7 +540,6 @@ class FiberTest(CkbTest):
             channels = fibers_data[i]["channels"]
             for channel in channels:
                 channel_id = channel["channel_id"]
-                peer_id = channel["peer_id"]
                 state_name = channel["state"]["state_name"]
                 local_balance = int(channel["local_balance"], 16) / 100000000
                 offered_tlc_balance = (
@@ -555,7 +556,6 @@ class FiberTest(CkbTest):
 
                 # 打印结果
                 self.logger.debug(f"-----Channel ID: {channel_id}-------")
-                self.logger.debug(f"Peer ID: {peer_id}")
                 self.logger.debug(f"State: {state_name}")
                 self.logger.debug(f"Local Balance: {local_balance}")
                 self.logger.debug(f"Offered TLC Balance: {offered_tlc_balance}")

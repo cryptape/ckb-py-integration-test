@@ -9,7 +9,15 @@ fiber:
 
 rpc:
   listening_addr: {{ rpc_listening_addr | default("127.0.0.1:8227") }}
-
+  enabled_modules:
+    - cch
+    - channel
+    - payment
+    - graph
+    - info
+    - invoice
+    - peer
+    - dev
 ckb:
   rpc_url: {{ ckb_rpc_url | default("http://127.0.0.1:8114") }}
   {% if ckb_udt_whitelist is defined %}

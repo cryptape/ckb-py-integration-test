@@ -6,6 +6,7 @@ from framework.basic_fiber import FiberTest
 
 
 class TestFundingAmount(FiberTest):
+
     def test_ckb_funding_amount_zero(self):
         node_info = self.fiber1.get_client().node_info()
         open_channel_auto_accept_min_ckb_funding_amount = node_info[

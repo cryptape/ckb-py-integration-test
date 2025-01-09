@@ -59,7 +59,7 @@ class TestAmount(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                     "amount": hex(0),
                     "keysend": True,
                     "dry_run": True,
@@ -74,7 +74,7 @@ class TestAmount(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                     "amount": hex(0),
                     "keysend": True,
                     "dry_run": True,
@@ -89,7 +89,7 @@ class TestAmount(FiberTest):
         # send amount ： hex(1)
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(1),
                 "keysend": True,
                 "dry_run": True,
@@ -98,7 +98,7 @@ class TestAmount(FiberTest):
         assert payment["fee"] == hex(0)
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(1),
                 "keysend": True,
                 "dry_run": True,
@@ -119,7 +119,7 @@ class TestAmount(FiberTest):
         channels = self.fiber1.get_client().list_channels({})
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(
                     int(int(channels["channels"][0]["local_balance"], 16) / 1.001)
                 ),
@@ -132,7 +132,7 @@ class TestAmount(FiberTest):
         # todo expected max  = local_balance /  1.001
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(
                     int(int(channels["channels"][0]["local_balance"], 16) / 1.002001)
                 ),
@@ -145,7 +145,7 @@ class TestAmount(FiberTest):
         # with pytest.raises(Exception) as exc_info:
         #     self.fiber1.get_client().send_payment(
         #         {
-        #             "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+        #             "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
         #             "amount": hex(
         #                 int(int(channels["channels"][0]["local_balance"], 16) / 1.001)
         #             ),
@@ -160,7 +160,7 @@ class TestAmount(FiberTest):
         # )
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(
                     int(int(channels["channels"][0]["local_balance"], 16) / 1.00101)
                 ),
@@ -201,7 +201,7 @@ class TestAmount(FiberTest):
         with pytest.raises(Exception) as exc_info:
             payment = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                     "amount": "0xfffffffffffffffffffffffffffffff",
                     "keysend": True,
                     "dry_run": True,
@@ -243,7 +243,7 @@ class TestAmount(FiberTest):
         time.sleep(1)
         self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(100 * 100000000),
                 "keysend": True,
                 "dry_run": True,
@@ -251,7 +251,7 @@ class TestAmount(FiberTest):
         )
         payment1 = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(100 * 100000000),
                 "keysend": True,
             }
@@ -259,7 +259,7 @@ class TestAmount(FiberTest):
         self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
         self.fiber2.get_client().send_payment(
             {
-                "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                 "amount": hex(200 * 100000000),
                 "keysend": True,
                 "dry_run": True,
@@ -267,7 +267,7 @@ class TestAmount(FiberTest):
         )
         payment2 = self.fiber2.get_client().send_payment(
             {
-                "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                 "amount": hex(200 * 100000000),
                 "keysend": True,
             }
@@ -332,7 +332,7 @@ class TestAmount(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                     "amount": hex(0),
                     "keysend": True,
                     "dry_run": True,
@@ -350,7 +350,7 @@ class TestAmount(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                     "amount": hex(0),
                     "keysend": True,
                     "dry_run": True,
@@ -368,7 +368,7 @@ class TestAmount(FiberTest):
         # send amount ： hex(1)
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(1),
                 "keysend": True,
                 "dry_run": True,
@@ -380,7 +380,7 @@ class TestAmount(FiberTest):
         assert payment["fee"] == hex(0)
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(1),
                 "keysend": True,
                 "dry_run": True,
@@ -403,7 +403,7 @@ class TestAmount(FiberTest):
         # node1 send to node2 current max = local_balance / 1.001
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(
                     int(int(channels["channels"][0]["local_balance"], 16) / 1.00101)
                 ),
@@ -419,7 +419,7 @@ class TestAmount(FiberTest):
         # todo max = local_balance / 1.001
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(
                     int(int(channels["channels"][0]["local_balance"], 16) / 1.00101)
                 ),

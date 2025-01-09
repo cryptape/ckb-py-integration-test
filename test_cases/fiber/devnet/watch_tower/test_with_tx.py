@@ -23,7 +23,7 @@ class WithTx(FiberTest):
         payment = self.fiber1.get_client().send_payment(
             {
                 "amount": hex(100),
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "keysend": True,
             }
         )
@@ -72,7 +72,7 @@ class WithTx(FiberTest):
         self.fiber2.get_client().send_payment(
             {
                 "amount": hex(1),
-                "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                 "keysend": True,
             }
         )

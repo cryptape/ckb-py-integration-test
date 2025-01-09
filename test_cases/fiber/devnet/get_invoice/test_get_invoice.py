@@ -1,5 +1,4 @@
 import datetime
-import time
 
 import pytest
 
@@ -41,7 +40,7 @@ class TestGetInvoice(FiberTest):
         node_info = self.fiber1.get_client().node_info()
 
         assert (
-            node_info["public_key"]
+            node_info["node_id"]
             == result["invoice"]["data"]["attrs"][3]["PayeePublicKey"]
         )
         parse_invoice = self.fiber1.get_client().parse_invoice(

@@ -37,6 +37,15 @@ fiber:
 
 rpc:
   listening_addr: {{ rpc_listening_addr | default("127.0.0.1:8227") }}
+  enabled_modules:
+    - cch
+    - channel
+    - payment
+    - graph
+    - info
+    - invoice
+    - peer
+    - dev
 
 ckb:
   rpc_url: "https://testnet.ckbapp.dev/"
