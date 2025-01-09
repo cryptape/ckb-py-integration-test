@@ -90,7 +90,7 @@ class TestForce(FiberTest):
             }
         )
         # payment = self.fiber1.get_client().send_payment({
-        #     "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+        #     "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
         #     "currency": "Fibd",
         #     "amount": hex(1 * 100000000),
         #     "keysend": True
@@ -114,7 +114,7 @@ class TestForce(FiberTest):
             }
         )
         # payment = self.fiber1.get_client().send_payment({
-        #     "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+        #     "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
         #     "currency": "Fibd",
         #     "amount": hex(1 * 100000000),
         #     "keysend": True
@@ -312,7 +312,7 @@ class TestForce(FiberTest):
         payment = self.fiber1.get_client().send_payment(
             {
                 "amount": hex(100),
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "keysend": True,
             }
         )

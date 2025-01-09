@@ -202,7 +202,7 @@ class TestUpdateChannel(FiberTest):
                 current_fiber.get_client(), linked_fiber.get_peer_id(), "CHANNEL_READY"
             )
         time.sleep(1)
-        pub_key = self.fibers[-1].get_client().node_info()["public_key"]
+        pub_key = self.fibers[-1].get_client().node_info()["node_id"]
         payment = (
             self.fibers[0]
             .get_client()

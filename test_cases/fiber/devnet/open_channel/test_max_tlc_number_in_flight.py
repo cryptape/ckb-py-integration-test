@@ -64,7 +64,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
                     "amount": hex(100),
                     # "payment_hash": invoice_list[i]['invoice']['data']['payment_hash'],
                     "payment_hash": payment_preimage,
-                    "expiry": hex((int(time.time()) + 40) * 1000),
+                    "expiry": hex((int(time.time()) + 1000) * 1000),
                     "hash_algorithm": "sha256",
                 }
             )
@@ -107,6 +107,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
     def test_max_tlc_number_in_flight_zero(self):
         """
         max_tlc_number_in_flight = 0

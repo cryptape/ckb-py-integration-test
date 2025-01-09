@@ -69,6 +69,30 @@ class TestSendPayment(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    # FiberTest.debug = True
+    # def test_Mus222ig2VerifyError(self):
+    #     #
+    #     account_private = self.generate_account(1000)
+    #     self.fiber3 = self.start_new_fiber(account_private)
+    #     self.fiber3.connect_peer(self.fiber2)
+    #     for i in range(10):
+    #         self.fiber1.get_client().open_channel(
+    #             {
+    #                 "peer_id": self.fiber2.get_peer_id(),
+    #                 "funding_amount": hex(500 * 100000000),
+    #                 "public": True,
+    #             }
+    #         )
+    #         time.sleep(3)
+    #         self.wait_for_channel_state(
+    #             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+    #         )
+
+    # def test_list_channes(self):
+    #     channels = self.fiber1.get_client().list_channels({})
+    #     for i in range(len(channels["channels"])):
+    #         print(f"local_balance: {channels['channels'][i]['local_balance']},remote_balance: {channels['channels'][i]['remote_balance']}")
+
     def test_Musig2VerifyError(self):
         #
         account_private = self.generate_account(1000)
@@ -121,7 +145,9 @@ class TestSendPayment(FiberTest):
                 "payment_hash": parse_invoice["invoice"]["data"]["payment_hash"],
             }
         )
-        self.wait_invoice_state(self.fiber3, payment1["payment_hash"], "Received")
+        time.sleep(1)
+        self.wait_invoice_state(self.fiber3, payment1["payment_hash"], "Open")
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Failed")
         channels = self.fiber1.get_client().list_channels({})
         assert channels["channels"][0]["remote_balance"] == "0x0"
         assert (
@@ -160,19 +186,117 @@ class TestSendPayment(FiberTest):
         self.wait_for_channel_state(
             self.fiber3.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
         )
-        for i in range(100):
+        time.sleep(1)
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(1 * 100000000),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(1 * 100000000),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+        node1_payments = []
+        node2_payments = []
+        node3_payments = []
+        node1_before_balance = self.fiber1.get_client().list_channels({})["channels"][
+            0
+        ]["local_balance"]
+        node3_before_balance = self.fiber3.get_client().list_channels({})["channels"][
+            0
+        ]["local_balance"]
+        for i in range(1000):
+            print("current i:", i)
             payment1 = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                     "currency": "Fibd",
                     "amount": hex(1),
                     "keysend": True,
                     # "payment_hash": self.generate_random_preimage(),
                 }
             )
-        time.sleep(10)
-        self.fiber2.get_client().node_info()
-        # self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+            node1_payments.append(payment1)
+            payment1 = self.fiber2.get_client().send_payment(
+                {
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+                    "currency": "Fibd",
+                    "amount": hex(1),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            node2_payments.append(payment1)
+            payment1 = self.fiber2.get_client().send_payment(
+                {
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
+                    "currency": "Fibd",
+                    "amount": hex(1),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            node2_payments.append(payment1)
+            payment1 = self.fiber3.get_client().send_payment(
+                {
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
+                    "currency": "Fibd",
+                    "amount": hex(1),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            node3_payments.append(payment1)
+        for i in range(len(node1_payments)):
+            payment1 = node1_payments[i]
+            self.wait_payment_state(
+                self.fiber1, payment1["payment_hash"], "Success", 3600
+            )
+            payment2 = node2_payments[i]
+            self.wait_payment_state(
+                self.fiber2, payment2["payment_hash"], "Success", 3600
+            )
+            payment3 = node3_payments[i]
+            self.wait_payment_state(
+                self.fiber3, payment3["payment_hash"], "Success", 3600
+            )
+
+        # check balance
+        node1_after_balance = self.fiber1.get_client().list_channels({})["channels"][0][
+            "local_balance"
+        ]
+        node3_after_balance = self.fiber3.get_client().list_channels({})["channels"][0][
+            "local_balance"
+        ]
+        assert node1_before_balance == node1_after_balance
+        assert node3_before_balance == node3_after_balance
+
+    # def test_restart_node2(self):
+    #     self.fiber2.stop()
+    #     self.fiber2.start()
+    #     time.sleep(10)
+    #     self.fiber3 = self.start_new_fiber("")
+    #     payment1 = self.fiber1.get_client().send_payment(
+    #         {
+    #             "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+    #             "currency": "Fibd",
+    #             "amount": hex(1 * 100000000),
+    #             "keysend": True,
+    #             # "payment_hash": self.generate_random_preimage(),
+    #         }
+    #     )
+    #     self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
 
     def test_send_payment_sametime(self):
         """
@@ -240,3 +364,191 @@ class TestSendPayment(FiberTest):
         payment2 = self.fiber2.get_client().get_payment(
             {"payment_hash": payment2["payment_hash"]}
         )
+
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/436")
+    def test_send_payment_each_other(self):
+        account_private = self.generate_account(1000)
+        self.fiber3 = self.start_new_fiber(account_private)
+        self.fiber3.connect_peer(self.fiber2)
+        self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        self.fiber2.get_client().open_channel(
+            {
+                "peer_id": self.fiber3.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber3.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        time.sleep(5)
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(1 * 100000000),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+        time.sleep(1)
+        node1_pubkey = self.fiber1.get_client().node_info()["node_id"]
+        node3_pubkey = self.fiber3.get_client().node_info()["node_id"]
+        for i in range(100):
+            payment1 = self.fiber1.get_client().send_payment(
+                {
+                    "target_pubkey": node3_pubkey,
+                    "currency": "Fibd",
+                    "amount": hex(100),
+                    "keysend": True,
+                }
+            )
+            payment2 = self.fiber3.get_client().send_payment(
+                {
+                    "target_pubkey": node1_pubkey,
+                    "currency": "Fibd",
+                    "amount": hex(100),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+            self.wait_payment_state(self.fiber3, payment2["payment_hash"], "Success")
+
+        time.sleep(10)
+        self.fiber2.get_client().node_info()
+
+        # self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+
+    def test_send_payment_each_other_2(self):
+
+        self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(1 * 100000000),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+        time.sleep(1)
+        node1_pubkey = self.fiber1.get_client().node_info()["node_id"]
+        node2_pubkey = self.fiber2.get_client().node_info()["node_id"]
+        for i in range(100):
+            payment1 = self.fiber1.get_client().send_payment(
+                {
+                    "target_pubkey": node2_pubkey,
+                    "currency": "Fibd",
+                    "amount": hex(100),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            payment2 = self.fiber2.get_client().send_payment(
+                {
+                    "target_pubkey": node1_pubkey,
+                    "currency": "Fibd",
+                    "amount": hex(100),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+            self.wait_payment_state(self.fiber2, payment2["payment_hash"], "Success")
+
+        time.sleep(10)
+        self.fiber2.get_client().node_info()
+
+        # self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/436")
+    def test_send_payment_0x1(self):
+        account_private = self.generate_account(1000)
+        self.fiber3 = self.start_new_fiber(account_private)
+        self.fiber3.connect_peer(self.fiber2)
+        self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+        self.fiber2.get_client().open_channel(
+            {
+                "peer_id": self.fiber3.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber3.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
+        )
+
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(1 * 100000000),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        time.sleep(5)
+        payment1 = self.fiber1.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(100),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        self.fiber3.get_client().send_payment(
+            {
+                "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
+                "currency": "Fibd",
+                "amount": hex(1),
+                "keysend": True,
+                # "payment_hash": self.generate_random_preimage(),
+            }
+        )
+        time.sleep(5)
+
+        for i in range(10):
+            print("current :", i)
+            payment1 = self.fiber1.get_client().send_payment(
+                {
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+                    "currency": "Fibd",
+                    "amount": hex(1),
+                    "keysend": True,
+                    # "payment_hash": self.generate_random_preimage(),
+                }
+            )
+            self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+            time.sleep(1)

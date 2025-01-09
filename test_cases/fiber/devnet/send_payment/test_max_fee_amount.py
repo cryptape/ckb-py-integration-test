@@ -35,7 +35,7 @@ class TestMaxFeeAmount(FiberTest):
         # send to node1 -> node2 no fee  max_fee = 0
         payment1 = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(1000000 * 100000000),
                 "keysend": True,
                 "max_fee_amount": hex(0),
