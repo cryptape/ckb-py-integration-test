@@ -4,6 +4,10 @@ from framework.basic import CkbTest
 from framework.fiber_rpc import FiberRPCClient
 from framework.test_fiber import Fiber, FiberConfigPath
 from framework.util import generate_random_preimage
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 
 # ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqt2yg5ctyv59wsrqk2d634rj6k7c8kdjycft39my
 # ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0n4lwpc3k24hnt75pmgpmg2hgack50wdgnlsp6m
@@ -145,9 +149,9 @@ class TestFiber(CkbTest):
             self.fiber2.get_client(), self.fiber1.get_client(), 1000, None, 10 * 60
         )
         fiber2_to_fiber1_time = time.time()
-        print("fiber1_to_fiber2 cost time:", fiber1_to_fiber2_time - begin)
-        print(
-            "fiber2_to_fiber1 cost time:", fiber2_to_fiber1_time - fiber1_to_fiber2_time
+        LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
+        LOGGER.info(
+            f"fiber2_to_fiber1 cost time: {fiber2_to_fiber1_time - fiber1_to_fiber2_time}"
         )
 
     def test_ckb_02(self):
@@ -164,9 +168,9 @@ class TestFiber(CkbTest):
             self.fiber2.get_client(), self.fiber1.get_client(), 1000, None, 10 * 60
         )
         fiber2_to_fiber1_time = time.time()
-        print("fiber1_to_fiber2 cost time:", fiber1_to_fiber2_time - begin)
-        print(
-            "fiber2_to_fiber1 cost time:", fiber2_to_fiber1_time - fiber1_to_fiber2_time
+        LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
+        LOGGER.info(
+            f"fiber2_to_fiber1 cost time: {fiber2_to_fiber1_time - fiber1_to_fiber2_time}"
         )
 
     def test_udt(self):
@@ -239,9 +243,9 @@ class TestFiber(CkbTest):
             10 * 60,
         )
         fiber2_to_fiber1_time = time.time()
-        print("fiber1_to_fiber2 cost time:", fiber1_to_fiber2_time - begin)
-        print(
-            "fiber2_to_fiber1 cost time:", fiber2_to_fiber1_time - fiber1_to_fiber2_time
+        LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
+        LOGGER.info(
+            f"fiber2_to_fiber1 cost time: {fiber2_to_fiber1_time - fiber1_to_fiber2_time}"
         )
 
     def test_udt_02(self):
@@ -288,9 +292,9 @@ class TestFiber(CkbTest):
             10 * 60,
         )
         fiber2_to_fiber1_time = time.time()
-        print("fiber1_to_fiber2 cost time:", fiber1_to_fiber2_time - begin)
-        print(
-            "fiber2_to_fiber1 cost time:", fiber2_to_fiber1_time - fiber1_to_fiber2_time
+        LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
+        LOGGER.info(
+            f"fiber2_to_fiber1 cost time: {fiber2_to_fiber1_time - fiber1_to_fiber2_time}"
         )
 
 
