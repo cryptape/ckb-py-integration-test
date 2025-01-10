@@ -12,9 +12,7 @@ import requests
 from tqdm import tqdm
 
 
-versions = [
-    "0.2.1"
-]  # Replace with your versions
+versions = ["0.2.0", "0.2.1"]  # Replace with your versions
 
 DOWNLOAD_DIR = "download/fiber"
 SYSTEMS = {
