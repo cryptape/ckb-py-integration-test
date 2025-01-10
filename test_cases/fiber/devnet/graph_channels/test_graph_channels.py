@@ -250,7 +250,7 @@ class TestGraphChannels(FiberTest):
         print("node1_channels:", node1_channels)
         key = (
             "fee_rate_of_node1"
-            if node3_channels["channels"][0]["node1"] == node_info["public_key"]
+            if node3_channels["channels"][0]["node1"] == node_info["node_id"]
             else "fee_rate_of_node2"
         )
         print("key:", key)
@@ -261,7 +261,7 @@ class TestGraphChannels(FiberTest):
         print("node2_channels", node2_channels)
         key = (
             "fee_rate_of_node1"
-            if node3_channels["channels"][0]["node1"] == node_info["public_key"]
+            if node3_channels["channels"][0]["node1"] == node_info["node_id"]
             else "fee_rate_of_node2"
         )
         assert (
@@ -271,7 +271,7 @@ class TestGraphChannels(FiberTest):
         print("node3_channels", node3_channels)
         key = (
             "fee_rate_of_node1"
-            if node3_channels["channels"][0]["node1"] == node_info["public_key"]
+            if node3_channels["channels"][0]["node1"] == node_info["node_id"]
             else "fee_rate_of_node2"
         )
         assert (
@@ -325,7 +325,7 @@ class TestGraphChannels(FiberTest):
         # node1
         node1_info = self.fiber1.get_client().node_info()
         node2_info = self.fiber2.get_client().node_info()
-        nodes = [node1_info["public_key"], node2_info["public_key"]]
+        nodes = [node1_info["node_id"], node2_info["node_id"]]
         # node2
         assert node1_channels["channels"][0]["node1"] in nodes
         assert node1_channels["channels"][0]["node2"] in nodes

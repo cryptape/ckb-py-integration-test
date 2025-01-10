@@ -64,7 +64,7 @@ class TestForceRestart(FiberTest):
         node_info = self.fiber1.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
         node3_info = self.fiber3.get_client().node_info()
-        fiber3_pub = node3_info["public_key"]
+        fiber3_pub = node3_info["node_id"]
         payment = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": fiber3_pub,

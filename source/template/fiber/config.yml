@@ -37,9 +37,18 @@ fiber:
 
 rpc:
   listening_addr: "127.0.0.1:8227"
+  enabled_modules:
+    - cch
+    - channel
+    - payment
+    - graph
+    - info
+    - invoice
+    - peer
+    - dev
 
 ckb:
-  rpc_url: "https://testnet.ckbapp.dev/"
+  rpc_url: "https://testnet.ckb.dev/"
   udt_whitelist:
     - name: RUSD
       script:

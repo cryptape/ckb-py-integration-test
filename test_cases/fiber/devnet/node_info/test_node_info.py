@@ -22,7 +22,7 @@ class TestNodeInfo(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": node_info["public_key"],
+                    "target_pubkey": node_info["node_id"],
                     "amount": hex(10 * 100000000),
                     "keysend": True,
                     "dry_run": True,
@@ -87,7 +87,7 @@ class TestNodeInfo(FiberTest):
         # open channel
         self.fiber2.get_client().open_channel(
             {
-                "peer_id": before_open_channel_node1_info["peer_id"],
+                "peer_id": self.fiber1.get_peer_id(),
                 "funding_amount": hex(1000 * 100000000),
                 "public": True,
             }
@@ -108,7 +108,7 @@ class TestNodeInfo(FiberTest):
         )
 
         self.wait_for_channel_state(
-            self.fiber2.get_client(), pending_node1_info["peer_id"], "CHANNEL_READY"
+            self.fiber2.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY"
         )
         after_node1_info = self.fiber1.get_client().node_info()
         after_node2_info = self.fiber2.get_client().node_info()

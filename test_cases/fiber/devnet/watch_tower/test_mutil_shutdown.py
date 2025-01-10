@@ -106,6 +106,7 @@ class TestMutilShutdown(FiberTest):
 
         # 4. Wait for shutdown commit.
         self.wait_tx_pool(1, 1000)
+        time.sleep(5)
         for i in range(10):
             self.Miner.miner_with_version(self.node, "0x0")
         # 5. todo Check open_channel cell cost.

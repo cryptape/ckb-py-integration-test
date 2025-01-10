@@ -24,6 +24,7 @@ class TestChannelId(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/431")
     def test_channel_id_exist(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {

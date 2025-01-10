@@ -5,10 +5,19 @@ fiber:
   announce_private_addr: true
   gossip_store_maintenance_interval_ms: 1000
   gossip_network_maintenance_interval_ms: 1000
+  open_channel_auto_accept_min_ckb_funding_amount: {{ fiber_open_channel_auto_accept_min_ckb_funding_amount | default(10000000000)}}
 
 rpc:
   listening_addr: {{ rpc_listening_addr | default("127.0.0.1:8227") }}
-
+  enabled_modules:
+    - cch
+    - channel
+    - payment
+    - graph
+    - info
+    - invoice
+    - peer
+    - dev
 ckb:
   rpc_url: {{ ckb_rpc_url | default("http://127.0.0.1:8114") }}
   {% if ckb_udt_whitelist is defined %}

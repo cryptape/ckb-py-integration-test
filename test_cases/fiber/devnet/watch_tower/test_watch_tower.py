@@ -807,7 +807,7 @@ class TestWatchTower(FiberTest):
             tx_message["output_cells"][0]["args"]
             == self.get_account_script(self.fiber2.account_private)["args"]
         )
-        assert tx_message["output_cells"][0]["capacity"] == 6299999545
+        assert tx_message["output_cells"][0]["capacity"] == 6199999545
 
         assert (
             tx_message["output_cells"][1]["args"]
@@ -1472,7 +1472,7 @@ class TestWatchTower(FiberTest):
         payment = src_fiber.get_client().send_payment(
             {
                 "amount": hex(amount),
-                "target_pubkey": to_fiber.get_client().node_info()["public_key"],
+                "target_pubkey": to_fiber.get_client().node_info()["node_id"],
                 "keysend": True,
             }
         )

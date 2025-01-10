@@ -45,7 +45,7 @@ class TestLongRouter(FiberTest):
             )
 
         time.sleep(1)
-        pub_key = self.fibers[-1].get_client().node_info()["public_key"]
+        pub_key = self.fibers[-1].get_client().node_info()["node_id"]
         payment = (
             self.fibers[0]
             .get_client()

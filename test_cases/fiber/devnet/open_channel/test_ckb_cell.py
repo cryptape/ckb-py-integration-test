@@ -165,7 +165,7 @@ class TestCkbCell(FiberTest):
         assert len(channels["channels"]) == 1
         assert channels["channels"][0]["capacity"] == hex(928 * 100000000)
         node3_info = new_fiber.get_client().node_info()
-        fiber3_pub = node3_info["public_key"]
+        fiber3_pub = node3_info["node_id"]
         payment = self.fiber2.get_client().send_payment(
             {
                 "target_pubkey": fiber3_pub,
@@ -198,7 +198,7 @@ class TestCkbCell(FiberTest):
         assert len(channels["channels"]) == 1
         assert channels["channels"][0]["capacity"] == hex(928 * 100000000)
         node3_info = new_fiber.get_client().node_info()
-        fiber3_pub = node3_info["public_key"]
+        fiber3_pub = node3_info["node_id"]
         payment = self.fiber2.get_client().send_payment(
             {
                 "target_pubkey": fiber3_pub,

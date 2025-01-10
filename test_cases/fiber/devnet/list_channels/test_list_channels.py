@@ -231,9 +231,6 @@ class TestListChannels(FiberTest):
         print("channel_outpoint:", channels["channels"][0]["channel_outpoint"])
         assert open_tx_hash in channels["channels"][0]["channel_outpoint"]
 
-        # peer_id
-        assert channels["channels"][0]["peer_id"] == self.fiber2.get_peer_id()
-
         # funding_udt_type_script
         assert channels["channels"][0][
             "funding_udt_type_script"

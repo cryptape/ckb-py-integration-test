@@ -1579,7 +1579,7 @@ class TestWatchTowerUdt(FiberTest):
         payment = src_fiber.get_client().send_payment(
             {
                 "amount": hex(amount),
-                "target_pubkey": to_fiber.get_client().node_info()["public_key"],
+                "target_pubkey": to_fiber.get_client().node_info()["node_id"],
                 "keysend": True,
                 "udt_type_script": self.get_account_udt_script(
                     self.fiber1.account_private

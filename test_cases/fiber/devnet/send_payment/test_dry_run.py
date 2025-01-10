@@ -149,9 +149,11 @@ class TestDryRun(FiberTest):
             self.fiber2.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY"
         )
         time.sleep(1)
+        graph_channels = self.fiber1.get_client().graph_channels({})
+        print("graph_channels:", graph_channels)
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(10 * 100000000),
                 "keysend": True,
                 "dry_run": True,

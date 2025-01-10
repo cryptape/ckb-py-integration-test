@@ -64,7 +64,7 @@ class TestRestart(FiberTest):
         node_info = self.fiber1.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
         node3_info = self.fiber3.get_client().node_info()
-        fiber3_pub = node3_info["public_key"]
+        fiber3_pub = node3_info["node_id"]
         payment = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": fiber3_pub,
@@ -228,7 +228,9 @@ class TestRestart(FiberTest):
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(30 * 100000000)
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
+    # FiberTest.debug = True
+
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
     def test_restart_when_node_send_payment(self):
         account3_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account3_private)

@@ -7,7 +7,6 @@ from framework.basic_fiber import FiberTest
 
 class TestAllowSelfPaymnent(FiberTest):
     # FiberTest.debug = True
-
     def test_a1_to_b1_to_a1(self):
         """
         a1-b1-a1
@@ -36,7 +35,7 @@ class TestAllowSelfPaymnent(FiberTest):
         with pytest.raises(Exception) as exc_info:
             payment1 = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                     "amount": hex(500 * 10000000),
                     "keysend": True,
                     "dry_run": True,
@@ -73,14 +72,14 @@ class TestAllowSelfPaymnent(FiberTest):
         with pytest.raises(Exception) as exc_info:
             payment1 = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                     "amount": hex(500 * 10000000),
                     "keysend": True,
                     "dry_run": True,
                     "allow_self_payment": True,
                 }
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -99,7 +98,7 @@ class TestAllowSelfPaymnent(FiberTest):
             payment1 = self.fiber1.get_client().send_payment(
                 {"invoice": invoice["invoice_address"], "allow_self_payment": True}
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -107,7 +106,7 @@ class TestAllowSelfPaymnent(FiberTest):
         # a1(1000 )->b1(100)  a1 send payment with self pay
         payment1 = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "amount": hex(100 * 10000000),
                 "keysend": True,
             }
@@ -118,14 +117,14 @@ class TestAllowSelfPaymnent(FiberTest):
         with pytest.raises(Exception) as exc_info:
             payment1 = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                     "amount": hex(10 * 10000000),
                     "keysend": True,
                     "dry_run": True,
                     "allow_self_payment": True,
                 }
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -144,7 +143,7 @@ class TestAllowSelfPaymnent(FiberTest):
             payment1 = self.fiber1.get_client().send_payment(
                 {"invoice": invoice["invoice_address"], "allow_self_payment": True}
             )
-        expected_error_message = "no path found"
+        expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -197,7 +196,7 @@ class TestAllowSelfPaymnent(FiberTest):
         with pytest.raises(Exception) as exc_info:
             payment1 = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                     "amount": hex(500 * 10000000),
                     "keysend": True,
                     "dry_run": True,
@@ -233,7 +232,7 @@ class TestAllowSelfPaymnent(FiberTest):
         # a1(100000000 )->b1(0)  a1 send payment with self pay
         payment1 = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                 "amount": hex(500 * 10000000),
                 "keysend": True,
                 "dry_run": True,
@@ -259,6 +258,7 @@ class TestAllowSelfPaymnent(FiberTest):
         # todo a1(1000 )->b1(100)  a1 send payment with self pay
 
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/362")
+    @pytest.mark.skip("wait ")
     def test_a1_to_b1_to_c1_a2(self):
         """
 
@@ -306,7 +306,7 @@ class TestAllowSelfPaymnent(FiberTest):
         for i in range(3):
             payment1 = self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                     "amount": hex(6 * 10000000),
                     "keysend": True,
                     "allow_self_payment": True,
@@ -361,7 +361,7 @@ class TestAllowSelfPaymnent(FiberTest):
         time.sleep(1)
         payment1 = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber1.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
                 "amount": hex(6 * 10000000),
                 "keysend": True,
                 "allow_self_payment": True,

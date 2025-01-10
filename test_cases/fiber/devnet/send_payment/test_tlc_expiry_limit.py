@@ -46,7 +46,7 @@ class TestTlcExpiryLimit(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                     "amount": hex(10 * 100000000),
                     "keysend": True,
                     "dry_run": True,
@@ -63,7 +63,7 @@ class TestTlcExpiryLimit(FiberTest):
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().send_payment(
                 {
-                    "target_pubkey": self.fiber2.get_client().node_info()["public_key"],
+                    "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                     "amount": hex(10 * 100000000),
                     "keysend": True,
                     "dry_run": True,
@@ -77,7 +77,7 @@ class TestTlcExpiryLimit(FiberTest):
         )
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(10 * 100000000),
                 "keysend": True,
                 "tlc_expiry_limit": hex(86400000 * 2),
@@ -87,7 +87,7 @@ class TestTlcExpiryLimit(FiberTest):
 
         payment = self.fiber1.get_client().send_payment(
             {
-                "target_pubkey": self.fiber3.get_client().node_info()["public_key"],
+                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "amount": hex(10 * 100000000),
                 "keysend": True,
                 "tlc_expiry_limit": hex(1209600000),
