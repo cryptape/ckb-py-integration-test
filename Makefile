@@ -23,12 +23,7 @@ prepare_fiber_testnet:
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
 	python3 -m download_fiber
-	git clone https://github.com/nervosnetwork/ckb-cli.git
-	cd ckb-cli
-	git checkout develop
-	make prod
-	cp target/release/ckb-cli ../source/ckb-cli
-	cd ../
+	cp download/0.119.0/ckb-cli ./source/ckb-cli
 	cp download/0.110.2/ckb-cli ./source/ckb-cli-old
 
 develop_prepare:
