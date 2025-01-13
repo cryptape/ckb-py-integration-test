@@ -7,6 +7,13 @@ from framework.test_fiber import FiberConfigPath
 class TestP2p(FiberTest):
 
     def test_old_fiber(self):
+        """
+        1. start 0.2.0 node
+        2. open_channel with node 0.2.0
+        3. send_payment with node 0.2.0
+        Returns:
+
+        """
         old_fiber = self.start_new_fiber(
             self.generate_account(10000), fiber_version=FiberConfigPath.V020_DEV
         )
