@@ -181,7 +181,7 @@ class FiberTest(CkbTest):
                 ckb_balance,
                 self.node.rpcUrl,
             )
-            self.Miner.miner_until_tx_committed(self.node, tx_hash)
+            self.Miner.miner_until_tx_committed(self.node, tx_hash, True)
 
         if udt_owner_private_key is None:
             return account_private_key
@@ -192,7 +192,7 @@ class FiberTest(CkbTest):
             account_private_key,
             udt_balance,
         )
-        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash, True)
 
     def generate_account(
         self, ckb_balance, udt_owner_private_key=None, udt_balance=1000 * 1000000000
