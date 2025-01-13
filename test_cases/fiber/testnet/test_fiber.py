@@ -30,7 +30,7 @@ class TestFiber(CkbTest):
     def setup_class(cls):
         print("\nSetup TestClass2")
         cls.fiber1 = Fiber.init_by_port(
-            FiberConfigPath.V100_TESTNET,
+            FiberConfigPath.CURRENT_TESTNET,
             cls.ACCOUNT_PRIVATE_1,
             "fiber/node1",
             "8228",
@@ -38,7 +38,7 @@ class TestFiber(CkbTest):
         )
 
         cls.fiber2 = Fiber.init_by_port(
-            FiberConfigPath.V100_TESTNET,
+            FiberConfigPath.CURRENT_TESTNET,
             cls.ACCOUNT_PRIVATE_2,
             "fiber/node2",
             "8229",

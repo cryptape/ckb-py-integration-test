@@ -72,14 +72,14 @@ class FiberTest(CkbTest):
         cls.fibers = []
         cls.new_fibers = []
         cls.fiber1 = Fiber.init_by_port(
-            FiberConfigPath.V100_DEV,
+            FiberConfigPath.CURRENT_DEV,
             cls.account1_private_key,
             "fiber/node1",
             "8228",
             "8227",
         )
         cls.fiber2 = Fiber.init_by_port(
-            FiberConfigPath.V100_DEV,
+            FiberConfigPath.CURRENT_DEV,
             cls.account2_private_key,
             "fiber/node2",
             "8229",
@@ -206,10 +206,15 @@ class FiberTest(CkbTest):
         )
         return account_private_key
 
-    def start_new_mock_fiber(self, account_private_key, config=None):
+    def start_new_mock_fiber(
+        self,
+        account_private_key,
+        config=None,
+        fiber_version=FiberConfigPath.CURRENT_DEV,
+    ):
         i = len(self.new_fibers)
         fiber = Fiber.init_by_port(
-            FiberConfigPath.V100_DEV,
+            fiber_version,
             account_private_key,
             f"fiber/node{3 + i}",
             str(8251 + i),
@@ -220,7 +225,12 @@ class FiberTest(CkbTest):
         self.fibers.append(fiber)
         return fiber
 
-    def start_new_fiber(self, account_private_key, config=None):
+    def start_new_fiber(
+        self,
+        account_private_key,
+        config=None,
+        fiber_version=FiberConfigPath.CURRENT_DEV,
+    ):
         if self.debug:
             self.logger.debug("=================start  mock fiber ==================")
             return self.start_new_mock_fiber(account_private_key, config)
@@ -240,7 +250,7 @@ class FiberTest(CkbTest):
         i = len(self.new_fibers)
         # start fiber3
         fiber = Fiber.init_by_port(
-            FiberConfigPath.V100_DEV,
+            fiber_version,
             account_private_key,
             f"fiber/node{3 + i}",
             str(8251 + i),
@@ -355,6 +365,16 @@ class FiberTest(CkbTest):
         # channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
+
+    def send_payment(self, fiber1, fiber2, amount):
+        payment = fiber1.get_client().send_payment(
+            {
+                "target_pubkey": fiber2.get_client().node_info()["node_id"],
+                "amount": hex(amount),
+                "keysend": True,
+            }
+        )
+        self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
 
     def get_account_script(self, account_private_key):
         account1 = self.Ckb_cli.util_key_info_by_private_key(account_private_key)

@@ -16,8 +16,22 @@ from framework.config import get_tmp_path
 
 
 class FiberConfigPath(Enum):
-    V100_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.2.0/fnn")
-    V100_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
+    CURRENT_DEV = (
+        "/source/template/fiber/dev_config.yml.j2",
+        "download/fiber/0.2.0/fnn",
+    )
+    CURRENT_TESTNET = (
+        "/source/template/fiber/config.yml.j2",
+        "download/fiber/0.2.0/fnn",
+    )
+
+    V030_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
+    V020_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
+    V010_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
+
+    V030_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.0/fnn")
+    V020_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.0/fnn")
+    V010_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
 
     def __init__(self, fiber_config_path, fiber_bin_path):
         self.fiber_config_path = fiber_config_path
@@ -136,6 +150,11 @@ class Fiber:
             key = f.read()
         self.account_private = f"0x{key}"
         return self.account_private
+
+    def migration(self):
+        run_command(
+            f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}  --migrate -c {self.tmp_path}/config.yml -d {self.tmp_path}"
+        )
 
     def start(self, node=None):
         # env_map = dict(os.environ)  # Make a copy of the current environment

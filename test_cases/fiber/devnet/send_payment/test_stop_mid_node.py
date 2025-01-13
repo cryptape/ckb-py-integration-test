@@ -61,20 +61,3 @@ class TestStopMidNode(FiberTest):
             )
         )
         self.wait_payment_state(self.fibers[0], payment["payment_hash"], "Success", 120)
-
-    def test_0000(self):
-        self.start_new_mock_fiber("")
-        self.start_new_mock_fiber("")
-        payment = (
-            self.fibers[0]
-            .get_client()
-            .send_payment(
-                {
-                    "target_pubkey": self.fibers[2].get_client().node_info()["node_id"],
-                    "amount": hex(10 * 100000000),
-                    "keysend": True,
-                    "dry_run": True,
-                }
-            )
-        )
-        # self.wait_payment_state(self.fibers[0], payment["payment_hash"], "Success", 120)
