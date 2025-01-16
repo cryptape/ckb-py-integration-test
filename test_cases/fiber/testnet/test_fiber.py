@@ -58,7 +58,7 @@ class TestFiber(CkbTest):
         cls.fiber2.get_client().connect_peer(
             {"address": cls.cryptapeFiber2.node_info()["addresses"][0]}
         )
-        time.sleep(1)
+        time.sleep(10)
 
     @classmethod
     def teardown_class(cls):

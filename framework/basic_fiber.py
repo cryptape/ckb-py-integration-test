@@ -366,15 +366,18 @@ class FiberTest(CkbTest):
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
 
-    def send_payment(self, fiber1, fiber2, amount):
+    def send_payment(self, fiber1, fiber2, amount, wait=True):
         payment = fiber1.get_client().send_payment(
             {
                 "target_pubkey": fiber2.get_client().node_info()["node_id"],
                 "amount": hex(amount),
                 "keysend": True,
+                "allow_self_payment": True,
             }
         )
-        self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+        if wait:
+            self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+        return payment["payment_hash"]
 
     def get_account_script(self, account_private_key):
         account1 = self.Ckb_cli.util_key_info_by_private_key(account_private_key)
