@@ -366,13 +366,14 @@ class FiberTest(CkbTest):
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
 
-    def send_payment(self, fiber1, fiber2, amount, wait=True):
+    def send_payment(self, fiber1, fiber2, amount, wait=True, udt=None):
         payment = fiber1.get_client().send_payment(
             {
                 "target_pubkey": fiber2.get_client().node_info()["node_id"],
                 "amount": hex(amount),
                 "keysend": True,
                 "allow_self_payment": True,
+                "udt_type_script": udt,
             }
         )
         if wait:
@@ -396,6 +397,25 @@ class FiberTest(CkbTest):
         raise TimeoutError(
             f"status did not reach state {expected_state} within timeout period."
         )
+
+    def calculate_tx_fee(self, balance, fee_list):
+        """
+        A-B-C
+        A -> B 1000
+        B -> C 2000
+        calculate_tx_fee(1* 100000000, [2000])
+        Args:
+            balance:
+            fee_list:
+
+        Returns:
+
+        """
+        before_balance = balance
+        fee_list.reverse()
+        for fee in fee_list:
+            balance += balance * (fee / 1000000)
+        return int(balance - before_balance)
 
     def wait_tx_pool(self, pending_size, try_size=100):
         for i in range(try_size):

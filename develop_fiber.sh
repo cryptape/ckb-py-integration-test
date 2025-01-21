@@ -17,6 +17,6 @@ if [ "$BUILD_FIBER" == "true" ]; then
   git clone -b $GitFIBERBranch $GitFIBERUrl
   cd fiber
   cargo build
-  cp target/debug/fnn ../download/fiber/0.3.0/fnn
+  cp target/debug/fnn ../download/fiber/0.3.1/fnn
   cd ../
 fi
