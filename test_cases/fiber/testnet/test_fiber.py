@@ -142,11 +142,11 @@ class TestFiber(CkbTest):
         begin = time.time()
         # wait dry_run success
         send_payment(
-            self.fiber1.get_client(), self.fiber2.get_client(), 1000, None, 10 * 60
+            self.fiber1.get_client(), self.fiber2.get_client(), 1000, None, 20 * 60
         )
         fiber1_to_fiber2_time = time.time()
         send_payment(
-            self.fiber2.get_client(), self.fiber1.get_client(), 1000, None, 10 * 60
+            self.fiber2.get_client(), self.fiber1.get_client(), 1000, None, 20 * 60
         )
         fiber2_to_fiber1_time = time.time()
         LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
@@ -161,11 +161,11 @@ class TestFiber(CkbTest):
         self.fiber2.start()
         begin = time.time()
         send_payment(
-            self.fiber1.get_client(), self.fiber2.get_client(), 1000, None, 10 * 60
+            self.fiber1.get_client(), self.fiber2.get_client(), 1000, None, 20 * 60
         )
         fiber1_to_fiber2_time = time.time()
         send_payment(
-            self.fiber2.get_client(), self.fiber1.get_client(), 1000, None, 10 * 60
+            self.fiber2.get_client(), self.fiber1.get_client(), 1000, None, 20 * 60
         )
         fiber2_to_fiber1_time = time.time()
         LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
@@ -216,14 +216,14 @@ class TestFiber(CkbTest):
             self.cryptapeFiber2,
             100000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
         send_payment(
             self.fiber2.get_client(),
             self.cryptapeFiber1,
             100000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
 
         send_payment(
@@ -231,7 +231,7 @@ class TestFiber(CkbTest):
             self.fiber2.get_client(),
             1000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
 
         fiber1_to_fiber2_time = time.time()
@@ -240,7 +240,7 @@ class TestFiber(CkbTest):
             self.fiber1.get_client(),
             1000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
         fiber2_to_fiber1_time = time.time()
         LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
@@ -266,14 +266,14 @@ class TestFiber(CkbTest):
             self.cryptapeFiber2,
             100000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
         send_payment(
             self.fiber2.get_client(),
             self.cryptapeFiber1,
             100000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
 
         send_payment(
@@ -281,7 +281,7 @@ class TestFiber(CkbTest):
             self.fiber2.get_client(),
             1000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
         fiber1_to_fiber2_time = time.time()
         send_payment(
@@ -289,7 +289,7 @@ class TestFiber(CkbTest):
             self.fiber1.get_client(),
             1000,
             funding_udt_type_script,
-            10 * 60,
+            20 * 60,
         )
         fiber2_to_fiber1_time = time.time()
         LOGGER.info(f"fiber1_to_fiber2 cost time: {fiber1_to_fiber2_time - begin}")
@@ -316,7 +316,7 @@ def send_payment(
             break
         except Exception as e:
             print(e)
-            print(f"try count: {i}")
+            print(f"send try count: {i}")
             time.sleep(1)
             continue
     for i in range(wait_times):
@@ -330,7 +330,7 @@ def send_payment(
                 return payment
         except Exception as e:
             print(e)
-            print(f"try count: {i}")
+            print(f"wait try count: {i}")
             continue
     raise TimeoutError("payment timeout")
 
