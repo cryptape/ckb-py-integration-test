@@ -10,6 +10,7 @@ prepare:
 
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
+	python3 -m download_fiber
 	sh prepare.sh
 
 prepare_fiber_testnet:
