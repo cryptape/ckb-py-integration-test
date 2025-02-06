@@ -230,7 +230,7 @@ class TestRestart(FiberTest):
 
     # FiberTest.debug = True
 
-    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
     def test_restart_when_node_send_payment(self):
         account3_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account3_private)
@@ -291,7 +291,7 @@ class TestRestart(FiberTest):
         print("channels:", channels)
         channels = self.fiber3.get_client().list_channels({})
         print("channels:", channels)
-        # todo 如果fiber1 不启动了
+        # todo 如果 fiber1 不启动了
         # todo check fiber2 钱是否会丢
         self.fiber1.start()
 

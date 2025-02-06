@@ -4,3 +4,7 @@ tmp
 download
 pytest.ini
 reprot
+__pycache__
+pid.txt
+.DS_Store
+.idea

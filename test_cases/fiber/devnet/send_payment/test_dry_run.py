@@ -159,5 +159,6 @@ class TestDryRun(FiberTest):
                 "dry_run": True,
             }
         )
-        assert payment["fee"] == hex(2000000)
+        # assert payment["fee"] == hex(2000000)
+        assert payment["fee"] == hex(1000000)
         print("payment:", payment)

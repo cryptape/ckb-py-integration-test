@@ -5,8 +5,8 @@ import pytest
 from framework.basic_fiber import FiberTest
 
 
-class TestAllowSelfPaymnent(FiberTest):
-    # FiberTest.debug = True
+class TestAllowSelfPayment(FiberTest):
+
     def test_a1_to_b1_to_a1(self):
         """
         a1-b1-a1
@@ -103,6 +103,7 @@ class TestAllowSelfPaymnent(FiberTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
+        time.sleep(1)
         # a1(1000 )->b1(100)  a1 send payment with self pay
         payment1 = self.fiber1.get_client().send_payment(
             {
@@ -218,6 +219,7 @@ class TestAllowSelfPaymnent(FiberTest):
                     "payment_preimage": self.generate_random_preimage(),
                 }
             )
+            time.sleep(1)
             payment1 = self.fiber1.get_client().send_payment(
                 {
                     "invoice": invoice["invoice_address"],
@@ -228,6 +230,7 @@ class TestAllowSelfPaymnent(FiberTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
+        time.sleep(1)
 
         # a1(100000000 )->b1(0)  a1 send payment with self pay
         payment1 = self.fiber1.get_client().send_payment(
@@ -258,7 +261,6 @@ class TestAllowSelfPaymnent(FiberTest):
         # todo a1(1000 )->b1(100)  a1 send payment with self pay
 
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/362")
-    @pytest.mark.skip("wait ")
     def test_a1_to_b1_to_c1_a2(self):
         """
 
@@ -303,17 +305,29 @@ class TestAllowSelfPaymnent(FiberTest):
         )
         # node1 send to self
         time.sleep(1)
-        for i in range(3):
-            payment1 = self.fiber1.get_client().send_payment(
-                {
-                    "target_pubkey": self.fiber1.get_client().node_info()["node_id"],
-                    "amount": hex(6 * 10000000),
-                    "keysend": True,
-                    "allow_self_payment": True,
-                }
-            )
-            self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
-        # after fix todo add check
+        success_size = 0
+        try_size = 0
+        while success_size < 3:
+            try_size += 1
+            assert try_size < 30
+            try:
+                payment1 = self.fiber1.get_client().send_payment(
+                    {
+                        "target_pubkey": self.fiber1.get_client().node_info()[
+                            "node_id"
+                        ],
+                        "amount": hex(6 * 10000000),
+                        "keysend": True,
+                        "allow_self_payment": True,
+                    }
+                )
+                time.sleep(3)
+                self.wait_payment_state(
+                    self.fiber1, payment1["payment_hash"], "Success"
+                )
+                success_size += 1
+            except Exception as e:
+                continue
 
     def test_a1_to_b1_to_c1_a2_2(self):
         """

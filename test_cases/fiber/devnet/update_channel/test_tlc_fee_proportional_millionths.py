@@ -73,11 +73,13 @@ class TestTlcFeeProportionalMillionths(FiberTest):
             after_channel["channels"][0]["local_balance"], 16
         ) == int(invoice_balance, 16)
         before_channel = self.fiber3.get_client().list_channels({})
+        before2_channel = self.fiber2.get_client().list_channels({})
+
         # 4. fiber2 call  update_channel (id,tlc_fee_proportional_millionths)
         tlc_fee_proportional_millionths = 0
         channels = self.fiber1.get_client().update_channel(
             {
-                "channel_id": before_channel["channels"][0]["channel_id"],
+                "channel_id": before2_channel["channels"][0]["channel_id"],
                 # "enabled": False,
                 "tlc_fee_proportional_millionths": hex(tlc_fee_proportional_millionths),
             }
@@ -252,11 +254,13 @@ class TestTlcFeeProportionalMillionths(FiberTest):
             after_channel["channels"][0]["local_balance"], 16
         ) == int(invoice_balance, 16)
         before_channel = self.fiber3.get_client().list_channels({})
+        before2_channel = self.fiber2.get_client().list_channels({})
+
         # 4. fiber2 call  update_channel (id,tlc_fee_proportional_millionths)
         tlc_fee_proportional_millionths = 2000
         channels = self.fiber1.get_client().update_channel(
             {
-                "channel_id": before_channel["channels"][0]["channel_id"],
+                "channel_id": before2_channel["channels"][0]["channel_id"],
                 # "enabled": False,
                 "tlc_fee_proportional_millionths": hex(tlc_fee_proportional_millionths),
             }

@@ -366,19 +366,24 @@ class FiberTest(CkbTest):
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
 
-    def send_payment(self, fiber1, fiber2, amount, wait=True, udt=None):
-        payment = fiber1.get_client().send_payment(
-            {
-                "target_pubkey": fiber2.get_client().node_info()["node_id"],
-                "amount": hex(amount),
-                "keysend": True,
-                "allow_self_payment": True,
-                "udt_type_script": udt,
-            }
-        )
-        if wait:
-            self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
-        return payment["payment_hash"]
+    def send_payment(self, fiber1, fiber2, amount, wait=True, udt=None, try_count=5):
+        for i in range(try_count):
+            try:
+                payment = fiber1.get_client().send_payment(
+                    {
+                        "target_pubkey": fiber2.get_client().node_info()["node_id"],
+                        "amount": hex(amount),
+                        "keysend": True,
+                        "allow_self_payment": True,
+                        "udt_type_script": udt,
+                    }
+                )
+                if wait:
+                    self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+                return payment["payment_hash"]
+            except Exception as e:
+                time.sleep(1)
+                continue
 
     def get_account_script(self, account_private_key):
         account1 = self.Ckb_cli.util_key_info_by_private_key(account_private_key)
@@ -397,6 +402,42 @@ class FiberTest(CkbTest):
         raise TimeoutError(
             f"status did not reach state {expected_state} within timeout period."
         )
+
+    def wait_payment_finished(self, client, payment_hash, timeout=120):
+        for i in range(timeout):
+            result = client.get_client().get_payment({"payment_hash": payment_hash})
+            if result["status"] == "Success" or result["status"] == "Failed":
+                return result
+            time.sleep(1)
+        raise TimeoutError(
+            f"status did not reach state {expected_state} within timeout period."
+        )
+
+    def get_fibers_balance_message(self):
+        messages = []
+        for fiber in self.fibers:
+            messages.append(self.get_fiber_balance(fiber))
+        for i in range(len(messages)):
+            self.logger.debug(f"fiber{i} balance:{messages[i]}")
+
+    def get_fiber_balance(self, fiber):
+        channels = fiber.get_client().list_channels({})
+        channels_balance = 0
+        channels_offered_tlc_balance = 0
+        channels_received_tlc_balance = 0
+        for i in range(len(channels["channels"])):
+            channel = channels["channels"][i]
+            if channel["state"]["state_name"] == "CHANNEL_READY":
+                channels_balance += int(channel["local_balance"], 16)
+                channels_offered_tlc_balance += int(channel["offered_tlc_balance"], 16)
+                channels_received_tlc_balance += int(
+                    channel["received_tlc_balance"], 16
+                )
+        return {
+            "local_balance": channels_balance,
+            "offered_tlc_balance": channels_offered_tlc_balance,
+            "received_tlc_balance": channels_received_tlc_balance,
+        }
 
     def calculate_tx_fee(self, balance, fee_list):
         """

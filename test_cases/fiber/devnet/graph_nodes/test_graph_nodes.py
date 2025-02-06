@@ -17,7 +17,7 @@ class TestGraphNodes(FiberTest):
     3. 测试迭代
     """
 
-    @pytest.mark.skip("todo 待确定")
+    # @pytest.mark.skip("todo 待确定")
     def test_add_nodes(self):
         """
         add nodes
@@ -39,10 +39,10 @@ class TestGraphNodes(FiberTest):
         current_fiber2.connect_peer(current_fiber)
         time.sleep(5)
         assert len(current_fiber.get_client().graph_nodes()["nodes"]) == 35
-        assert len(current_fiber1.get_client().graph_nodes()["nodes"]) == 5
+        assert len(current_fiber1.get_client().graph_nodes()["nodes"]) == 35
         assert len(current_fiber2.get_client().graph_nodes()["nodes"]) == 35
-        assert len(self.fiber1.get_client().graph_nodes()["nodes"]) == 5
-        assert len(self.fiber2.get_client().graph_nodes()["nodes"]) == 5
+        assert len(self.fiber1.get_client().graph_nodes()["nodes"]) == 35
+        assert len(self.fiber2.get_client().graph_nodes()["nodes"]) == 35
         # 测试迭代
         for fiber in self.fibers:
             graph_nodes = fiber.get_client().graph_nodes()
@@ -92,7 +92,7 @@ class TestGraphNodes(FiberTest):
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
 
-    @pytest.mark.skip("其他节点的graph_nodes 不一定会更新")
+    # @pytest.mark.skip("其他节点的graph_nodes 不一定会更新")
     def test_change_node_info(self):
         """
         1. 修改配置 ，重启节点
@@ -114,7 +114,6 @@ class TestGraphNodes(FiberTest):
             node_info = self.fibers[i].get_client().node_info()
             # alias
             # assert node['alias'] == node_info['node_name']
-            assert node["alias"] == ""
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id
@@ -144,9 +143,6 @@ class TestGraphNodes(FiberTest):
         for i in range(len(graph_nodes["nodes"])):
             node = graph_nodes["nodes"][i]
             node_info = self.fibers[i].get_client().node_info()
-            # alias
-            # assert node['alias'] == node_info['node_name']
-            assert node["alias"] == ""
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id

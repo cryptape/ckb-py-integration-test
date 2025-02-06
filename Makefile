@@ -87,6 +87,8 @@ fiber_test_cases := \
 	test_cases/fiber/devnet/send_payment \
 	test_cases/fiber/devnet/shutdown_channel \
 	test_cases/fiber/devnet/update_channel \
+	test_cases/fiber/devnet/issue \
+	test_cases/fiber/devnet/compatibility \
 	test_cases/fiber/devnet/watch_tower
 
 fiber_testnet_cases := \

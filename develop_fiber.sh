@@ -7,7 +7,7 @@ set -e
 # cd ../
 DEFAULT_FIBER_BRANCH="develop"
 DEFAULT_FIBER_URL="https://github.com/nervosnetwork/fiber.git"
-DEFAULT_BUILD_FIBER=false
+DEFAULT_BUILD_FIBER=true
 
 
 GitFIBERBranch="${GitBranch:-$DEFAULT_FIBER_BRANCH}"
@@ -17,6 +17,9 @@ if [ "$BUILD_FIBER" == "true" ]; then
   git clone -b $GitFIBERBranch $GitFIBERUrl
   cd fiber
   cargo build
-  cp target/debug/fnn ../download/fiber/0.3.1/fnn
-  cd ../
+  cp target/debug/fnn ../download/fiber/current/fnn
+  cd migrate
+  cargo build
+  cp target/debug/fnn-migrate ../../download/fiber/current/fnn-migrate
+  cd ../../
 fi

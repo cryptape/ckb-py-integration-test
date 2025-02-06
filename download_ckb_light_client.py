@@ -12,16 +12,7 @@ import requests
 from tqdm import tqdm
 
 
-versions = [
-    "0.2.4",
-    "0.3.0",
-    "0.3.1",
-    "0.3.2",
-    "0.3.3",
-    "0.3.4",
-    "0.3.5",
-    "0.3.6",
-]  # Replace with your versions
+versions = ["0.2.1"]  # Replace with your versions
 
 DOWNLOAD_DIR = "download"
 SYSTEMS = {
@@ -32,19 +23,19 @@ SYSTEMS = {
     },
     "Linux": {
         "x86_64": {
-            "url": "https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{"
+            "url": "https://github.com/nervosnetwork/fiber/releases/download/v{version}/fnn_v{"
             "version}-x86_64-linux.tar.gz",
             "ext": ".tar.gz",
         },
     },
     "Darwin": {
         "x86_64": {
-            "url": "https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{"
+            "url": "https://github.com/nervosnetwork/fiber/releases/download/v{version}/fnn_v{"
             "version}-x86_64-darwin-portable.tar.gz",
             "ext": ".tar.gz",
         },
         "arm64": {
-            "url": "https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{"
+            "url": "https://github.com/nervosnetwork/fiber/releases/download/v{version}/fnn_v{"
             "version}-x86_64-darwin.tar.gz",
             "ext": ".tar.gz",
         },
