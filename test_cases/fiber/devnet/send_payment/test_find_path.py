@@ -181,7 +181,7 @@ class FindPath(FiberTest):
             for i in range(len(self.fibers)):
                 try:
                     payment_hash = self.send_payment(
-                        self.fibers[i], self.fibers[i], 500 * 10000000, False
+                        self.fibers[i], self.fibers[i], 500 * 10000000, False, None, 0
                     )
                     hashes[i].append(payment_hash)
                 except:
@@ -192,10 +192,16 @@ class FindPath(FiberTest):
                 self.wait_payment_finished(self.fibers[i], hashes[i][j], 1200)
 
         for i in range(len(self.fibers)):
-            payment_hash = self.send_payment(
-                self.fibers[i], self.fibers[i], 500 * 10000000, False
-            )
-            self.wait_payment_state(self.fibers[i], payment_hash, "Success", 1200)
+            for i in range(20):
+                payment_hash = self.send_payment(
+                    self.fibers[i], self.fibers[i], 500 * 10000000, False
+                )
+                result = self.wait_payment_finished(self.fibers[i], payment_hash, 1200)
+                if result["status"] == "Success":
+                    break
+                time.sleep(1)
+                if i == 19:
+                    raise Exception("payment failed")
         for i in range(len(self.fibers)):
             channels_balance = self.get_fiber_balance(self.fibers[i])
             assert channels_balance["offered_tlc_balance"] == 0

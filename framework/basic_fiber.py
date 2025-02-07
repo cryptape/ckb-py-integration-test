@@ -99,6 +99,9 @@ class FiberTest(CkbTest):
         if cls.debug:
             return
             # # issue
+        cls.node.getClient().clear_tx_pool()
+        for i in range(5):
+            cls.Miner.miner_with_version(cls.node, "0x0")
         tx_hash = issue_udt_tx(
             cls.udtContract,
             cls.node.rpcUrl,
@@ -143,9 +146,6 @@ class FiberTest(CkbTest):
         cls.fiber1.connect_peer(cls.fiber2)
         time.sleep(1)
         cls.logger.debug(f"\nSetting up method:{method.__name__}")
-        cls.node.getClient().clear_tx_pool()
-        for i in range(5):
-            cls.Miner.miner_with_version(cls.node, "0x0")
 
     def teardown_method(self, method):
         if self.debug:
@@ -384,6 +384,18 @@ class FiberTest(CkbTest):
             except Exception as e:
                 time.sleep(1)
                 continue
+        payment = fiber1.get_client().send_payment(
+            {
+                "target_pubkey": fiber2.get_client().node_info()["node_id"],
+                "amount": hex(amount),
+                "keysend": True,
+                "allow_self_payment": True,
+                "udt_type_script": udt,
+            }
+        )
+        if wait:
+            self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+        return payment["payment_hash"]
 
     def get_account_script(self, account_private_key):
         account1 = self.Ckb_cli.util_key_info_by_private_key(account_private_key)

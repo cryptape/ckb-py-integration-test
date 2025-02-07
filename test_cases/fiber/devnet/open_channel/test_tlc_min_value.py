@@ -120,7 +120,7 @@ class TlcMinValue(FiberTest):
         # transfer
         before_channel = self.fiber1.get_client().list_channels({})
         with pytest.raises(Exception) as exc_info:
-            self.send_payment(self.fiber1, self.fiber2, 2 * 100000000 - 1)
+            self.send_payment(self.fiber1, self.fiber2, 2 * 100000000 - 1, 1)
         expected_error_message = "Failed to build route"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "

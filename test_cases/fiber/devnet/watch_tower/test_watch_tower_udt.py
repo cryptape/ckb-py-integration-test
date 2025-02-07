@@ -172,7 +172,7 @@ class TestWatchTowerUdt(FiberTest):
         # Step 4: Wait for the transaction to be committed
         tx = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx)
-
+        time.sleep(1)
         # Step 5: Mine additional blocks
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
@@ -275,7 +275,7 @@ class TestWatchTowerUdt(FiberTest):
         # Step 4: Wait for the transaction to be committed
         tx = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx)
-
+        time.sleep(1)
         # Step 5: Mine additional blocks
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
