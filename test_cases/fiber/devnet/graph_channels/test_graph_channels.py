@@ -152,6 +152,7 @@ class TestGraphChannels(FiberTest):
         node4_channels = fiber4.get_client().graph_channels()
         print("node4_channels", node4_channels)
         assert len(node4_channels["channels"]) == 2
+
     @pytest.mark.skip("remove failed ")
     def test_remove_channels_with_force(self):
         """
