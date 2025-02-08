@@ -49,7 +49,10 @@ class TestGraphNodes(FiberTest):
 
         for fiber in self.fibers:
             graph_nodes = fiber.get_client().graph_nodes()
-            print(f"idx:{idx}, current:{len(graph_nodes['nodes'])}", len(graph_nodes["nodes"]))
+            print(
+                f"idx:{idx}, current:{len(graph_nodes['nodes'])}",
+                len(graph_nodes["nodes"]),
+            )
             idx += 1
             graph_nodes = get_graph_nodes(fiber, 3)
             total_graph_nodes = fiber.get_client().graph_nodes()
@@ -90,8 +93,8 @@ class TestGraphNodes(FiberTest):
             assert node["chain_hash"] == node_info["chain_hash"]
             # auto_accept_min_ckb_funding_amount
             assert (
-                    node["auto_accept_min_ckb_funding_amount"]
-                    == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
+                node["auto_accept_min_ckb_funding_amount"]
+                == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
@@ -128,8 +131,8 @@ class TestGraphNodes(FiberTest):
             assert node["chain_hash"] == node_info["chain_hash"]
             # auto_accept_min_ckb_funding_amount
             assert (
-                    node["auto_accept_min_ckb_funding_amount"]
-                    == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
+                node["auto_accept_min_ckb_funding_amount"]
+                == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
@@ -157,8 +160,8 @@ class TestGraphNodes(FiberTest):
             assert node["chain_hash"] == node_info["chain_hash"]
             # auto_accept_min_ckb_funding_amount
             assert (
-                    node["auto_accept_min_ckb_funding_amount"]
-                    == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
+                node["auto_accept_min_ckb_funding_amount"]
+                == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
