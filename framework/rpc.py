@@ -100,7 +100,9 @@ class RPCClient:
         return self.call("get_fee_rate_statics", [target])
 
     def generate_epochs(self, epoch):
-        return self.call("generate_epochs", [epoch])
+        response = self.call("generate_epochs", [epoch])
+        time.sleep(1)
+        return response
 
     def generate_block(self):
         return self.call("generate_block", [])
