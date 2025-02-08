@@ -324,6 +324,7 @@ class FiberTest(CkbTest):
                     "public": True,
                 }
             )
+            time.sleep(1)
             fiber2.get_client().accept_channel(
                 {
                     "temporary_channel_id": temporary_channel["temporary_channel_id"],

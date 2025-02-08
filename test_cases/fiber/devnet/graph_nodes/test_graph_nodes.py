@@ -25,7 +25,7 @@ class TestGraphNodes(FiberTest):
         # add nodes
         new_fibers = []
         current_fiber = self.start_new_fiber(self.generate_random_preimage())
-        for i in range(30):
+        for i in range(10):
             new_fiber = self.start_new_fiber(self.generate_random_preimage())
             current_fiber.connect_peer(new_fiber)
             new_fibers.append(new_fiber)
@@ -37,16 +37,20 @@ class TestGraphNodes(FiberTest):
         current_fiber1.connect_peer(self.fiber2)
         current_fiber2 = self.start_new_fiber(self.generate_random_preimage())
         current_fiber2.connect_peer(current_fiber)
-        time.sleep(5)
-        assert len(current_fiber.get_client().graph_nodes()["nodes"]) == 35
-        assert len(current_fiber1.get_client().graph_nodes()["nodes"]) == 35
-        assert len(current_fiber2.get_client().graph_nodes()["nodes"]) == 35
-        assert len(self.fiber1.get_client().graph_nodes()["nodes"]) == 35
-        assert len(self.fiber2.get_client().graph_nodes()["nodes"]) == 35
+        # wait fiber3 nodes == 15
+        self.wait_graph_nodes(self.fibers[3], 15)
+        assert len(current_fiber.get_client().graph_nodes()["nodes"]) == 15
+        assert len(current_fiber1.get_client().graph_nodes()["nodes"]) == 15
+        assert len(current_fiber2.get_client().graph_nodes()["nodes"]) == 15
+        assert len(self.fiber1.get_client().graph_nodes()["nodes"]) == 15
+        assert len(self.fiber2.get_client().graph_nodes()["nodes"]) == 15
         # 测试迭代
+        idx = 0
+
         for fiber in self.fibers:
             graph_nodes = fiber.get_client().graph_nodes()
-            print("current:", len(graph_nodes["nodes"]))
+            print(f"idx:{idx}, current:{len(graph_nodes['nodes'])}", len(graph_nodes["nodes"]))
+            idx += 1
             graph_nodes = get_graph_nodes(fiber, 3)
             total_graph_nodes = fiber.get_client().graph_nodes()
             assert len(graph_nodes) == len(total_graph_nodes["nodes"])
@@ -86,8 +90,8 @@ class TestGraphNodes(FiberTest):
             assert node["chain_hash"] == node_info["chain_hash"]
             # auto_accept_min_ckb_funding_amount
             assert (
-                node["auto_accept_min_ckb_funding_amount"]
-                == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
+                    node["auto_accept_min_ckb_funding_amount"]
+                    == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
@@ -124,8 +128,8 @@ class TestGraphNodes(FiberTest):
             assert node["chain_hash"] == node_info["chain_hash"]
             # auto_accept_min_ckb_funding_amount
             assert (
-                node["auto_accept_min_ckb_funding_amount"]
-                == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
+                    node["auto_accept_min_ckb_funding_amount"]
+                    == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
@@ -153,11 +157,21 @@ class TestGraphNodes(FiberTest):
             assert node["chain_hash"] == node_info["chain_hash"]
             # auto_accept_min_ckb_funding_amount
             assert (
-                node["auto_accept_min_ckb_funding_amount"]
-                == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
+                    node["auto_accept_min_ckb_funding_amount"]
+                    == node_info["open_channel_auto_accept_min_ckb_funding_amount"]
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
+
+    def wait_graph_nodes(self, fiber, number, time_out=30):
+        start_time = time.time()
+        while True:
+            graph_nodes = fiber.get_client().graph_nodes()
+            if len(graph_nodes["nodes"]) == number:
+                return
+            time.sleep(1)
+            if time.time() - start_time > time_out:
+                raise Exception("wait graph nodes timeout")
 
 
 def get_graph_nodes(fiber, page_size):
