@@ -349,20 +349,21 @@ class FiberTest(CkbTest):
             fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
         )
         channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
-        payment = fiber1.get_client().send_payment(
-            {
-                "target_pubkey": fiber2.get_client().node_info()["node_id"],
-                "amount": hex(fiber2_balance),
-                "keysend": True,
-            }
-        )
+        # payment = fiber1.get_client().send_payment(
+        #     {
+        #         "target_pubkey": fiber2.get_client().node_info()["node_id"],
+        #         "amount": hex(fiber2_balance),
+        #         "keysend": True,
+        #     }
+        # )
+        self.send_payment(fiber1, fiber2, fiber2_balance, True, None, 10)
         fiber2.get_client().update_channel(
             {
                 "channel_id": channels["channels"][0]["channel_id"],
                 "tlc_fee_proportional_millionths": hex(fiber2_fee),
             }
         )
-        self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+        # self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
         # channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
