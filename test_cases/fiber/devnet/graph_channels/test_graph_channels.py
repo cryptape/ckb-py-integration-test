@@ -14,19 +14,36 @@ class TestGraphChannels(FiberTest):
 
     def test_add_channels(self):
         """
-        1. node1 add channel
-        2. node2 add channel
-        3. node3 add channel
+        Test adding channels.
 
-        4. add new node link node3
+        Steps:
+            1. Generate a new account with 1000 units of balance
+            2. Start a new fiber with the generated account
+            3. Connect fiber3 to fiber2
+            4. Open a new public channel with fiber1 as the client and fiber2 as the peer
+            5. Check the graph channels for node1, node2, and node3
+            6. Open a new private channel with fiber1 as the client and fiber2 as the peer
+            7. Check the graph channels for node1, node2, and node3
+            8. Open a new public channel with fiber2 as the client and fiber3 as the peer
+            9. Check the graph channels for node1, node2, and node3
+            10. Open a new private channel with fiber2 as the client and fiber3 as the peer
+            11. Check the graph channels for node1, node2, and node3
+            12. Start a new fiber and connect it to fiber3
+            13. Check the graph channels for node4
+
         Returns:
-
         """
+        # Step 1: Generate a new account with 1000 units of balance
         account3_private_key = self.generate_account(1000)
+
+        # Step 2: Start a new fiber with the generated account
         self.fiber3 = self.start_new_fiber(account3_private_key)
+
+        # Step 3: Connect fiber3 to fiber2
         self.fiber3.connect_peer(self.fiber2)
         time.sleep(1)
-        # n1-n2 创建 public channel
+
+        # Step 4: Open a new public channel with fiber1 as the client and fiber2 as the peer
         self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
@@ -37,7 +54,8 @@ class TestGraphChannels(FiberTest):
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
         )
-        # check node1 graph channels
+
+        # Step 5: Check the graph channels for node1, node2, and node3
         time.sleep(1)
         node1_channels = self.fiber1.get_client().graph_channels()
         node2_channels = self.fiber2.get_client().graph_channels()
@@ -49,10 +67,8 @@ class TestGraphChannels(FiberTest):
         assert len(node2_channels["channels"]) == 1
         print("node3_channels", node3_channels)
         assert len(node3_channels["channels"]) == 1
-        # check node2 graph channels
-        # check node3 graph channels
 
-        # n1-n2 创建 私有 channel
+        # Step 6: Open a new private channel with fiber1 as the client and fiber2 as the peer
         self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
@@ -63,6 +79,8 @@ class TestGraphChannels(FiberTest):
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY"
         )
+
+        # Step 7: Check the graph channels for node1, node2, and node3
         time.sleep(1)
         node1_channels = self.fiber1.get_client().graph_channels()
         node2_channels = self.fiber2.get_client().graph_channels()
@@ -74,7 +92,8 @@ class TestGraphChannels(FiberTest):
         assert len(node2_channels["channels"]) == 1
         print("node3_channels", node3_channels)
         assert len(node3_channels["channels"]) == 1
-        # n2-n3 创建 public channel
+
+        # Step 8: Open a new public channel with fiber2 as the client and fiber3 as the peer
         self.fiber2.get_client().open_channel(
             {
                 "peer_id": self.fiber3.get_peer_id(),
@@ -85,6 +104,8 @@ class TestGraphChannels(FiberTest):
         self.wait_for_channel_state(
             self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY"
         )
+
+        # Step 9: Check the graph channels for node1, node2, and node3
         time.sleep(1)
         node1_channels = self.fiber1.get_client().graph_channels()
         node2_channels = self.fiber2.get_client().graph_channels()
@@ -96,7 +117,8 @@ class TestGraphChannels(FiberTest):
         assert len(node2_channels["channels"]) == 2
         print("node3_channels", node3_channels)
         assert len(node3_channels["channels"]) == 2
-        # n2-n3 创建 私有 channel
+
+        # Step 10: Open a new private channel with fiber2 as the client and fiber3 as the peer
         self.fiber2.get_client().open_channel(
             {
                 "peer_id": self.fiber3.get_peer_id(),
@@ -107,6 +129,8 @@ class TestGraphChannels(FiberTest):
         self.wait_for_channel_state(
             self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY"
         )
+
+        # Step 11: Check the graph channels for node1, node2, and node3
         time.sleep(1)
         node1_channels = self.fiber1.get_client().graph_channels()
         node2_channels = self.fiber2.get_client().graph_channels()
@@ -119,15 +143,18 @@ class TestGraphChannels(FiberTest):
         print("node3_channels", node3_channels)
         assert len(node3_channels["channels"]) == 2
 
+        # Step 12: Start a new fiber and connect it to fiber3
         fiber4 = self.start_new_fiber(self.generate_random_preimage())
         fiber4.connect_peer(self.fiber3)
         time.sleep(5)
+
+        # Step 13: Check the graph channels for node4
         node4_channels = fiber4.get_client().graph_channels()
         print("node4_channels", node4_channels)
         assert len(node4_channels["channels"]) == 2
 
     @pytest.mark.skip("remove failed ")
-    def test_remove_channels(self):
+    def test_remove_channels_with_force(self):
         """
         force close channel
         close channel

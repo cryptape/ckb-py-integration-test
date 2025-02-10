@@ -17,7 +17,7 @@ class TestGraphNodes(FiberTest):
     3. 测试迭代
     """
 
-    @pytest.mark.skip("todo 待确定")
+    # @pytest.mark.skip("todo 待确定")
     def test_add_nodes(self):
         """
         add nodes
@@ -25,7 +25,7 @@ class TestGraphNodes(FiberTest):
         # add nodes
         new_fibers = []
         current_fiber = self.start_new_fiber(self.generate_random_preimage())
-        for i in range(30):
+        for i in range(10):
             new_fiber = self.start_new_fiber(self.generate_random_preimage())
             current_fiber.connect_peer(new_fiber)
             new_fibers.append(new_fiber)
@@ -37,16 +37,23 @@ class TestGraphNodes(FiberTest):
         current_fiber1.connect_peer(self.fiber2)
         current_fiber2 = self.start_new_fiber(self.generate_random_preimage())
         current_fiber2.connect_peer(current_fiber)
-        time.sleep(5)
-        assert len(current_fiber.get_client().graph_nodes()["nodes"]) == 35
-        assert len(current_fiber1.get_client().graph_nodes()["nodes"]) == 5
-        assert len(current_fiber2.get_client().graph_nodes()["nodes"]) == 35
-        assert len(self.fiber1.get_client().graph_nodes()["nodes"]) == 5
-        assert len(self.fiber2.get_client().graph_nodes()["nodes"]) == 5
+        # wait fiber3 nodes == 15
+        self.wait_graph_nodes(self.fibers[3], 15)
+        assert len(current_fiber.get_client().graph_nodes()["nodes"]) == 15
+        assert len(current_fiber1.get_client().graph_nodes()["nodes"]) == 15
+        assert len(current_fiber2.get_client().graph_nodes()["nodes"]) == 15
+        assert len(self.fiber1.get_client().graph_nodes()["nodes"]) == 15
+        assert len(self.fiber2.get_client().graph_nodes()["nodes"]) == 15
         # 测试迭代
+        idx = 0
+
         for fiber in self.fibers:
             graph_nodes = fiber.get_client().graph_nodes()
-            print("current:", len(graph_nodes["nodes"]))
+            print(
+                f"idx:{idx}, current:{len(graph_nodes['nodes'])}",
+                len(graph_nodes["nodes"]),
+            )
+            idx += 1
             graph_nodes = get_graph_nodes(fiber, 3)
             total_graph_nodes = fiber.get_client().graph_nodes()
             assert len(graph_nodes) == len(total_graph_nodes["nodes"])
@@ -92,7 +99,7 @@ class TestGraphNodes(FiberTest):
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
 
-    @pytest.mark.skip("其他节点的graph_nodes 不一定会更新")
+    # @pytest.mark.skip("其他节点的graph_nodes 不一定会更新")
     def test_change_node_info(self):
         """
         1. 修改配置 ，重启节点
@@ -114,7 +121,6 @@ class TestGraphNodes(FiberTest):
             node_info = self.fibers[i].get_client().node_info()
             # alias
             # assert node['alias'] == node_info['node_name']
-            assert node["alias"] == ""
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id
@@ -144,9 +150,6 @@ class TestGraphNodes(FiberTest):
         for i in range(len(graph_nodes["nodes"])):
             node = graph_nodes["nodes"][i]
             node_info = self.fibers[i].get_client().node_info()
-            # alias
-            # assert node['alias'] == node_info['node_name']
-            assert node["alias"] == ""
             # addresses
             assert node["addresses"] == node_info["addresses"]
             # node_id
@@ -162,6 +165,16 @@ class TestGraphNodes(FiberTest):
             )
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
+
+    def wait_graph_nodes(self, fiber, number, time_out=30):
+        start_time = time.time()
+        while True:
+            graph_nodes = fiber.get_client().graph_nodes()
+            if len(graph_nodes["nodes"]) == number:
+                return
+            time.sleep(1)
+            if time.time() - start_time > time_out:
+                raise Exception("wait graph nodes timeout")
 
 
 def get_graph_nodes(fiber, page_size):

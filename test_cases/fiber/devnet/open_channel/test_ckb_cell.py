@@ -130,7 +130,7 @@ class TestCkbCell(FiberTest):
 
     # FiberTest.debug = True
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/284")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/284")
     def test_config_not_eq(self):
         """
 
@@ -175,6 +175,10 @@ class TestCkbCell(FiberTest):
             }
         )
         self.wait_payment_state(self.fiber2, payment["payment_hash"], "Success", 120)
+        self.send_payment(new_fiber, self.fiber2, 1 * 100000000)
+        nodes = self.fiber2.get_client().graph_nodes({})
+        new_nodes = new_fiber.get_client().graph_nodes({})
+        assert len(nodes["nodes"]) == len(new_nodes["nodes"])
 
     def test_config_eq(self):
         account3_private_key = self.generate_account(1000)

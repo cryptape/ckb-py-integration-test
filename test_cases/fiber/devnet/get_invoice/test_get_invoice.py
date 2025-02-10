@@ -18,10 +18,9 @@ class TestGetInvoice(FiberTest):
         """
         1. new invoice
             - parse invoice  能够解析 invoice_address ，解析结果和invoice 一致
-            -
         Returns:
-
         """
+        # Step 1: Create a new invoice
         invoice = self.fiber1.get_client().new_invoice(
             {
                 "amount": hex(1),
@@ -34,15 +33,19 @@ class TestGetInvoice(FiberTest):
             }
         )
 
+        # Step 2: Retrieve the created invoice using its payment hash
         result = self.fiber1.get_client().get_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
         node_info = self.fiber1.get_client().node_info()
 
+        # Step 3: Verify the node ID matches the PayeePublicKey in the invoice
         assert (
             node_info["node_id"]
             == result["invoice"]["data"]["attrs"][3]["PayeePublicKey"]
         )
+
+        # Step 4: Parse the invoice and verify the parsed result matches the original invoice
         parse_invoice = self.fiber1.get_client().parse_invoice(
             {"invoice": invoice["invoice_address"]}
         )
@@ -56,23 +59,27 @@ class TestGetInvoice(FiberTest):
         assert invoice["invoice"]["data"]["attrs"][1]["ExpiryTime"]["secs"] == 3600
         assert invoice["invoice"]["data"]["attrs"][2]["HashAlgorithm"] == "sha256"
 
-        # assert invoice['invoice']['data']['timestamp']
+        # Step 5: Verify the timestamp of the invoice
         assert int(int(invoice["invoice"]["data"]["timestamp"], 16) / 1000) == int(
             datetime.datetime.now().timestamp()
         )
 
     def test_get_not_exist_invoice(self):
         """
-        not exist invoice
-            return err "invoice not found"
+        Test case for querying a non-existent invoice.
+        Steps:
+        1. Attempt to retrieve an invoice with a random payment hash.
+        2. Verify that the error message "invoice not found" is returned.
         Returns:
-
         """
 
+        # Step 1: Attempt to retrieve an invoice with a random payment hash
         with pytest.raises(Exception) as exc_info:
             result = self.fiber1.get_client().get_invoice(
                 {"payment_hash": self.generate_random_preimage()}
             )
+
+        # Step 2: Verify that the error message "invoice not found" is returned
         expected_error_message = "invoice not found"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "

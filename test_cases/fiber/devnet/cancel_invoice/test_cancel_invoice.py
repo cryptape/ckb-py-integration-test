@@ -25,9 +25,15 @@ class TestCancelInvoice(FiberTest):
 
     def test_not_exist_payment_hash(self):
         """
-        1. 不存在的payment hash
+        Test case for canceling an invoice with a non-existent payment hash.
+
+        Steps:
+        1. Generate a random preimage to simulate a non-existent payment hash.
+        2. Attempt to cancel the invoice with the generated payment hash.
+        3. Verify that the expected error message "invoice not found" is raised.
+
         Returns:
-            err: "invoice not found"
+            None
         """
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().cancel_invoice(
@@ -41,11 +47,17 @@ class TestCancelInvoice(FiberTest):
 
     def test_cancel_invoice_that_statue_is_open(self):
         """
-        1. new invoice
-        2. cancel invoice
-        3. query invoice
+        Test case for canceling an invoice that is in the 'Open' state.
+
+        Steps:
+        1. Create a new invoice.
+        2. Cancel the created invoice.
+        3. Query the invoice to verify its status is 'Cancelled'.
+
         Returns:
+            None
         """
+        # Step 1: Generate a random preimage and create a new invoice
         preimage = self.generate_random_preimage()
         invoice = self.fiber1.get_client().new_invoice(
             {
@@ -58,9 +70,13 @@ class TestCancelInvoice(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
+
+        # Step 2: Cancel the created invoice
         self.fiber1.get_client().cancel_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
+
+        # Step 3: Query the invoice to verify its status is 'Cancelled'
         result = self.fiber1.get_client().get_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
@@ -68,12 +84,18 @@ class TestCancelInvoice(FiberTest):
 
     def test_cancel_invoice_that_statue_is_cancelled(self):
         """
-        1. new invoice
-        2. cancel invoice
-        3. cancel invoice again
-            invoice can not be canceled, current status: Cancelled
+        Test case for canceling an invoice that is already in the 'Cancelled' state.
+
+        Steps:
+        1. Create a new invoice.
+        2. Cancel the created invoice.
+        3. Attempt to cancel the invoice again.
+        4. Verify that the expected error message "invoice can not be canceled, current status: Cancelled" is raised.
+
         Returns:
+            None
         """
+        # Step 1: Generate a random preimage and create a new invoice
         preimage = self.generate_random_preimage()
         invoice = self.fiber1.get_client().new_invoice(
             {
@@ -86,14 +108,19 @@ class TestCancelInvoice(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
+
+        # Step 2: Cancel the created invoice
         self.fiber1.get_client().cancel_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
+
+        # Step 3: Query the invoice to verify its status is 'Cancelled'
         result = self.fiber1.get_client().get_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
         assert result["status"] == "Cancelled"
 
+        # Step 4: Attempt to cancel the invoice again and verify the expected error message
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().cancel_invoice(
                 {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
@@ -108,10 +135,18 @@ class TestCancelInvoice(FiberTest):
 
     def test_cancel_invoice_that_statue_is_expired(self):
         """
-        Expired
-        Returns:
+        Test case for canceling an invoice that is in the 'Expired' state.
 
+        Steps:
+        1. Generate a random preimage and create a new invoice with an expiry of 0.
+        2. Query the invoice to verify its status is 'Expired'.
+        3. Cancel the expired invoice.
+        4. Query the invoice again to verify its status is 'Cancelled'.
+
+        Returns:
+            None
         """
+        # Step 1: Generate a random preimage and create a new invoice with an expiry of 0
         preimage = self.generate_random_preimage()
         invoice = self.fiber1.get_client().new_invoice(
             {
@@ -124,16 +159,20 @@ class TestCancelInvoice(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
-        # time.sleep(1)
+
+        # Step 2: Query the invoice to verify its status is 'Expired'
         result = self.fiber1.get_client().get_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
-
         assert result["status"] == "Expired"
+
+        # Step 3: Cancel the expired invoice
         result = self.fiber1.get_client().cancel_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
         assert result["status"] == "Cancelled"
+
+        # Step 4: Query the invoice again to verify its status is 'Cancelled'
         result = self.fiber1.get_client().get_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
@@ -141,11 +180,21 @@ class TestCancelInvoice(FiberTest):
 
     def test_send_failed_that_invoice_cancel(self):
         """
-        取消后，发送失败，下次交易不受影响
+        Test case for sending a payment after an invoice is canceled and ensuring subsequent transactions are not affected.
+
+        Steps:
+        1. Open a new channel.
+        2. Create a new invoice.
+        3. Cancel the created invoice.
+        4. Attempt to send a payment using the canceled invoice and verify it fails.
+        5. Create a new invoice.
+        6. Send a payment using the new invoice and verify it succeeds.
+        7. Verify the channel balance is updated correctly.
 
         Returns:
-
+            None
         """
+        # Step 1: Open a new channel
         temporary_channel_id = self.fiber2.get_client().open_channel(
             {
                 "peer_id": self.fiber1.get_peer_id(),
@@ -160,6 +209,8 @@ class TestCancelInvoice(FiberTest):
             "CHANNEL_READY",
             120,
         )
+
+        # Step 2: Create a new invoice
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 1 * 100000000
         invoice = self.fiber1.get_client().new_invoice(
@@ -174,16 +225,20 @@ class TestCancelInvoice(FiberTest):
             }
         )
 
+        # Step 3: Cancel the created invoice
         self.fiber1.get_client().cancel_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
+
+        # Step 4: Attempt to send a payment using the canceled invoice and verify it fails
         payment = self.fiber2.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-
         self.wait_payment_state(self.fiber2, payment["payment_hash"], "Failed")
+
+        # Step 5: Create a new invoice
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 1 * 100000000
         invoice = self.fiber1.get_client().new_invoice(
@@ -197,6 +252,8 @@ class TestCancelInvoice(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
+
+        # Step 6: Send a payment using the new invoice and verify it succeeds
         before_channel = self.fiber2.get_client().list_channels({})
         payment = self.fiber2.get_client().send_payment(
             {
@@ -205,6 +262,8 @@ class TestCancelInvoice(FiberTest):
         )
         self.wait_payment_state(self.fiber2, payment["payment_hash"], "Success")
         after_channel = self.fiber2.get_client().list_channels({})
+
+        # Step 7: Verify the channel balance is updated correctly
         assert (
             int(before_channel["channels"][0]["local_balance"], 16)
             - int(after_channel["channels"][0]["local_balance"], 16)
@@ -212,6 +271,19 @@ class TestCancelInvoice(FiberTest):
         )
 
     def test_cancel_invoice_that_statue_is_paid(self):
+        """
+        Test case for canceling an invoice that is in the 'Paid' state.
+
+        Steps:
+        1. Open a new channel.
+        2. Create a new invoice.
+        3. Send a payment using the created invoice.
+        4. Attempt to cancel the invoice and verify the expected error message "invoice can not be canceled, current status: Paid" is raised.
+
+        Returns:
+            None
+        """
+        # Step 1: Open a new channel
         temporary_channel_id = self.fiber2.get_client().open_channel(
             {
                 "peer_id": self.fiber1.get_peer_id(),
@@ -226,6 +298,8 @@ class TestCancelInvoice(FiberTest):
             "CHANNEL_READY",
             120,
         )
+
+        # Step 2: Create a new invoice
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 1 * 100000000
         invoice = self.fiber1.get_client().new_invoice(
@@ -240,19 +314,7 @@ class TestCancelInvoice(FiberTest):
             }
         )
 
-        payment_preimage = self.generate_random_preimage()
-        invoice_balance = 1 * 100000000
-        invoice = self.fiber1.get_client().new_invoice(
-            {
-                "amount": hex(invoice_balance),
-                "currency": "Fibd",
-                "description": "test invoice generated by node2",
-                "expiry": "0xe10",
-                "final_cltv": "0x28",
-                "payment_preimage": payment_preimage,
-                "hash_algorithm": "sha256",
-            }
-        )
+        # Step 3: Send a payment using the created invoice
         before_channel = self.fiber2.get_client().list_channels({})
         payment = self.fiber2.get_client().send_payment(
             {
@@ -267,6 +329,7 @@ class TestCancelInvoice(FiberTest):
             == invoice_balance
         )
 
+        # Step 4: Attempt to cancel the invoice and verify the expected error message
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().cancel_invoice(
                 {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
@@ -278,6 +341,23 @@ class TestCancelInvoice(FiberTest):
         )
 
     def test_cancel_invoice_that_statue_is_receive(self):
+        """
+        Test case for canceling an invoice that is in the 'Received' state.
+
+        Steps:
+        1. Open a new channel.
+        2. Create a new invoice.
+        3. Send a payment using the created invoice.
+        4. Cancel the invoice and verify the payment fails.
+        5. Verify the channel balance is unchanged.
+        6. Create a new invoice.
+        7. Send a payment using the new invoice and verify it succeeds.
+        8. Verify the channel balance is updated correctly.
+
+        Returns:
+            None
+        """
+        # Step 1: Open a new channel
         temporary_channel_id = self.fiber2.get_client().open_channel(
             {
                 "peer_id": self.fiber1.get_peer_id(),
@@ -292,6 +372,8 @@ class TestCancelInvoice(FiberTest):
             "CHANNEL_READY",
             120,
         )
+
+        # Step 2: Create a new invoice
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 1 * 100000000
         invoice = self.fiber1.get_client().new_invoice(
@@ -306,21 +388,8 @@ class TestCancelInvoice(FiberTest):
             }
         )
 
-        payment_preimage = self.generate_random_preimage()
-        invoice_balance = 1 * 100000000
-        invoice = self.fiber1.get_client().new_invoice(
-            {
-                "amount": hex(invoice_balance),
-                "currency": "Fibd",
-                "description": "test invoice generated by node2",
-                "expiry": "0xe10",
-                "final_cltv": "0x28",
-                "payment_preimage": payment_preimage,
-                "hash_algorithm": "sha256",
-            }
-        )
+        # Step 3: Send a payment using the created invoice
         before_channel = self.fiber2.get_client().list_channels({})
-
         payment = self.fiber2.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
@@ -333,13 +402,14 @@ class TestCancelInvoice(FiberTest):
         #     20,
         #     0,
         # )
+
+        # Step 4: Cancel the invoice and verify the payment fails
         self.fiber1.get_client().cancel_invoice(
             {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
         )
         self.wait_payment_state(self.fiber2, payment["payment_hash"], "Failed")
-        self.fiber1.get_client().get_invoice(
-            {"payment_hash": invoice["invoice"]["data"]["payment_hash"]}
-        )
+
+        # Step 5: Verify the channel balance is unchanged
         channels = self.fiber2.get_client().list_channels({})
         assert (
             channels["channels"][0]["local_balance"]
@@ -350,6 +420,7 @@ class TestCancelInvoice(FiberTest):
             != before_channel["channels"][0]["latest_commitment_transaction_hash"]
         )
 
+        # Step 6: Create a new invoice
         invoice_balance = 1 * 100000000
         invoice = self.fiber1.get_client().new_invoice(
             {
@@ -362,8 +433,9 @@ class TestCancelInvoice(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
-        before_channel = self.fiber2.get_client().list_channels({})
 
+        # Step 7: Send a payment using the new invoice and verify it succeeds
+        before_channel = self.fiber2.get_client().list_channels({})
         payment = self.fiber2.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
@@ -371,6 +443,90 @@ class TestCancelInvoice(FiberTest):
         )
         self.wait_payment_state(self.fiber2, payment["payment_hash"], "Success")
         after_channel = self.fiber2.get_client().list_channels({})
+
+        # Step 8: Verify the channel balance is updated correctly
         assert after_channel["channels"][0]["local_balance"] == hex(
             int(before_channel["channels"][0]["local_balance"], 16) - invoice_balance
         )
+
+    def test_batch_cancel(self):
+        """
+        Test case for batch canceling invoices.
+
+        Steps:
+        1. Start new fibers.
+        2. Open channels between fibers.
+        3. Create new invoices.
+        4. Send payments and cancel invoices.
+        5. Verify payment statuses.
+        6. Verify fiber balance.
+
+        Returns:
+            None
+        """
+        cancel_size = 50
+        channel_length = 4
+
+        # Step 1: Start new fibers
+        for i in range(channel_length - 2):
+            self.start_new_fiber(self.generate_account(10000))
+
+        # Step 2: Open channels between fibers
+        for i in range(len(self.fibers)):
+            self.open_channel(
+                self.fibers[i],
+                self.fibers[(i + 1) % len(self.fibers)],
+                1000 * 100000000,
+                1000 * 100000000,
+            )
+
+        # Step 3: Create new invoices
+        new_invoices = []
+        for i in range(cancel_size):
+            new_invoice = (
+                self.fibers[0]
+                .get_client()
+                .new_invoice(
+                    {
+                        "amount": hex(1 * 100000000),
+                        "currency": "Fibd",
+                        "description": "test invoice generated by node2",
+                        "expiry": "0xe10",
+                        "final_cltv": "0x28",
+                        "payment_preimage": self.generate_random_preimage(),
+                        "hash_algorithm": "sha256",
+                    }
+                )
+            )
+            new_invoices.append(new_invoice)
+
+        # Step 4: Send payments and cancel invoices
+        for i in range(cancel_size):
+            self.fiber1.get_client().send_payment(
+                {
+                    "invoice": new_invoices[i]["invoice_address"],
+                    "allow_self_payment": True,
+                }
+            )
+            self.fiber1.get_client().cancel_invoice(
+                {"payment_hash": new_invoices[i]["invoice"]["data"]["payment_hash"]}
+            )
+
+        # Step 5: Verify payment statuses
+        payment_status = []
+        for i in range(cancel_size):
+            payment = self.fiber1.get_client().get_payment(
+                {"payment_hash": new_invoices[i]["invoice"]["data"]["payment_hash"]}
+            )
+            payment_status.append(payment)
+
+        for i in range(cancel_size):
+            self.wait_payment_state(
+                self.fibers[0],
+                new_invoices[i]["invoice"]["data"]["payment_hash"],
+                "Failed",
+            )
+
+        # Step 6: Verify fiber balance
+        balance = self.get_fiber_balance(self.fibers[0])
+        assert balance["local_balance"] == 200000000000

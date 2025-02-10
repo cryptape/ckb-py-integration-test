@@ -610,7 +610,6 @@ class TestWatchTower(FiberTest):
         )
         assert tx_message["output_cells"][1]["capacity"] == 19899999545
 
-    @pytest.mark.skip("failed")
     def test_node2_shutdown_after_send_tx1_and_node1_split_tx(self):
         """
         Test scenario where node2 shuts down after sending a transaction and node1 splits the transaction.
@@ -748,8 +747,8 @@ class TestWatchTower(FiberTest):
         )
 
         # Step 3: Send a payment from node1 to node2
-        self.send_payment(self.fiber1, self.fiber2, 1 * 100000000, True)
-
+        self.send_payment(self.fiber1, self.fiber2, 11 * 100000000, True)
+        time.sleep(1)
         # Step 4: Shutdown the channel from node1
         self.fiber1.get_client().shutdown_channel(
             {
@@ -795,7 +794,7 @@ class TestWatchTower(FiberTest):
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
         tx_message = self.get_tx_message(tx_hash)
-
+        print(tx_message)
         # Step 13: Assert the capacity and arguments of input and output cells in the transaction message
         assert tx_message["input_cells"][0]["capacity"] == 26199999545
         assert (
@@ -807,15 +806,20 @@ class TestWatchTower(FiberTest):
             tx_message["output_cells"][0]["args"]
             == self.get_account_script(self.fiber2.account_private)["args"]
         )
-        assert tx_message["output_cells"][0]["capacity"] == 6199999545
+        assert (
+            tx_message["output_cells"][0]["capacity"]
+            == 62 * 100000000 + 11 * 100000000 - 455
+        )
 
         assert (
             tx_message["output_cells"][1]["args"]
             == self.get_account_script(self.fiber1.account_private)["args"]
         )
-        assert tx_message["output_cells"][1]["capacity"] == 19899999545
+        assert (
+            tx_message["output_cells"][1]["capacity"]
+            == 200 * 100000000 - 11 * 100000000 - 455
+        )
 
-    @pytest.mark.skip("commit tx err")
     def test_node1_shutdown_after_send_tx2_and_node1_split_tx(self):
         """
         Test scenario where node1 shuts down after sending a transaction and node1 splits the transaction.
@@ -878,7 +882,7 @@ class TestWatchTower(FiberTest):
         # Step 6: Mine additional blocks
         for i in range(5):
             self.Miner.miner_with_version(self.node, "0x0")
-        self.get_fiber_env()
+
         # Step 7: Check the list of channels for both nodes
         node1_channel = self.fiber1.get_client().list_channels({})
         node2_channel = self.fiber2.get_client().list_channels({})
@@ -890,10 +894,9 @@ class TestWatchTower(FiberTest):
         # Step 9: Check graph channels for both nodes
         node1_graph_channels = self.fiber1.get_client().graph_channels()
         node2_graph_channels = self.fiber2.get_client().graph_channels()
-        # self.fiber2.stop()
 
-        # Step 10: Stop node1
-        self.fiber1.stop()
+        # Step 10: Stop node2
+        self.fiber2.stop()
 
         # Step 11: Generate epochs
         self.node.getClient().generate_epochs("0xa")
@@ -922,9 +925,7 @@ class TestWatchTower(FiberTest):
             == self.get_account_script(self.fiber1.account_private)["args"]
         )
         assert tx_message["output_cells"][1]["capacity"] == 19999999545
-        self.get_fiber_env()
 
-    @pytest.mark.skip("commit tx err")
     def test_node1_shutdown_after_send_tx2_and_node2_split_tx(self):
         """
         Test scenario where node1 shuts down after sending a transaction and node2 splits the transaction.
@@ -1130,7 +1131,6 @@ class TestWatchTower(FiberTest):
         )
         assert tx_message["output_cells"][1]["capacity"] == 6199999545
 
-    @pytest.mark.skip("commit tx err")
     def test_node2_shutdown_after_send_tx2_and_node2_split_tx(self):
         """
         Test scenario where node2 shuts down after sending a transaction and node2 splits the transaction.

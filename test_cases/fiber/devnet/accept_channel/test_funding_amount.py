@@ -8,11 +8,31 @@ from framework.basic_fiber import FiberTest
 class TestFundingAmount(FiberTest):
 
     def test_ckb_funding_amount_zero(self):
+        """
+        accept_channel:
+            ckb
+                funding_amount :0x0
+                    error: The funding amount (0) should be greater than or equal to 6200000000
+
+        Steps:
+        1. Get node information.
+        2. Retrieve the minimum CKB funding amount for auto-accepting channels.
+        3. Open a temporary channel with funding amount just below the minimum.
+        4. Wait for the channel to open.
+        5. Attempt to accept a channel with zero funding amount and expect an exception.
+        6. Verify the exception message contains the expected error message.
+
+        Returns:
+        """
+        # Step 1: Get node information
         node_info = self.fiber1.get_client().node_info()
+
+        # Step 2: Retrieve the minimum CKB funding amount for auto-accepting channels
         open_channel_auto_accept_min_ckb_funding_amount = node_info[
             "open_channel_auto_accept_min_ckb_funding_amount"
         ]
 
+        # Step 3: Open a temporary channel with funding amount just below the minimum
         temporary_channel = self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
@@ -22,7 +42,11 @@ class TestFundingAmount(FiberTest):
                 "public": True,
             }
         )
+
+        # Step 4: Wait for the channel to open
         time.sleep(1)
+
+        # Step 5: Attempt to accept a channel with zero funding amount and expect an exception
         with pytest.raises(Exception) as exc_info:
             self.fiber2.get_client().accept_channel(
                 {
@@ -30,6 +54,8 @@ class TestFundingAmount(FiberTest):
                     "funding_amount": "0x0",
                 }
             )
+
+        # Step 6: Verify the exception message contains the expected error message
         expected_error_message = "should be greater than or equal to 6200000000"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
@@ -38,7 +64,16 @@ class TestFundingAmount(FiberTest):
 
     def test_udt_funding_amount_zero(self):
         """
-        funding_amount :0x0
+        accept_channel:
+            udt
+                funding_amount :0x0
+                    accept channel success
+
+        1. fiber1 open udt channel
+        2. fiber2 accept udt channel 0
+        3. fiber1 send 1 udt to fiber2
+        4. shutdown channel
+        5. check balance
         Returns:
         """
         temporary_channel = self.fiber1.get_client().open_channel(
@@ -117,8 +152,9 @@ class TestFundingAmount(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close txx commit
-        time.sleep(20)
+        # todo wait close tx commit
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
         after_account1 = self.udtContract.list_cell(
             self.node.getClient(),
@@ -136,6 +172,19 @@ class TestFundingAmount(FiberTest):
         assert after_account2[-1]["balance"] == 1 * 100000000
 
     def test_ckb_funding_amount_eq_auto_accept_channel_ckb_funding_amount(self):
+        """
+        accept_channel:
+            ckb
+                funding_amount == open_channel_auto_accept_min_ckb_funding_amount
+                    accept channel success
+        1. fiber1 call node info get open_channel_auto_accept_min_ckb_funding_amount
+        2. fiber1 open channel with fiber, ckb == open_channel_auto_accept_min_ckb_funding_amount
+        3. fiber1 send fiber2 1 ckb
+        4. shutdown channel
+        5. check balance
+        Returns:
+
+        """
         node_info = self.fiber1.get_client().node_info()
         open_channel_auto_accept_min_ckb_funding_amount = node_info[
             "open_channel_auto_accept_min_ckb_funding_amount"
@@ -215,8 +264,10 @@ class TestFundingAmount(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close txx commit
-        time.sleep(20)
+
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.fiber1.get_account()["address"]["testnet"]
         )
@@ -230,6 +281,19 @@ class TestFundingAmount(FiberTest):
         assert after_balance2 - before_balance2 == 63
 
     def test_ckb_funding_amount_gt_auto_accept_channel_ckb_funding_amount(self):
+        """
+        accept_channel:
+            ckb
+                funding_amount > open_channel_auto_accept_min_ckb_funding_amount
+                    accept channel success
+        1. fiber1 call node info get open_channel_auto_accept_min_ckb_funding_amount
+        2. fiber1 open channel with fiber, ckb == 1 + open_channel_auto_accept_min_ckb_funding_amount
+        3. fiber1 send fiber2 1 ckb
+        4. shutdown channel
+        5. check balance
+        Returns:
+
+        """
         node_info = self.fiber1.get_client().node_info()
         open_channel_auto_accept_min_ckb_funding_amount = node_info[
             "open_channel_auto_accept_min_ckb_funding_amount"
@@ -323,6 +387,7 @@ class TestFundingAmount(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 64
 
+    @pytest.mark.skip("repeat")
     def test_ckb_funding_amount_lt_account(self):
         """
         funding_amount < account
@@ -477,10 +542,12 @@ class TestFundingAmount(FiberTest):
         print(after_account2)
         assert after_account2[-1]["balance"] == (10000 + 1 - 9999) * 100000000
 
-    @pytest.mark.skip("无法再次 accept")
     def test_ckb_funding_amount_gt_account(self):
         """
-        funding_amount > account
+        1. accept funding_amount > account
+            failed message in log file
+        2. accept again
+            err: No channel with temp id
         Returns:
         """
         temporary_channel = self.fiber1.get_client().open_channel(
@@ -509,16 +576,23 @@ class TestFundingAmount(FiberTest):
             120,
         )
         # 失败了, 好像不能再次accept_channel
-        self.fiber2.get_client().accept_channel(
-            {
-                "temporary_channel_id": temporary_channel["temporary_channel_id"],
-                "funding_amount": hex(1000 * 100000000),
-            }
+        with pytest.raises(Exception) as exc_info:
+            self.fiber2.get_client().accept_channel(
+                {
+                    "temporary_channel_id": temporary_channel["temporary_channel_id"],
+                    "funding_amount": hex(1000 * 100000000),
+                }
+            )
+        expected_error_message = "No channel with temp id"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
     def test_funding_amount_over_flow(self):
         """
         funding_amount > int.max
+            err: Invalid params
         Returns:
         """
         temporary_channel = self.fiber1.get_client().open_channel(
@@ -547,6 +621,14 @@ class TestFundingAmount(FiberTest):
         )
 
     def test_udt_funding_amount_gt_account(self):
+        """
+        1. accept funding_amount > account
+            failed message in log file
+              2025-02-05T08:59:50.811397Z ERROR fnn::fiber::network: Failed to fund channel: Failed to build CKB tx: other error: `can not find enough UDT owner cells for funding transaction`
+
+        Returns:
+
+        """
         self.faucet(
             self.fiber2.account_private,
             1000,

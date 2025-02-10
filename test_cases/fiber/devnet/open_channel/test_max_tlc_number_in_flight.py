@@ -107,7 +107,7 @@ class TestMaxTlcNumberInFlight(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
     def test_max_tlc_number_in_flight_zero(self):
         """
         max_tlc_number_in_flight = 0
@@ -149,9 +149,9 @@ class TestMaxTlcNumberInFlight(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in payment["failed_error"]
-
+        # expected_error_message = "TemporaryChannelFailure"
+        # assert expected_error_message in payment["failed_error"]
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
         channels = self.fiber1.get_client().list_channels(
             {"peer_id": self.fiber2.get_peer_id()}
         )

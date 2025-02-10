@@ -16,6 +16,14 @@ class TestShutdownScript(FiberTest):
 
     def test_ckb_shutdown_script(self):
         """
+        shutdown_script
+            is not None
+                shut_down the channel triggers a balance refund to the shutdown script.
+        1. fiber1 open channel with fiber2
+        2. fiber2 accept channel with shutdown script
+        3. fiber1 send payment to fiber2
+        4. fiber1 shutdown channel
+        5. check balance
         Returns:
 
         """
@@ -94,8 +102,9 @@ class TestShutdownScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close txx commit
-        time.sleep(20)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.fiber1.get_account()["address"]["testnet"]
         )
@@ -114,6 +123,18 @@ class TestShutdownScript(FiberTest):
         assert after_new_balance == 63
 
     def test_udt_shutdown_script(self):
+        """
+        shutdown_script
+            is not none
+                shut_down the channel triggers a balance refund to the shutdown script.
+        1. fiber1 open channel with fiber2
+        2. fiber2 accept channel with shutdown script
+        3. fiber1 send payment to fiber2
+        4. fiber1 shutdown channel
+        5. check balance
+        Returns:
+
+        """
         new_account_private_key = self.generate_account(0)
         new_account = self.Ckb_cli.util_key_info_by_private_key(new_account_private_key)
         temporary_channel = self.fiber1.get_client().open_channel(
@@ -193,8 +214,9 @@ class TestShutdownScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close txx commit
-        time.sleep(20)
+
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
         after_account1 = self.udtContract.list_cell(
             self.node.getClient(),
@@ -218,6 +240,12 @@ class TestShutdownScript(FiberTest):
         assert after_new_account[-1]["balance"] == 1 * 100000000
 
     def test_shutdown_script_too_long_gt_funding_amount(self):
+        """
+        shutdown_script : data too big ,will cause ckb not enough
+                err: "The funding amount (6200000000) should be greater than or equal to 147200000000"
+        Returns:
+
+        """
         node_info = self.fiber1.get_client().node_info()
         open_channel_auto_accept_min_ckb_funding_amount = node_info[
             "open_channel_auto_accept_min_ckb_funding_amount"
@@ -253,7 +281,12 @@ class TestShutdownScript(FiberTest):
 
     def test_shutdown_script_too_long(self):
         """
-        shutdown_script : data too big ,will cause ckb not enough
+        shutdown_script : data too big
+            pass
+        1. fiber1 open channel with fiber2
+        2. fiber2 accept channel with big data arg
+        3. fiber1 send payment to fiber2
+        4. fiber1 shutdown channel
         Returns:
         """
         node_info = self.fiber1.get_client().node_info()

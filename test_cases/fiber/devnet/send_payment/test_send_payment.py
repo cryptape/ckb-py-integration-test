@@ -483,7 +483,7 @@ class TestSendPayment(FiberTest):
 
         # self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/436")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/436")
     def test_send_payment_0x1(self):
         account_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account_private)

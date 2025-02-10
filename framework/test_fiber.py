@@ -16,8 +16,26 @@ from framework.config import get_tmp_path
 
 
 class FiberConfigPath(Enum):
-    V100_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
-    V100_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
+
+    CURRENT_DEV = (
+        "/source/template/fiber/dev_config.yml.j2",
+        "download/fiber/current/fnn",
+    )
+    CURRENT_TESTNET = (
+        "/source/template/fiber/config.yml.j2",
+        "download/fiber/0.3.1/fnn",
+    )
+
+    V031_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.1/fnn")
+    V030_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
+    V020_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.2.0/fnn")
+    V010_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
+
+    V031_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.1/fnn")
+    V030_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.0/fnn")
+    V021_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.1/fnn")
+    V020_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.0/fnn")
+    V010_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
 
     def __init__(self, fiber_config_path, fiber_bin_path):
         self.fiber_config_path = fiber_config_path
@@ -137,6 +155,11 @@ class Fiber:
         self.account_private = f"0x{key}"
         return self.account_private
 
+    def migration(self):
+        run_command(
+            f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
+        )
+
     def start(self, node=None):
         # env_map = dict(os.environ)  # Make a copy of the current environment
         # if node:
@@ -149,15 +172,19 @@ class Fiber:
             # env=env_map,
         )
         # wait rpc start
-        time.sleep(2)
+        time.sleep(1)
         print("start fiber client ")
 
     def stop(self):
         run_command(f"kill $(lsof -t -i:{self.rpc_port})", False)
-        time.sleep(3)
+        time.sleep(1)
 
     def force_stop(self):
-        run_command(f"kill -9 $(lsof -t -i:{self.rpc_port})", False)
+        # run_command(f"kill -9 $(lsof -t -i:{self.rpc_port} | head -1)", False)
+        run_command(
+            "kill -9 $(lsof -i:" + self.rpc_port + " | grep LISTEN | awk '{print $2}')",
+            False,
+        )
         time.sleep(3)
 
     def clean(self):

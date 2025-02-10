@@ -123,10 +123,12 @@ class TestUpdateChannel(FiberTest):
             after_channel["channels"][0]["local_balance"], 16
         ) == int(invoice_balance, 16)
         channel = self.fiber3.get_client().list_channels({})
+        channel2 = self.fiber2.get_client().list_channels({})
+
         # 4. fiber2 call  update_channel (id,tlc_fee_proportional_millionths)
         tlc_fee_proportional_millionths = 2000
 
-        update_channel_param["channel_id"] = channel["channels"][0]["channel_id"]
+        update_channel_param["channel_id"] = channel2["channels"][0]["channel_id"]
         channels = self.fiber1.get_client().update_channel(update_channel_param)
         time.sleep(1)
         # 1. todo check enable

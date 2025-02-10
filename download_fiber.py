@@ -11,10 +11,9 @@ import zipfile
 import requests
 from tqdm import tqdm
 
+versions = ["0.2.0", "0.2.1", "0.3.0", "0.3.1"]  # Replace with your versions
 
-versions = ["0.2.1"]  # Replace with your versions
-
-DOWNLOAD_DIR = "download"
+DOWNLOAD_DIR = "download/fiber"
 SYSTEMS = {
     "Windows": {
         "url": "https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{"
@@ -90,14 +89,9 @@ def extract_file(filename, path):
     elif filename.endswith(".tar.gz"):
         with tarfile.open(filename, "r:gz") as tar_ref:
             tar_ref.extractall(temp_path)
-    # Change permission of ckb-light-client
-    for file in ["ckb-light-client"]:
-        filepath = os.path.join(path, file)
-        if os.path.isfile(filepath):
-            os.chmod(filepath, 0o755)
 
 
-def download_ckb(ckb_version):
+def download_ckb(ckb_version, last_one=False):
     """
     download ckb from gitHub by ckb version
     :param ckb_version: gitHub release ckb version
@@ -119,7 +113,15 @@ def download_ckb(ckb_version):
 
     download_file(url, filename)
     extract_file(filename, download_path)
+    if last_one:
+        current_download_path = os.path.join(DOWNLOAD_DIR, "current")
+        extract_file(filename, current_download_path)
 
 
-for version in versions:
-    download_ckb(version)
+for i in range(len(versions)):
+    current = i == len(versions) - 1
+    download_ckb(versions[i], current)
+
+# for version in versions:
+#
+#     download_ckb(version)

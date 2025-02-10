@@ -16,10 +16,8 @@ class TestNodeState(FiberTest):
 
     """
 
-    # FiberTest.debug = True
-
     # @pytest.mark.skip("node1 send payment node4 failed")
-    @pytest.mark.skip("交易发送一半，如果交易卡在Inflight，下一笔交易好像也发不出去")
+    # @pytest.mark.skip("交易发送一半，如果交易卡在Inflight，下一笔交易好像也发不出去")
     def test_shutdown_in_send_payment(self):
         """
         payment state 卡在 Inflight
@@ -67,13 +65,6 @@ class TestNodeState(FiberTest):
         self.wait_for_channel_state(
             self.fiber3.get_client(), self.fiber4.get_peer_id(), "CHANNEL_READY", 120
         )
-        # node4 open channel node1
-        # self.fiber4.get_client().open_channel({
-        #     "peer_id": self.fiber1.get_peer_id(),
-        #     "funding_amount": hex(200 * 100000000),
-        #     "public": True,
-        # })
-        # self.wait_for_channel_state(self.fiber4.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY", 120)
         time.sleep(3)
         # node1 send payment to node4
         node4_info = self.fiber4.get_client().node_info()

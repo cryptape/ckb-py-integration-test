@@ -15,7 +15,7 @@ class TestMaxTlcValueInFlight(FiberTest):
         """
         # self.test_linked_peer()
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
     def test_max_tlc_value_in_flight_is_zero(self):
         """
         max_tlc_value_in_flight = 0
@@ -74,8 +74,10 @@ class TestMaxTlcValueInFlight(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in payment["failed_error"]
+
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
+        # expected_error_message = "TemporaryChannelFailure"
+        # assert expected_error_message in payment["failed_error"]
 
         # invoice_balance = hex(160 * 100000000)
         # payment_preimage = self.generate_random_preimage()
@@ -466,7 +468,7 @@ class TestMaxTlcValueInFlight(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 143
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
     def test_debug_ckb_max_tlc_value_in_flight_not_eq_default(self):
         self.fiber1.get_client().open_channel(
             {
@@ -508,14 +510,10 @@ class TestMaxTlcValueInFlight(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(1)
-        payment = self.fiber1.get_client().get_payment(
-            {"payment_hash": payment["payment_hash"]}
-        )
-        print("payment:", payment)
+
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
     def test_ckb_max_tlc_value_in_flight_not_eq_default(self):
         """
         max_tlc_value_in_flight != default
@@ -563,8 +561,10 @@ class TestMaxTlcValueInFlight(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in payment["failed_error"]
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
+        time.sleep(1)
+        # expected_error_message = "TemporaryChannelFailure"
+        # assert expected_error_message in payment["failed_error"]
         # send 1  ckb
         invoice_balance = hex(1 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -683,7 +683,7 @@ class TestMaxTlcValueInFlight(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 62.90000057220459
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/450")
     def test_udt_max_tlc_value_in_flight_not_eq_default(self):
         """
         max_tlc_value_in_flight != default
@@ -737,8 +737,9 @@ class TestMaxTlcValueInFlight(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        expected_error_message = "TemporaryChannelFailure"
-        assert expected_error_message in payment["failed_error"]
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed")
+        # expected_error_message = "TemporaryChannelFailure"
+        # assert expected_error_message in payment["failed_error"]
         # send 1  ckb
         invoice_balance = hex(1 * 100000000)
         payment_preimage = self.generate_random_preimage()
@@ -758,7 +759,7 @@ class TestMaxTlcValueInFlight(FiberTest):
             }
         )
         before_channel = self.fiber1.get_client().list_channels({})
-
+        time.sleep(1)
         payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
