@@ -4,9 +4,8 @@ from framework.basic import CkbTest
 from framework.helper.spawn_contract import SpawnContract
 
 
-# https://github.com/nervosnetwork/ckb/pull/4665/files
-# pub const CKB2023_START_EPOCH: u64 = 9690;
-
+# https://github.com/nervosnetwork/ckb/pull/4807
+# pub const CKB2023_START_EPOCH: u64 = 12_293;
 
 class CKBTestnet(CkbTest):
 
