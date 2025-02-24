@@ -50,8 +50,13 @@ def deploy_ckb_contract(
         with open(tmp_deploy_toml_path, "w") as f:
             f.write(deploy_toml_str)
         account = util_key_info_by_private_key(private_key)
+        net = (
+            "testnet"
+            if RPCClient(api_url).get_consensus()["id"] != "ckb"
+            else "mainnet"
+        )
         deploy_gen_txs(
-            account["address"]["testnet"],
+            account["address"][net],
             tmp_deploy_toml_path,
             tmp_tx_info_path,
             api_url,
@@ -61,7 +66,8 @@ def deploy_ckb_contract(
         return deploy_tx_result["cell_tx"]
 
     # rand ckb address ,provider contract cell cant be used
-    to_ckb_address = "ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqwgx292hnvmn68xf779vmzrshpmm6epn4g6eqkaw"
+    pre_address = "ckb" if RPCClient(api_url).get_consensus()["id"] == "ckb" else "ckt"
+    to_ckb_address = f"{pre_address}1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqwgx292hnvmn68xf779vmzrshpmm6epn4g6eqkaw"
     with open(contract_path, "rb") as f:
         # +100 provider capacity enough deploy contract
         capacity = len(f.read()) + 100
@@ -149,7 +155,8 @@ def invoke_ckb_contract(
         )
     # get input_cell
     account = util_key_info_by_private_key(account_private)
-    account_address = account["address"]["testnet"]
+    net = "testnet" if RPCClient(api_url).get_consensus()["id"] != "ckb" else "mainnet"
+    account_address = account["address"][net]
     account_live_cells = wallet_get_live_cells(account_address, api_url=api_url)
     assert len(account_live_cells["live_cells"]) > 0
     input_cell_out_points = []
