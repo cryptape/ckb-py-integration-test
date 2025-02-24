@@ -21,24 +21,31 @@ class CkbNodeConfigPath(Enum):
         "download/0.200.0",
     )
     TESTNET = (
-        "source/template/ckb/v121/ckb.toml.j2",
-        "source/template/ckb/v121/ckb-miner.toml.j2",
+        "source/template/ckb/v200/ckb.toml.j2",
+        "source/template/ckb/v200/ckb-miner.toml.j2",
         "source/template/specs/testnet.toml.j2",
-        "download/0.121.0",
+        "download/0.200.0",
     )
 
     CURRENT_MAIN = (
-        "source/template/ckb/v121/ckb.toml.j2",
-        "source/template/ckb/v121/ckb-miner.toml.j2",
+        "source/template/ckb/v200/ckb.toml.j2",
+        "source/template/ckb/v200/ckb-miner.toml.j2",
         "source/template/specs/mainnet.toml.j2",
-        "download/0.121.0",
+        "download/0.200.0",
     )
 
     PREVIEW_DUMMY = (
-        "source/template/ckb/v121/ckb.toml.j2",
-        "source/template/ckb/v121/ckb-miner.toml.j2",
+        "source/template/ckb/v200/ckb.toml.j2",
+        "source/template/ckb/v200/ckb-miner.toml.j2",
         "source/template/specs/preview_dev.toml",
-        "download/0.121.0",
+        "download/0.200.0",
+    )
+
+    v200 = (
+        "source/template/ckb/v200/ckb.toml.j2",
+        "source/template/ckb/v200/ckb-miner.toml.j2",
+        "source/template/ckb/v200/specs/dev.toml",
+        "download/0.200.0",
     )
 
     v121 = (
