@@ -318,7 +318,7 @@ class CkbNode:
                     root_path=get_project_root(),
                     spec_path=self.ckb_config_path.ckb_spec_path,
                 ),
-                self.ckb_dir,
+                "{ckb_dir}/dev.toml".format(ckb_dir=self.ckb_dir),
             )
 
         shutil.copy(
