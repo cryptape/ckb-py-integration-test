@@ -182,7 +182,7 @@ class TestRestart(FiberTest):
         # 3.检查关闭后balance被正常返还
         assert after_balance2 - before_balance2 == 62.0
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/427")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/427")
     def test_restart_ckb_node_shutdown_channel(self):
         """
         1.ckb节点重启
@@ -229,6 +229,7 @@ class TestRestart(FiberTest):
         self.node.stop()
         time.sleep(10)
         self.node.start()
+        self.node.start_miner()
         time.sleep(10)
         # todo wait close tx commit
         time.sleep(20)
