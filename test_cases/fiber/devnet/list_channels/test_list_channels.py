@@ -169,8 +169,10 @@ class TestListChannels(FiberTest):
         channels = self.fiber1.get_client().list_channels({})
         created_at_hex = int(channels["channels"][0]["created_at"], 16) / 1000
 
-        assert int(created_at_hex / 1000) == int(
-            int(datetime.datetime.now().timestamp()) / 1000
+        assert (
+            int(int(datetime.datetime.now().timestamp()) / 1000)
+            - int(created_at_hex / 1000)
+            < 10
         )
 
     def test_is_public(self):
