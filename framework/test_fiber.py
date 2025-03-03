@@ -23,9 +23,10 @@ class FiberConfigPath(Enum):
     )
     CURRENT_TESTNET = (
         "/source/template/fiber/config.yml.j2",
-        "download/fiber/0.3.1/fnn",
+        "download/fiber/0.4.0/fnn",
     )
 
+    V040_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.0/fnn")
     V031_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.1/fnn")
     V030_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
     V020_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.2.0/fnn")

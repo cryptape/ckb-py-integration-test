@@ -193,6 +193,9 @@ class FiberRPCClient:
         """
         return self.call("graph_channels", [param])
 
+    def remove_watch_channel(self, param):
+        return self.call("remove_watch_channel", [param])
+
     def get_peer_id(self):
         return self.node_info()["addresses"][0].split("/")[-1]
 

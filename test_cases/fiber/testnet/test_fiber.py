@@ -14,7 +14,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TestFiber(CkbTest):
-    cryptapeFiber1 = FiberRPCClient("http://18.163.221.211:8227")
+    # cryptapeFiber1 = FiberRPCClient("http://18.163.221.211:8227")
+    # todo wait 18.163.221.211 recover
+    cryptapeFiber1 = FiberRPCClient("http://18.162.235.225:8227")
     cryptapeFiber2 = FiberRPCClient("http://18.162.235.225:8227")
 
     ACCOUNT_PRIVATE_1 = (
@@ -106,6 +108,9 @@ class TestFiber(CkbTest):
         cls.fiber1.clean()
         cls.fiber2.stop()
         cls.fiber2.clean()
+
+    def test_dd(self):
+        pass
 
     def test_ckb_01(self):
         # open_channel
