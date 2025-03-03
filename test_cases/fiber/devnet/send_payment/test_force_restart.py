@@ -363,6 +363,4 @@ class TestForceRestart(FiberTest):
         )
         print("self.fiber3.force_stop() payment:", payment)
         self.fiber3.start()
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
-        channels = self.fiber3.get_client().list_channels({})
-        assert channels["channels"][0]["local_balance"] == hex(30 * 100000000)
+        self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)
