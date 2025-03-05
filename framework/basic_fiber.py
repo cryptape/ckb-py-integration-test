@@ -576,7 +576,16 @@ class FiberTest(CkbTest):
                 }
             )
         print({"input_cells": input_cells, "output_cells": output_cells})
-        return {"input_cells": input_cells, "output_cells": output_cells}
+        input_cap = 0
+        for i in range(len(input_cells)):
+            input_cap = input_cap + input_cells[i]["capacity"]
+        for i in range(len(output_cells)):
+            input_cap = input_cap - output_cells[i]["capacity"]
+        return {
+            "input_cells": input_cells,
+            "output_cells": output_cells,
+            "fee": input_cap,
+        }
 
     def get_fiber_env(self, new_fiber_count=0):
         # self.logger.debug ckb tip number
