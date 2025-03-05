@@ -14,8 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TestFiber(CkbTest):
-    # cryptapeFiber1 = FiberRPCClient("http://18.163.221.211:8227")
-    # todo wait 18.163.221.211 recover
+
     cryptapeFiber1 = FiberRPCClient("http://18.162.235.225:8227")
     cryptapeFiber2 = FiberRPCClient("http://18.162.235.225:8227")
 
