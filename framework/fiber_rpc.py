@@ -16,6 +16,9 @@ class FiberRPCClient:
     def send_btc(self, btc_pay_req):
         return self.call("send_btc", [btc_pay_req])
 
+    def abandon_channel(self, param):
+        return self.call("abandon_channel", [param])
+
     def open_channel(self, param):
         """
         curl --location 'http://127.0.0.1:8227' --header 'Content-Type: application/json' --data '{
@@ -192,6 +195,9 @@ class FiberRPCClient:
 
         """
         return self.call("graph_channels", [param])
+
+    def remove_watch_channel(self, param):
+        return self.call("remove_watch_channel", [param])
 
     def get_peer_id(self):
         return self.node_info()["addresses"][0].split("/")[-1]
