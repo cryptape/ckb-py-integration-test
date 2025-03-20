@@ -101,7 +101,7 @@ class RPCClient:
 
     def generate_epochs(self, epoch):
         response = self.call("generate_epochs", [epoch])
-        time.sleep(1)
+        time.sleep(2)
         return response
 
     def generate_block(self):

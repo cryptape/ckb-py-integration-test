@@ -14,7 +14,7 @@ class TestEnable(FiberTest):
 
     # FiberTest.debug = True
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/499")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/499")
     def test_true(self):
         """
         A-B-C
@@ -44,10 +44,29 @@ class TestEnable(FiberTest):
             .get_client()
             .list_channels({"peer_id": self.fibers[2].get_peer_id()})
         )
+        channels = self.fibers[1].get_client().graph_channels({})
+        assert len(channels["channels"]) == 2
         self.fibers[1].get_client().update_channel(
             {"channel_id": channel["channels"][0]["channel_id"], "enabled": False}
         )
         time.sleep(1)
+        channels = self.fibers[1].get_client().graph_channels({})
+        assert len(channels["channels"]) == 1
+        channel = (
+            self.fibers[1]
+            .get_client()
+            .list_channels({"peer_id": self.fibers[2].get_peer_id()})
+        )
+        print("fiber1 channel:", channel)
+        assert channel["channels"][0]["enabled"] == False
+        channel = (
+            self.fibers[2]
+            .get_client()
+            .list_channels({"peer_id": self.fibers[1].get_peer_id()})
+        )
+        print("fiber2 channel:", channel)
+        assert channel["channels"][0]["enabled"] == True
+
         # 2. A->C 报错
         with pytest.raises(Exception) as exc_info:
             self.send_payment(self.fibers[0], self.fibers[2], 1)
@@ -81,6 +100,23 @@ class TestEnable(FiberTest):
             {"channel_id": channel["channels"][0]["channel_id"], "enabled": True}
         )
         time.sleep(1)
+        channels = self.fibers[1].get_client().graph_channels({})
+        print("after true graph_channels:", channels)
+        assert len(channels["channels"]) == 2
+        channel = (
+            self.fibers[1]
+            .get_client()
+            .list_channels({"peer_id": self.fibers[2].get_peer_id()})
+        )
+        print("fiber1 channel:", channel)
+        assert channel["channels"][0]["enabled"] == True
+        channel = (
+            self.fibers[2]
+            .get_client()
+            .list_channels({"peer_id": self.fibers[1].get_peer_id()})
+        )
+        print("fiber2 channel:", channel)
+        assert channel["channels"][0]["enabled"] == True
         # 7. A->C 不会报错
         # 8. B->C 不会报错
         self.send_payment(self.fibers[0], self.fibers[2], 1)

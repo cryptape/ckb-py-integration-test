@@ -22,6 +22,7 @@ class FiberTest(CkbTest):
     debug = False
     first_debug = False
     logger = logging.getLogger(__name__)
+    start_fiber_config = {}
 
     @classmethod
     def setup_class(cls):
@@ -113,31 +114,21 @@ class FiberTest(CkbTest):
         cls.node.start_miner()
         # deploy fiber
         # start 2 fiber with xudt
+        update_config = {
+            "ckb_rpc_url": cls.node.rpcUrl,
+            "ckb_udt_whitelist": True,
+            "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
+                deploy_hash, deploy_index, True, cls.node.rpcUrl
+            ),
+            "xudt_cell_deps_tx_hash": deploy_hash,
+            "xudt_cell_deps_index": deploy_index,
+        }
+        update_config.update(cls.start_fiber_config)
 
-        cls.fiber1.prepare(
-            update_config={
-                "ckb_rpc_url": cls.node.rpcUrl,
-                "ckb_udt_whitelist": True,
-                "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
-                    deploy_hash, deploy_index, True, cls.node.rpcUrl
-                ),
-                "xudt_cell_deps_tx_hash": deploy_hash,
-                "xudt_cell_deps_index": deploy_index,
-            }
-        )
+        cls.fiber1.prepare(update_config=update_config)
         cls.fiber1.start(cls.node)
 
-        cls.fiber2.prepare(
-            update_config={
-                "ckb_rpc_url": cls.node.rpcUrl,
-                "ckb_udt_whitelist": True,
-                "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
-                    deploy_hash, deploy_index, True, cls.node.rpcUrl
-                ),
-                "xudt_cell_deps_tx_hash": deploy_hash,
-                "xudt_cell_deps_index": deploy_index,
-            }
-        )
+        cls.fiber2.prepare(update_config=update_config)
         cls.fiber2.start(cls.node)
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
@@ -246,6 +237,7 @@ class FiberTest(CkbTest):
                 "xudt_cell_deps_tx_hash": deploy_hash,
                 "xudt_cell_deps_index": deploy_index,
             }
+        update_config.update(self.start_fiber_config)
 
         i = len(self.new_fibers)
         # start fiber3
