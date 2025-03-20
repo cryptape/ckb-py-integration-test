@@ -255,8 +255,8 @@ class TestFiber(CkbTest):
             "args": "0x878fcc6f1f08d48e87bb1c3b3d5083f23f8a39c5d5c764f253b55b998526439b",
         }
         self.fiber1.stop()
-        self.fiber1.start()
         self.fiber2.stop()
+        self.fiber1.start()
         self.fiber2.start()
         begin = time.time()
         # wait dry_run success
@@ -299,7 +299,7 @@ class TestFiber(CkbTest):
 
 
 def send_payment(
-    fiber1: FiberRPCClient, fiber2: FiberRPCClient, amount, udt=None, wait_times=300
+        fiber1: FiberRPCClient, fiber2: FiberRPCClient, amount, udt=None, wait_times=300
 ):
     try_times = 0
     payment = None
