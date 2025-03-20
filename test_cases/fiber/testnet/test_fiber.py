@@ -299,7 +299,7 @@ class TestFiber(CkbTest):
 
 
 def send_payment(
-        fiber1: FiberRPCClient, fiber2: FiberRPCClient, amount, udt=None, wait_times=300
+    fiber1: FiberRPCClient, fiber2: FiberRPCClient, amount, udt=None, wait_times=300
 ):
     try_times = 0
     payment = None
