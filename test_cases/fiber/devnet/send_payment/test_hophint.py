@@ -98,21 +98,24 @@ class TestHopHint(FiberTest):  # a-b
         )
 
         try:
-            #走b-a会成功
+            # 走b-a会成功
             payment = (
                 self.fibers[1]
-                    .get_client()
-                    .send_payment(  # b
+                .get_client()
+                .send_payment(  # b
                     {
-                        "target_pubkey": self.fibers[0].get_client().node_info()["node_id"],
+                        "target_pubkey": self.fibers[0]
+                        .get_client()
+                        .node_info()["node_id"],
                         "amount": hex(10 * 100000000),
                         "keysend": True,
                     }
-                ))
+                )
+            )
             print(f"debug payment content:{payment}")
 
         except Exception as e:
-            #如果走的是b-c-d-a，不通过hophit应该发送失败
+            # 如果走的是b-c-d-a，不通过hophit应该发送失败
             error_message = str(e)
             assert (
                 error_message
@@ -181,33 +184,36 @@ class TestHopHint(FiberTest):  # a-b
         try:
             payment = (
                 self.fibers[1]
-                    .get_client()
-                    .send_payment(  # b
+                .get_client()
+                .send_payment(  # b
                     {
-                        "target_pubkey": self.fibers[0].get_client().node_info()["node_id"],
+                        "target_pubkey": self.fibers[0]
+                        .get_client()
+                        .node_info()["node_id"],
                         "amount": hex(1 * 100000000),
                         "keysend": True,
                     }
-                ))
+                )
+            )
             print(f"debug payment content:{payment}")
 
             channels = (
                 self.fibers[1]
-                    .get_client()
-                    .list_channels({"peer_id": self.fibers[0].get_peer_id()})
+                .get_client()
+                .list_channels({"peer_id": self.fibers[0].get_peer_id()})
             )
-            print(
-                f"b-a,channel:{channels}"
-            )
+            print(f"b-a,channel:{channels}")
             ba_channel_outpoint = channels["channels"][0]["channel_outpoint"]
             print(f"b-a, channel_outpoint:{ba_channel_outpoint}")
-            assert payment["router"]["nodes"][0]["channel_outpoint"] == ba_channel_outpoint
+            assert (
+                payment["router"]["nodes"][0]["channel_outpoint"] == ba_channel_outpoint
+            )
         except Exception as e:
             # 如果走的是b-c-d-a，不通过hophit应该发送失败
             error_message = str(e)
             assert (
-                    error_message
-                    == "Error: Send payment error: Failed to build route, PathFind error: no path found"
+                error_message
+                == "Error: Send payment error: Failed to build route, PathFind error: no path found"
             ), f"Unexpected error message: {error_message}"
 
     def test_use_hophit(self):
