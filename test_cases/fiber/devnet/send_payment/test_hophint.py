@@ -8,14 +8,53 @@ from framework.basic_fiber import FiberTest
 class TestHopHint(FiberTest):  # a-b
     # FiberTest.debug = True
 
+    def test_not_hophit_simple(self):
+        """
+        b-c-d-私-a
+        1.b-a(不通过hophit应该发送失败)
+        Returns:
+
+        """
+        self.start_new_fiber(self.generate_account(10000))  # c
+        self.start_new_fiber(self.generate_account(10000))  # d
+
+        fiber1_balance = 1000 * 100000000
+        fiber1_fee = 1000
+        self.open_channel(self.fibers[1], self.fibers[2], 1000 * 100000000, 1)  # b-c
+        self.open_channel(
+            self.fibers[2], self.fibers[3], 1000 * 100000000, 1
+        )  # c-d == b-c-d
+
+        self.fibers[3].connect_peer(self.fibers[0])  # d-a
+        time.sleep(1)
+        self.fibers[3].get_client().open_channel(  # d -a private channel
+            {
+                "peer_id": self.fibers[0].get_peer_id(),
+                "funding_amount": hex(fiber1_balance + 62 * 100000000),
+                "tlc_fee_proportional_millionths": hex(fiber1_fee),
+                "public": False,
+            }
+        )
+        time.sleep(1)
+        self.wait_for_channel_state(
+            self.fibers[3].get_client(), self.fibers[0].get_peer_id(), "CHANNEL_READY"
+        )
+
+        # b-a(不通过hophit应该发送失败)
+
+        try:
+            self.send_payment(self.fibers[1], self.fibers[0], 1 * 100000000)
+        except Exception as e:
+            error_message = str(e)
+            assert (
+                error_message
+                == "Error: Send payment error: Failed to build route, PathFind error: no path found"
+            ), f"Unexpected error message: {error_message}"
+
     def test_not_hophit(self):
         """
         a-私-b-c-d-私-a
-        1. a->b
-        2. a->c
-        3. a->d
-        4. a->a
-        5. b-a(不通过hophit应该发送失败)
+        1. b-a(不通过hophit应该发送失败)
         Returns:
 
         """
@@ -55,11 +94,6 @@ class TestHopHint(FiberTest):  # a-b
         self.wait_for_channel_state(
             self.fibers[3].get_client(), self.fibers[0].get_peer_id(), "CHANNEL_READY"
         )
-
-        # for i in range(1, len(self.fibers)): #b,c,d
-        #     self.send_payment(self.fibers[0], self.fibers[i], 1 * 100000000) #a->b,a->c,a>d
-        #
-        # self.send_payment(self.fibers[0], self.fibers[0], 1 * 100000000)#a->a
 
         # b-a(不通过hophit应该发送失败)
 
