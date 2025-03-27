@@ -129,7 +129,7 @@ class TestHopHint(FiberTest):  # a-b
         1. a->b
         2. a->c
         3. a->d
-        4. a->a
+        4. a->a(不支持，不能自己转给自己)
         5. 路径选择
             5.1. b-a，预期是能成功(大概率走这个)
             5.2. 如果走的是b-c-d-a，则需要走hint才可以成功，预期是失败
@@ -177,8 +177,9 @@ class TestHopHint(FiberTest):  # a-b
             self.send_payment(
                 self.fibers[0], self.fibers[i], 1 * 100000000
             )  # a->b,a->c,a>d
-
-        self.send_payment(self.fibers[0], self.fibers[0], 1 * 100000000)  # a->a
+        print(f"debug:a-a,route")
+        # a->a是不支持的，除非a-私-b-c-d-私-a这么走一圈，异常捕捉在方法里面
+        self.send_payment(self.fibers[0], self.fibers[0], 1 * 100000000)
 
         # b-a(不通过hophit应该发送失败)
         try:
