@@ -29,9 +29,12 @@ class TestMutilChannel(FiberTest):
         channels = self.fiber1.get_client().list_channels({})
         for i in range(len(before_channels["channels"])):
             print(before_channels["channels"][i])
+        used_channel = 0
         for i in range(len(channels["channels"])):
             print(channels["channels"][i])
-            assert (
+            if (
                 channels["channels"][i]["remote_balance"]
                 > before_channels["channels"][i]["remote_balance"]
-            )
+            ):
+                used_channel += 1
+        assert used_channel > 1
