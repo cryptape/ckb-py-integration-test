@@ -83,7 +83,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 11: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -193,7 +193,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 11: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -296,7 +296,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber2.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 11: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -375,7 +375,7 @@ class TestWatchTowerUdt(FiberTest):
         node1_graph_channels = self.fiber1.get_client().graph_channels()
         node2_graph_channels = self.fiber2.get_client().graph_channels()
         self.fiber2.stop()
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
         tx_message = self.get_tx_message(tx_hash)
         # assert tx_message['input_cells'][0]['capacity'] ==
@@ -485,7 +485,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -595,7 +595,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -709,7 +709,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -820,7 +820,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -933,7 +933,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1047,7 +1047,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1162,7 +1162,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1275,7 +1275,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1388,7 +1388,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1504,7 +1504,7 @@ class TestWatchTowerUdt(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)

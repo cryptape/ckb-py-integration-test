@@ -53,7 +53,7 @@ class TestPaymentHash(FiberTest):
         payment1 = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
-                    "PayeePublicKey"
+                    "payee_public_key"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),
@@ -105,7 +105,7 @@ class TestPaymentHash(FiberTest):
         payment1 = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
-                    "PayeePublicKey"
+                    "payee_public_key"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),
@@ -116,7 +116,7 @@ class TestPaymentHash(FiberTest):
         payment1 = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
-                    "PayeePublicKey"
+                    "payee_public_key"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),
