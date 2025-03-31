@@ -20,14 +20,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, macos-14, ubuntu-22.04, ubuntu-24.04-arm64, centos-8, windows-latest]
+        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm64, centos-8, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
           - os: ubuntu-24.04-arm64
             arch: arm64
             runs-on: [self-hosted, ubuntu-24.04-arm64, ARM64, Linux]
-          - os: macos-12
+          - os: macos-13
             arch: x86
           - os: macos-14
             arch: arm64
@@ -70,7 +70,7 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
               tar -xzf ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
               ;;
-            "macos-12-x86")
+            "macos-13-x86")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable.zip
               unzip ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable.zip
               ;;
@@ -110,7 +110,7 @@ jobs:
             "centos-8")
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable/ckb init 
               ;;
-            "macos-12")
+            "macos-13")
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable/ckb init 
               ;;
             "macos-14")
