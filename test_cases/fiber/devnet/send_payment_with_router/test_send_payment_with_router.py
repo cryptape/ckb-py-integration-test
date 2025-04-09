@@ -210,7 +210,7 @@ class TestSendPaymentWithRouter(FiberTest):
         )
         print(f"payment:{payment}")
         assert payment["status"] == "Created"
-        self.wait_payment_state(self.fibers[3], payment["payment_hash"], "Success")
+        self.wait_payment_state(self.fibers[1], payment["payment_hash"], "Success")
 
     def test_loop_send_payment_with_router(self):
         """
@@ -355,7 +355,7 @@ class TestSendPaymentWithRouter(FiberTest):
         )
         print(f"payment:{payment}")
         assert payment["status"] == "Created"
-        self.wait_payment_state(self.fibers[3], payment["payment_hash"], "Success")
+        self.wait_payment_state(self.fibers[1], payment["payment_hash"], "Success")
 
     def get_channel_outpoint(self, from_fiber, to_fiber):
         """
