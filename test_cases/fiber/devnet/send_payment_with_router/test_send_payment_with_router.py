@@ -30,7 +30,8 @@ class TestSendPaymentWithRouter(FiberTest):
        - 验证支付历史中的路由信息
        - 验证每个节点的金额和通道信息
     """
-    FiberTest.debug = True
+
+    # FiberTest.debug = True
 
     def test_base_send_payment_with_router(self):
         """
