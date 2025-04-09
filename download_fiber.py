@@ -42,7 +42,7 @@ SYSTEMS = {
         },
         "arm64": {
             "url": "https://github.com/nervosnetwork/fiber/releases/download/v{version}/fnn_v{"
-            "version}-x86_64-darwin.tar.gz",
+            "version}-x86_64-darwin-portable.tar.gz",
             "ext": ".tar.gz",
         },
     },
