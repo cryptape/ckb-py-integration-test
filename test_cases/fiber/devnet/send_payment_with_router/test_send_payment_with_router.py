@@ -30,13 +30,13 @@ class TestSendPaymentWithRouter(FiberTest):
        - 验证支付历史中的路由信息
        - 验证每个节点的金额和通道信息
     """
+    FiberTest.debug = True
 
     def test_base_send_payment_with_router(self):
         """
         b-c-d-私-a网络
         1. d-a建立了路由关系，查看构建的路由返回信息
         2. d call a ,route info: d-a channel outpoint
-        3. b call a ,走route info: b-c-d-私-a网络（检查应该不支持自动拼接完整的路由）
         """
         self.start_new_fiber(self.generate_account(10000))
         self.start_new_fiber(self.generate_account(10000))
@@ -119,8 +119,9 @@ class TestSendPaymentWithRouter(FiberTest):
         )
         print(f"payment:{payment}")
         assert payment["status"] == "Created"
+        self.wait_payment_state(self.fibers[3], payment["payment_hash"], "Success")
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/641")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/641")
     def test_auto_send_payment_with_router(self):
         """
         b-c-d-私-a网络
@@ -207,13 +208,8 @@ class TestSendPaymentWithRouter(FiberTest):
             )
         )
         print(f"payment:{payment}")
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .get_payment({"payment_hash": payment["payment_hash"]})
-        )
-        print("payment", payment)
-        # assert payment["status"] == "Created" 预期应该不支持，待解决
+        assert payment["status"] == "Created"
+        self.wait_payment_state(self.fibers[3], payment["payment_hash"], "Success")
 
     def test_loop_send_payment_with_router(self):
         """
@@ -357,12 +353,8 @@ class TestSendPaymentWithRouter(FiberTest):
             )
         )
         print(f"payment:{payment}")
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .get_payment({"payment_hash": payment["payment_hash"]})
-        )
-        print("payment", payment)
+        assert payment["status"] == "Created"
+        self.wait_payment_state(self.fibers[3], payment["payment_hash"], "Success")
 
     def get_channel_outpoint(self, from_fiber, to_fiber):
         """
