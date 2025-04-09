@@ -16,6 +16,12 @@ class FiberRPCClient:
     def send_btc(self, btc_pay_req):
         return self.call("send_btc", [btc_pay_req])
 
+    def build_router(self, param):
+        return self.call("build_router", [param])
+
+    def send_payment_with_router(self, param):
+        return self.call("send_payment_with_router", [param])
+
     def abandon_channel(self, param):
         return self.call("abandon_channel", [param])
 
@@ -210,7 +216,7 @@ class FiberRPCClient:
                 url=self.url, data=json.dumps(data, indent=4)
             )
         )
-        for i in range(100):
+        for i in range(200):
             try:
                 response = requests.post(
                     self.url, data=json.dumps(data), headers=headers
