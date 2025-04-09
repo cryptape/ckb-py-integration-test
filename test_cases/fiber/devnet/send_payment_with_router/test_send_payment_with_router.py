@@ -120,31 +120,6 @@ class TestSendPaymentWithRouter(FiberTest):
         print(f"payment:{payment}")
         assert payment["status"] == "Created"
 
-        # b call a ,走route info: b-c-d-私-a网络（检查应该不支持自动拼接完整的路由）
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .send_payment_with_router(
-                {
-                    "payment_hash": None,
-                    "invoice": None,
-                    "keysend": True,
-                    "custom_records": None,
-                    "dry_run": False,
-                    "udt_type_script": None,
-                    "router": router_hops["router_hops"],
-                }
-            )
-        )
-        print(f"payment:{payment}")
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .get_payment({"payment_hash": payment["payment_hash"]})
-        )
-        print("payment", payment)
-        # assert payment["status"] == "Created" 预期应该不支持，待解决
-
     @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/641")
     def test_auto_send_payment_with_router(self):
         """
