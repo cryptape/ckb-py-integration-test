@@ -211,7 +211,10 @@ class TestSendPaymentWithRouter(FiberTest):
             )
         except Exception as e:
             error_message = str(e)
-            assert "Error: Send payment first hop error: Failed to send onion packet with error UnknownNextPeer" in error_message, f"预期错误信息不匹配，实际错误: {error_message}"
+            assert (
+                "Error: Send payment first hop error: Failed to send onion packet with error UnknownNextPeer"
+                in error_message
+            ), f"预期错误信息不匹配，实际错误: {error_message}"
 
     def test_loop_send_payment_with_router(self):
         """
