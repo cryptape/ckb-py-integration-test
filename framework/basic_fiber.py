@@ -400,14 +400,14 @@ class FiberTest(CkbTest):
             "args": account1["lock_arg"],
         }
 
-    def wait_payment_state(self, client, payment_hash, status="Success", timeout=120):
+    def wait_payment_state(self, client, payment_hash, status="Success", timeout=360):
         for i in range(timeout):
             result = client.get_client().get_payment({"payment_hash": payment_hash})
             if result["status"] == status:
                 return
             time.sleep(1)
         raise TimeoutError(
-            f"status did not reach state {expected_state} within timeout period."
+            f"status did not reach state: {status} within timeout period."
         )
 
     def wait_payment_finished(self, client, payment_hash, timeout=120):

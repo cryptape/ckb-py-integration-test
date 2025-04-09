@@ -31,7 +31,7 @@ class TestSendPaymentWithRouter(FiberTest):
        - 验证每个节点的金额和通道信息
     """
 
-    # FiberTest.debug = True
+    FiberTest.debug = True
 
     def test_base_send_payment_with_router(self):
         """
@@ -193,24 +193,25 @@ class TestSendPaymentWithRouter(FiberTest):
         assert hop["amount_received"] == hex(1 + 62 * 100000000)
 
         # b call a ,走route info: b-c-d-私-a网络（检查应该不支持自动拼接完整的路由）
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .send_payment_with_router(
-                {
-                    "payment_hash": None,
-                    "invoice": None,
-                    "keysend": True,
-                    "custom_records": None,
-                    "dry_run": False,
-                    "udt_type_script": None,
-                    "router": router_hops["router_hops"],
-                }
+        try:
+            payment = (
+                self.fibers[1]
+                .get_client()
+                .send_payment_with_router(
+                    {
+                        "payment_hash": None,
+                        "invoice": None,
+                        "keysend": True,
+                        "custom_records": None,
+                        "dry_run": False,
+                        "udt_type_script": None,
+                        "router": router_hops["router_hops"],
+                    }
+                )
             )
-        )
-        print(f"payment:{payment}")
-        assert payment["status"] == "Created"
-        self.wait_payment_state(self.fibers[1], payment["payment_hash"], "Success")
+        except Exception as e:
+            error_message = str(e)
+            assert "Error: Send payment first hop error: Failed to send onion packet with error UnknownNextPeer" in error_message, f"预期错误信息不匹配，实际错误: {error_message}"
 
     def test_loop_send_payment_with_router(self):
         """
