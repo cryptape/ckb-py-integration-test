@@ -174,7 +174,11 @@ def version():
     :return:
     """
     cmd = "{ckb_cli} --version".format(ckb_cli=cli_path)
-    return run_command(cmd)
+    output = run_command(cmd)
+    print("\n=============== CKB-CLI Version ===============")
+    print(output.strip())
+    print("===============================================\n")
+    return output
 
 
 def deploy_gen_txs(
@@ -1082,3 +1086,28 @@ def clear_tx_verify_queue(
 
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     return json.loads(run_command(cmd))
+
+def get_transaction(
+    hash_value,
+    raw_data=False,
+    no_color=False,
+    debug=False,
+    local_only=False,
+    api_url="http://127.0.0.1:8114",
+):
+    cmd = "rpc get_transaction"
+    if raw_data:
+        cmd += " --raw-data"
+    if no_color:
+        cmd += " --no-color"
+    if debug:
+        cmd += " --debug"
+    if local_only:
+        cmd += " --local-only"
+    cmd += f" --hash {hash_value}"
+    cmd += f" --output-format yaml"
+
+    cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
+    yaml_data = yaml.safe_dump(yaml.safe_load(run_command(cmd)))
+    parsed_data = yaml.safe_load(yaml_data)
+    return parsed_data
