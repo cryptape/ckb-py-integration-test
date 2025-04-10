@@ -11,7 +11,14 @@ import zipfile
 import requests
 from tqdm import tqdm
 
-versions = ["0.2.0", "0.2.1", "0.3.0", "0.3.1"]  # Replace with your versions
+versions = [
+    "0.2.0",
+    "0.2.1",
+    "0.3.0",
+    "0.3.1",
+    "0.4.0",
+    "0.4.2",
+]  # Replace with your versions
 
 DOWNLOAD_DIR = "download/fiber"
 SYSTEMS = {
@@ -35,7 +42,7 @@ SYSTEMS = {
         },
         "arm64": {
             "url": "https://github.com/nervosnetwork/fiber/releases/download/v{version}/fnn_v{"
-            "version}-x86_64-darwin.tar.gz",
+            "version}-x86_64-darwin-portable.tar.gz",
             "ext": ".tar.gz",
         },
     },

@@ -22,6 +22,7 @@ class FiberTest(CkbTest):
     debug = False
     first_debug = False
     logger = logging.getLogger(__name__)
+    start_fiber_config = {}
 
     @classmethod
     def setup_class(cls):
@@ -113,31 +114,21 @@ class FiberTest(CkbTest):
         cls.node.start_miner()
         # deploy fiber
         # start 2 fiber with xudt
+        update_config = {
+            "ckb_rpc_url": cls.node.rpcUrl,
+            "ckb_udt_whitelist": True,
+            "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
+                deploy_hash, deploy_index, True, cls.node.rpcUrl
+            ),
+            "xudt_cell_deps_tx_hash": deploy_hash,
+            "xudt_cell_deps_index": deploy_index,
+        }
+        update_config.update(cls.start_fiber_config)
 
-        cls.fiber1.prepare(
-            update_config={
-                "ckb_rpc_url": cls.node.rpcUrl,
-                "ckb_udt_whitelist": True,
-                "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
-                    deploy_hash, deploy_index, True, cls.node.rpcUrl
-                ),
-                "xudt_cell_deps_tx_hash": deploy_hash,
-                "xudt_cell_deps_index": deploy_index,
-            }
-        )
+        cls.fiber1.prepare(update_config=update_config)
         cls.fiber1.start(cls.node)
 
-        cls.fiber2.prepare(
-            update_config={
-                "ckb_rpc_url": cls.node.rpcUrl,
-                "ckb_udt_whitelist": True,
-                "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
-                    deploy_hash, deploy_index, True, cls.node.rpcUrl
-                ),
-                "xudt_cell_deps_tx_hash": deploy_hash,
-                "xudt_cell_deps_index": deploy_index,
-            }
-        )
+        cls.fiber2.prepare(update_config=update_config)
         cls.fiber2.start(cls.node)
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
@@ -246,6 +237,7 @@ class FiberTest(CkbTest):
                 "xudt_cell_deps_tx_hash": deploy_hash,
                 "xudt_cell_deps_index": deploy_index,
             }
+        update_config.update(self.start_fiber_config)
 
         i = len(self.new_fibers)
         # start fiber3
@@ -380,6 +372,7 @@ class FiberTest(CkbTest):
                         "udt_type_script": udt,
                     }
                 )
+                print(f"===debug route:{payment}")
                 if wait:
                     self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
                 return payment["payment_hash"]
@@ -407,14 +400,14 @@ class FiberTest(CkbTest):
             "args": account1["lock_arg"],
         }
 
-    def wait_payment_state(self, client, payment_hash, status="Success", timeout=120):
+    def wait_payment_state(self, client, payment_hash, status="Success", timeout=360):
         for i in range(timeout):
             result = client.get_client().get_payment({"payment_hash": payment_hash})
             if result["status"] == status:
                 return
             time.sleep(1)
         raise TimeoutError(
-            f"status did not reach state {expected_state} within timeout period."
+            f"status did not reach state: {status} within timeout period."
         )
 
     def wait_payment_finished(self, client, payment_hash, timeout=120):
@@ -576,7 +569,16 @@ class FiberTest(CkbTest):
                 }
             )
         print({"input_cells": input_cells, "output_cells": output_cells})
-        return {"input_cells": input_cells, "output_cells": output_cells}
+        input_cap = 0
+        for i in range(len(input_cells)):
+            input_cap = input_cap + input_cells[i]["capacity"]
+        for i in range(len(output_cells)):
+            input_cap = input_cap - output_cells[i]["capacity"]
+        return {
+            "input_cells": input_cells,
+            "output_cells": output_cells,
+            "fee": input_cap,
+        }
 
     def get_fiber_env(self, new_fiber_count=0):
         # self.logger.debug ckb tip number

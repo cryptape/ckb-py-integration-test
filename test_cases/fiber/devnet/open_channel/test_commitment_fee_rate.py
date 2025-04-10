@@ -25,9 +25,7 @@ class TestCommitmentFeeRate(FiberTest):
                     # "tlc_fee_proportional_millionths": "0x4B0",
                 }
             )
-        expected_error_message = (
-            "Commitment fee 18446744073709551 which caculated by commitment fee rate"
-        )
+        expected_error_message = "is larger than half of reserved fee 100000000"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
