@@ -336,23 +336,22 @@ class TestSendPaymentWithRouter(FiberTest):
             )
         )
 
-
         # 获取各个路由跳的基本信息
         bc_hop = bc_router_hops["router_hops"][0]
         cd_hop = cd_router_hops["router_hops"][0]
         da_hop = da_router_hops["router_hops"][0]
         ab_hop = ab_router_hops["router_hops"][0]
-        
+
         # 修改每一跳的 incoming_tlc_expiry 值，依次增加 172800000
         base_expiry = 86400000  # 基础过期时间
         delta = 172800000  # 每一跳增加的差值
-        
+
         # 从最后一跳开始，依次增加过期时间
         ab_hop["incoming_tlc_expiry"] = hex(base_expiry)  # 0x5265c00
         da_hop["incoming_tlc_expiry"] = hex(base_expiry + delta)  # 0xa4cb800
         cd_hop["incoming_tlc_expiry"] = hex(base_expiry + 2 * delta)  # 0xf731400
         bc_hop["incoming_tlc_expiry"] = hex(base_expiry + 3 * delta)  # 0x14997000
-        
+
         # b call b ,route info:b-c，c-d，d-a，a-b的route
         payment = (
             self.fibers[1]
