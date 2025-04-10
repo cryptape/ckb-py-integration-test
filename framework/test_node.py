@@ -268,6 +268,13 @@ class CkbNode:
         self.start()
 
     def start(self):
+        version = run_command(
+            "cd {ckb_dir} && ./ckb --version".format(ckb_dir=self.ckb_dir)
+        )
+        print("\n================= CKB Version =================")
+        print(version.strip())
+        print("===============================================\n")
+
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(
                 ckb_dir=self.ckb_dir
