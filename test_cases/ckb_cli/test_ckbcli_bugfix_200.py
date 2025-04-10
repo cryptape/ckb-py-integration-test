@@ -67,7 +67,9 @@ class TestCkbCliRpc200(CkbTest):
         # 2. send the normal tx
         tx_hash = self.node.getClient().send_transaction(tx)
 
-        tx_info = self.Ckb_cli.get_transaction(tx_hash, api_url=self.node.getClient().url)
+        tx_info = self.Ckb_cli.get_transaction(
+            tx_hash, api_url=self.node.getClient().url
+        )
 
         print("\n=========== Transaction Information ===========")
         print("Fee:                ", tx_info.get("fee"))
@@ -76,12 +78,14 @@ class TestCkbCliRpc200(CkbTest):
         print("===============================================\n")
 
         rpc_tx_info = self.node.getClient().get_transaction(tx_hash)
-        fee_int = int(rpc_tx_info.get('fee', '0x0'), 16)
-        min_replace_fee_int = int(rpc_tx_info.get('min_replace_fee', '0x0'), 16)
+        fee_int = int(rpc_tx_info.get("fee", "0x0"), 16)
+        min_replace_fee_int = int(rpc_tx_info.get("min_replace_fee", "0x0"), 16)
 
-        fee = f"{fee_int / 100_000_000:.8f}".rstrip('0').rstrip('.')
-        min_replace_fee = f"{min_replace_fee_int / 100_000_000:.8f}".rstrip('0').rstrip('.')
-        time_added_to_pool = int(rpc_tx_info.get('time_added_to_pool', '0x0'), 16)
+        fee = f"{fee_int / 100_000_000:.8f}".rstrip("0").rstrip(".")
+        min_replace_fee = f"{min_replace_fee_int / 100_000_000:.8f}".rstrip("0").rstrip(
+            "."
+        )
+        time_added_to_pool = int(rpc_tx_info.get("time_added_to_pool", "0x0"), 16)
 
         assert tx_info.get("fee") == fee
         assert tx_info.get("min_replace_fee") == min_replace_fee
@@ -95,7 +99,7 @@ class TestCkbCliRpc200(CkbTest):
         # joyid lock script
         # https://testnet.explorer.nervos.org/transaction/0x1343ff1daaccd170947b72aa54da121a67a2b06916b9e7caddb882eb878d1152
         tx_hash = "0x1343ff1daaccd170947b72aa54da121a67a2b06916b9e7caddb882eb878d1152"
-        self.Ckb_cli.tx_init(tmp_tx_file,api_url)
+        self.Ckb_cli.tx_init(tmp_tx_file, api_url)
         self.Ckb_cli.tx_add_input(tx_hash, 0, tmp_tx_file, api_url)
 
         with open(tmp_tx_file, "r") as f:

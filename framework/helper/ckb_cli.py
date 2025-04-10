@@ -1087,6 +1087,7 @@ def clear_tx_verify_queue(
     cmd = f"export API_URL={api_url} && {cli_path} {cmd}"
     return json.loads(run_command(cmd))
 
+
 def get_transaction(
     hash_value,
     raw_data=False,
