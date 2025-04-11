@@ -3,7 +3,7 @@ cp download/0.117.0/ckb-cli ./source/ckb-cli
 cp download/0.110.2/ckb-cli ./source/ckb-cli-old
 git clone https://github.com/nervosnetwork/fiber
 cd fiber
-git checkout v0.4.2
+git checkout v0.5.0-rc1
 cargo build
 cp target/debug/fnn ../download/fiber/current/fnn
 cd migrate

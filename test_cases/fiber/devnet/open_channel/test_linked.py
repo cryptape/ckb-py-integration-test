@@ -113,7 +113,9 @@ class LinkedTest(FiberTest):
             }
         )
         # todo wait close tx commit
-        time.sleep(20)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"]
         )

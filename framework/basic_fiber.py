@@ -477,19 +477,22 @@ class FiberTest(CkbTest):
             f"status did not reach state {expected_state} within timeout period."
         )
 
-    def wait_and_check_tx_pool_fee(self, fee_rate, check=True, try_size=120):
+    def wait_and_check_tx_pool_fee(
+        self, fee_rate, check=True, try_size=120, up_and_down_rate=0.1
+    ):
         self.wait_tx_pool(1, try_size)
         pool = self.node.getClient().get_raw_tx_pool()
         pool_tx_detail_info = self.node.getClient().get_pool_tx_detail_info(
             pool["pending"][0]
         )
         if check:
-            assert (
-                int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
-                * 1000
-                / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
-                == fee_rate
-            )
+            assert int(pool_tx_detail_info["score_sortkey"]["fee"], 16) * 1000 / int(
+                pool_tx_detail_info["score_sortkey"]["weight"], 16
+            ) <= fee_rate * (1 + up_and_down_rate)
+
+            assert int(pool_tx_detail_info["score_sortkey"]["fee"], 16) * 1000 / int(
+                pool_tx_detail_info["score_sortkey"]["weight"], 16
+            ) >= fee_rate * (1 - up_and_down_rate)
         return pool["pending"][0]
 
     def wait_invoice_state(
