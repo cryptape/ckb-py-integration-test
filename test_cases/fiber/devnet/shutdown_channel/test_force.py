@@ -49,6 +49,24 @@ class TestForce(FiberTest):
         latest_commitment_transaction_hash = list_channels["channels"][0][
             "latest_commitment_transaction_hash"
         ]
+        with pytest.raises(Exception) as exc_info:
+            self.fiber1.get_client().shutdown_channel(
+                {
+                    "channel_id": N1N2_CHANNEL_ID,
+                    "close_script": {
+                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "type",
+                        "args": self.account1["lock_arg"],
+                    },
+                    "fee_rate": "0x3FC",
+                }
+            )
+        expected_error_message = "Messaging failed because channel is closed"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
+        )
+
         # shut down
         self.fiber1.get_client().shutdown_channel(
             {
@@ -64,6 +82,7 @@ class TestForce(FiberTest):
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
         assert latest_commitment_transaction_hash == tx_hash
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
     def test_node_online(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -138,19 +157,23 @@ class TestForce(FiberTest):
         before_balance2 = self.Ckb_cli.wallet_get_capacity(
             self.account2["address"]["testnet"]
         )
+        list_channels = self.fiber1.get_client().list_channels({})
+        latest_commitment_transaction_hash = list_channels["channels"][0][
+            "latest_commitment_transaction_hash"
+        ]
         # shut down
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        assert latest_commitment_transaction_hash == tx_hash
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
+        self.fiber1.get_client().list_channels({})
+        self.fiber2.get_client().list_channels({})
 
     # def test_node_online(self):
     #     temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -196,14 +219,14 @@ class TestForce(FiberTest):
     #     # todo check graph_channels
     #     # todo check list channel
 
-    def test_NegotiatingFunding(self):
-        pass
-
-    def test_CollaboratingFundingTx(self):
-        pass
-
-    def test_SigningCommitment(self):
-        pass
+    # def test_NegotiatingFunding(self):
+    #     pass
+    #
+    # def test_CollaboratingFundingTx(self):
+    #     pass
+    #
+    # def test_SigningCommitment(self):
+    #     pass
 
     def test_AwaitingTxSignatures(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -230,12 +253,6 @@ class TestForce(FiberTest):
             self.fiber1.get_client().shutdown_channel(
                 {
                     "channel_id": N1N2_CHANNEL_ID,
-                    "close_script": {
-                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                        "hash_type": "type",
-                        "args": self.account1["lock_arg"],
-                    },
-                    "fee_rate": "0x3FC",
                     "force": True,
                 }
             )
@@ -276,12 +293,6 @@ class TestForce(FiberTest):
             self.fiber1.get_client().shutdown_channel(
                 {
                     "channel_id": N1N2_CHANNEL_ID,
-                    "close_script": {
-                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                        "hash_type": "type",
-                        "args": self.account1["lock_arg"],
-                    },
-                    "fee_rate": "0x3FC",
                     "force": True,
                 }
             )
@@ -294,6 +305,25 @@ class TestForce(FiberTest):
     @pytest.mark.skip("repeat")
     def test_ChannelReady(self):
         pass
+
+    # debug = True
+
+    # def test_bb1(self):
+    #     self.fiber1.get_client().list_channels({
+    #         "include_closed": True,
+    #     })
+    #     self.fiber2.get_client().list_channels({})
+    #
+    # def test_get_message(self):
+    #     msg = self.get_tx_message("0x85c2334a63dc0850b425eb2e9346f57af6a47c18c895aabbdaf7d02fa445109b")
+    #     print(msg)
+    #
+    # def test_bb(self):
+    #     f1_b = self.get_fiber_balance(self.fiber1)
+    #     f2_b = self.get_fiber_balance(self.fiber2)
+    #     print(f1_b)
+    #     print(f2_b)
+    #     self.node.getClient().generate_epochs("0x2")
 
     # @pytest.mark.skip("have bug")
     def test_in_tx(self):
@@ -311,14 +341,14 @@ class TestForce(FiberTest):
         )
         payment = self.fiber1.get_client().send_payment(
             {
-                "amount": hex(100),
+                "amount": hex(1 * 100000000),
                 "target_pubkey": self.fiber2.get_client().node_info()["node_id"],
                 "keysend": True,
             }
         )
         self.wait_payment_state(self.fiber1, payment["payment_hash"])
 
-        amount = 1
+        amount = 10 * 100000000
         invoice = self.fiber2.get_client().new_invoice(
             {
                 "amount": hex(amount),
@@ -346,12 +376,6 @@ class TestForce(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -361,6 +385,73 @@ class TestForce(FiberTest):
         )
         # todo check
         assert payment["status"] == "Inflight"
+
+    def test_in_tx_force_2(self):
+        self.open_channel(self.fiber1, self.fiber2, 1000 * 100000000, 1)
+        for i in range(100):
+            self.send_payment(self.fiber1, self.fiber2, 1 * 100000000, False)
+        self.fiber1.get_client().shutdown_channel(
+            {
+                "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
+                    "channel_id"
+                ],
+                "force": True,
+            }
+        )
+
+    # def test_in_key_send_tx2(self):
+    #     self.open_channel(self.fiber1, self.fiber2, 1000 * 100000000, 1)
+    #
+    #     for i in range(100):
+    #         self.send_payment(self.fiber1, self.fiber2, 1 * 100000000, False)
+    #     self.fiber1.get_client().shutdown_channel({
+    #         "channel_id": self.fiber1.get_client().list_channels({})["channels"][0]["channel_id"],
+    #         "close_script": {
+    #             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+    #             "hash_type": "type",
+    #             "args": self.account1["lock_arg"],
+    #         },
+    #         "fee_rate": "0x3FC",
+    #     })
+    #     self.wait_for_channel_state(self.fiber1.get_client(), self.fiber2.get_peer_id(), "CLOSED", 120, True)
+
+    # def test_in_invoice_send_tx2(self):
+    #     self.open_channel(self.fiber1, self.fiber2, 1000 * 100000000, 1)
+    #     invocies = []
+    #     for i in range(50):
+    #         invocies.append(
+    #             self.fibers[1].get_client().new_invoice(
+    #                 {"amount": hex(1 * 100000000),
+    #                  "currency": "Fibd",
+    #                  "description": "test invoice generated by node2",
+    #                  "expiry": "0xe10",
+    #                  "final_cltv": "0x28",
+    #                  "payment_preimage": self.generate_random_preimage(),
+    #                  "hash_algorithm": "sha256",
+    #                  }
+    #             )
+    #         )
+    #     # transfer
+    #     for i in range(50):
+    #         self.fiber1.get_client().send_payment({
+    #             "invoice": invocies[i]["invoice_address"],
+    #         })
+    #     self.fiber1.get_client().shutdown_channel({
+    #         "channel_id": self.fiber1.get_client().list_channels({})["channels"][0]["channel_id"],
+    #         "close_script": {
+    #             "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+    #             "hash_type": "type",
+    #             "args": self.account1["lock_arg"],
+    #         },
+    #         "fee_rate": "0x3FC",
+    #     })
+    #     self.wait_for_channel_state(self.fiber1.get_client(), self.fiber2.get_peer_id(), "SHUTTING_DOWN", 120, True)
+    #     self.fiber1.get_client().shutdown_channel({
+    #         "channel_id": self.fiber1.get_client().list_channels({})["channels"][0]["channel_id"],
+    #         "force": True
+    #     })
+    #     tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+    #     self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/333")
     def test_in_tx_offline(self):
@@ -400,12 +491,6 @@ class TestForce(FiberTest):
         self.fiber2.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -470,12 +555,6 @@ class TestForce(FiberTest):
         self.fiber2.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -533,12 +612,6 @@ class TestForce(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -606,12 +679,6 @@ class TestForce(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )

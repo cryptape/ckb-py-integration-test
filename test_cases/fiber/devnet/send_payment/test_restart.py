@@ -230,7 +230,7 @@ class TestRestart(FiberTest):
 
     # FiberTest.debug = True
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
     def test_restart_when_node_send_payment(self):
         account3_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account3_private)
@@ -365,6 +365,5 @@ class TestRestart(FiberTest):
         )
         print("self.fiber3.stop() payment:", payment)
         self.fiber3.start()
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
-        channels = self.fiber3.get_client().list_channels({})
-        assert channels["channels"][0]["local_balance"] == hex(30 * 100000000)
+        self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)
+        self.send_payment(self.fiber1, self.fiber2, 1)

@@ -58,12 +58,6 @@ class WithTx(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -143,12 +137,6 @@ class WithTx(FiberTest):
         self.fiber2.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )

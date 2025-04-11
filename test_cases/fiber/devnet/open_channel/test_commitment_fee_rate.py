@@ -25,15 +25,13 @@ class TestCommitmentFeeRate(FiberTest):
                     # "tlc_fee_proportional_millionths": "0x4B0",
                 }
             )
-        expected_error_message = (
-            "Commitment fee 18446744073709551 which caculated by commitment fee rate"
-        )
+        expected_error_message = "is larger than half of reserved fee 100000000"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("todo")
+    # @pytest.mark.skip("todo")
     def test_commitment_fee_rate_exist(self):
         """
         commitment_fee_rate != default.value
@@ -85,7 +83,7 @@ class TestCommitmentFeeRate(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-    @pytest.mark.skip("commitment_fee_rate 不准确")
+    # @pytest.mark.skip("commitment_fee_rate 不准确")
     def test_check_commitment_fee_rate_is_none(self):
         """
 
@@ -144,18 +142,12 @@ class TestCommitmentFeeRate(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
         self.wait_and_check_tx_pool_fee(1000)
 
-    @pytest.mark.skip("commitment_fee_rate 不准确")
+    # @pytest.mark.skip("commitment_fee_rate 不准确")
     def test_check_commitment_fee_rate(self):
         """
         验证我方的commit fee
@@ -213,23 +205,13 @@ class TestCommitmentFeeRate(FiberTest):
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
         self.wait_and_check_tx_pool_fee(commitment_fee_rate)
 
-    @pytest.mark.skip("目前双方commit fee 一致")
     def test_other_node_check_commitment_fee_rate(self):
         """
-        因为无法查询到shutdown_channel(force)的交易
-            因为dev 节点只会有我发的交易，所以通过监控pool池 查交易
-        验证对方的commit fee
         Returns:
         """
         commitment_fee_rate = 21978021
@@ -284,13 +266,10 @@ class TestCommitmentFeeRate(FiberTest):
         self.fiber2.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
-        self.wait_and_check_tx_pool_fee(1000)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        tx_message = self.get_tx_message(tx_hash)
+        assert tx_message["fee"] == 9999999

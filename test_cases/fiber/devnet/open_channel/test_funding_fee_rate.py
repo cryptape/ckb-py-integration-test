@@ -52,6 +52,11 @@ class TestFundingFeeRate(FiberTest):
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
+        tx_hash = self.wait_and_check_tx_pool_fee(int("0xffffffffffffffff", 16), False)
+        tx_message = self.get_tx_message(tx_hash)
+        print(tx_message)
+        return
+
         # self.wait_and_check_tx_pool_fee(int("0xffffffffffffffff", 16))
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120

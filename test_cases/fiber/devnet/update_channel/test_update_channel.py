@@ -24,11 +24,6 @@ class TestUpdateChannel(FiberTest):
         2. 修改为正常值
         3. overflow
         4. 0
-    - tlc_maximum_value
-        1. 不填
-        2. 修改为正常值
-        3. overflow
-        4. 0
     - tlc_fee_proportional_millionths
         1. 不填
         2. 修改为正常值

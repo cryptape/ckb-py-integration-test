@@ -140,7 +140,7 @@ class TestDescription(FiberTest):
                 {"payment_hash": payment["payment_hash"]}
             )
             assert (
-                invoice["invoice"]["data"]["attrs"][0]["Description"]
+                invoice["invoice"]["data"]["attrs"][0]["description"]
                 == test_description_str[i]
             )
             # 7. List channels after sending payment

@@ -63,8 +63,10 @@ class TestChannelId(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(20)
+
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         node_info = self.fiber1.get_client().node_info()
         print("node info :", node_info)
         assert node_info["channel_count"] == "0x0"

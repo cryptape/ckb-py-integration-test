@@ -57,7 +57,11 @@ class UdtContract(CkbContract):
         return ckb_hash_script(own_arg), to_big_uint128_le_compatible(amount)
 
     def balance(self, client, own_arg, query_arg):
-        pass
+        cells = self.list_cell(client, own_arg, query_arg)
+        balance = 0
+        for cell in cells:
+            balance += cell["balance"]
+        return balance
 
     def list_cell(self, client, own_arg, query_arg):
         code_hash = get_ckb_contract_codehash(
