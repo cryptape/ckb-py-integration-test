@@ -151,7 +151,7 @@ jobs:
           name: jfoa-accept_channel_to_disconnect_peer-reports-${{ runner.os }}
           path: ./report
 
-  fiber_test_send_payment:
+  fiber_test_send_payment_module_offline:
     needs: prepare
     runs-on: ubuntu-22.04
 
@@ -178,14 +178,51 @@ jobs:
           tar -xzf prepare-backup.tar.gz
 
       - name: Run fiber_test_demo
-        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/send_payment"
+        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/send_payment/module test_cases/fiber/devnet/send_payment/offline"
 
       - name: Publish reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: jfoa-send_payment-reports-${{ runner.os }}
+          name: jfoa-send_payment-module-offline-reports-${{ runner.os }}
           path: ./report
+
+  fiber_test_send_payment_params_path:
+    needs: prepare
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download prepare backup
+        uses: actions/download-artifact@v4
+        with:
+          name: prepare-backup-${{ runner.os }}
+          path: ./
+
+      - name: Extract tarball and restore permissions
+        run: |
+          tar -xzf prepare-backup.tar.gz
+
+      - name: Run fiber_test_demo
+        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/send_payment/params test_cases/fiber/devnet/send_payment/path"
+
+      - name: Publish reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfoa-send_payment-params-path-reports-${{ runner.os }}
+          path: ./report
+
 
   fiber_test_shutdown_channel_update_channel_issue:
     needs: prepare
@@ -256,5 +293,41 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: jfoa-send_payment-reports-${{ runner.os }}
+          name: jfoa-watch_tower-reports-${{ runner.os }}
+          path: ./report
+
+
+  fiber_test_watch_tower_tlc:
+    needs: prepare
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download prepare backup
+        uses: actions/download-artifact@v4
+        with:
+          name: prepare-backup-${{ runner.os }}
+          path: ./
+
+      - name: Extract tarball and restore permissions
+        run: |
+          tar -xzf prepare-backup.tar.gz
+
+      - name: Run fiber_test_demo
+        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/watch_tower_wit_tlc"
+      - name: Publish reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfoa-watch_tower-reports-${{ runner.os }}
           path: ./report
