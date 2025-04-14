@@ -372,7 +372,6 @@ class FiberTest(CkbTest):
                         "udt_type_script": udt,
                     }
                 )
-                print(f"===debug route:{payment}")
                 if wait:
                     self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
                 return payment["payment_hash"]

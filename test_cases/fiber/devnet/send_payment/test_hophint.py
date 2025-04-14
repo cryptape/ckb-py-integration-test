@@ -206,9 +206,7 @@ class TestHopHint(FiberTest):  # a-b
             print(f"b-a,channel:{channels}")
             ba_channel_outpoint = channels["channels"][0]["channel_outpoint"]
             print(f"b-a, channel_outpoint:{ba_channel_outpoint}")
-            assert (
-                payment["router"]["nodes"][0]["channel_outpoint"] == ba_channel_outpoint
-            )
+            assert payment["router"][0]["channel_outpoint"] == ba_channel_outpoint
         except Exception as e:
             # 如果走的是b-c-d-a，不通过hophit应该发送失败
             error_message = str(e)

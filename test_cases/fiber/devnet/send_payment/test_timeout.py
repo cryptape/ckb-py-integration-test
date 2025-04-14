@@ -15,9 +15,7 @@ class TestTimeout(FiberTest):
                 "timeout": hex(0),
             }
         )
-        self.wait_payment_state(
-            self.fiber1.get_client(), payment["payment_hash"], "Success", 100
-        )
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 100)
 
         # for i in range(100):
         #     payment = self.fiber1.get_client().send_payment({
