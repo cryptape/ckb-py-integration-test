@@ -37,7 +37,7 @@ jobs:
           path: |
             download/
             source/ckb-cli
-            source/ckb-clickb-cli-old
+            source/ckb-cli-old
 
   fiber_test_1:
     needs: prepare
@@ -60,6 +60,10 @@ jobs:
         with:
           name: prepare-backup-${{ runner.os }}
           path: ./
+
+      - name: Setup upterm session
+        if: always()
+        uses: lhotari/action-upterm@v1
 
       - name: Run fiber_test_demo
         run: make fiber_test_demo FIBER_TEST_DEMO=test_cases/fiber/devnet/new_invoice
