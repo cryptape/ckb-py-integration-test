@@ -119,7 +119,9 @@ class TestCloseScript(FiberTest):
 
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
-        time.sleep(5)
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CLOSED", 120, True
+        )
         node_info = self.fiber1.get_client().node_info()
         print("node info :", node_info)
         assert node_info["channel_count"] == "0x0"

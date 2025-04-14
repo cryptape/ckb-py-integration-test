@@ -20,7 +20,7 @@ class TestNodeState(FiberTest):
     # @pytest.mark.skip("交易发送一半，如果交易卡在Inflight，下一笔交易好像也发不出去")
     def test_shutdown_in_send_payment(self):
         """
-        payment state 卡在 Inflight
+        payment state 最终会failed
 
         Returns:
 
@@ -109,7 +109,8 @@ class TestNodeState(FiberTest):
         payment = self.fiber1.get_client().get_payment(
             {"payment_hash": payment["payment_hash"]}
         )
-        assert payment["status"] == "Inflight"
+        print("payment:", payment)
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed", 120)
         assert {
             "args": self.fiber4.get_account()["lock_arg"],
             "capacity": 6300000000,
