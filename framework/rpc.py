@@ -50,6 +50,9 @@ class RPCClient:
     def ping_peers(self):
         return self.call("ping_peers", [])
 
+    def ipc_call(self, ipc_script_locator, ipc_req, ipc_env=None):
+        return self.call("ipc_call", [ipc_script_locator, ipc_req, ipc_env])
+
     def remove_node(self, peer_id):
         return self.call("remove_node", [peer_id])
 
@@ -97,7 +100,9 @@ class RPCClient:
         return self.call("get_fee_rate_statics", [target])
 
     def generate_epochs(self, epoch):
-        return self.call("generate_epochs", [epoch])
+        response = self.call("generate_epochs", [epoch])
+        time.sleep(3)
+        return response
 
     def generate_block(self):
         return self.call("generate_block", [])
