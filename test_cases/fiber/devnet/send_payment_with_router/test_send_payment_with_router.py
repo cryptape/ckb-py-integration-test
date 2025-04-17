@@ -7,13 +7,14 @@ class TestSendPaymentWithRouter(FiberTest):
     """
     测试 send_payment_with_router RPC 的功能：
     1. 基本支付功能
-       - 使用指定路由发送支付
+       - 使用指定路由发送支付，d call a ,route info: d-a channel outpoint
        - 验证支付状态和路由信息
 
     2. 路由指定测试
        - 使用 build_router 构建的路由进行支付
        - 手动指定完整路由进行支付
-       - 测试无效路由的情况
+       - 测试无效路由的情况，b call a ,走route info: b-c-d-私-a网络（检查应该不支持自动拼接完整的路由）
+       - b-c-d-私-a网络-b网络(网络成环状)，b call b成环，走route info:b-c-d-a-b
 
     3. 支付选项测试
        - 测试指定 payment_hash 的情况
