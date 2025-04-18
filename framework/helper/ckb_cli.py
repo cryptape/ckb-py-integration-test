@@ -306,6 +306,28 @@ def util_key_info_by_private_key(account_private):
     return json.loads(run_command(cmd))
 
 
+def molecule_encode(json_map, type):
+    """
+    cat  demo.json
+    {"args": "0x8883a512ee2383c01574a328f60eeccbb4d78240", "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "hash_type": "type"}
+    ckb-cli molecule encode --type Script --json-path  demo.json --local-only
+    0x490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801140000008883a512ee2383c01574a328f60eeccbb4d78240
+
+    Args:
+        json_map:
+        type:
+
+    Returns:
+
+    """
+    json_map = json.dumps(json_map)
+    with open("/tmp/tmp.json", "w") as f:
+        f.write(json_map)
+    cmd = f"{cli_path} molecule encode --type {type} --json-path /tmp/tmp.json --local-only"
+    ret = run_command(cmd)
+    return ret.replace("\n", "").replace(" ", "")
+
+
 def tx_init(tx_file, api_url="http://127.0.0.1:8114"):
     """
     ./ckb-cli tx init --tx-file tx.txt

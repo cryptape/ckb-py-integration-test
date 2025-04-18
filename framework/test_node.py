@@ -18,7 +18,7 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v120/ckb.toml.j2",
         "source/template/ckb/v120/ckb-miner.toml.j2",
         "source/template/ckb/v120/specs/dev.toml",
-        "download/0.120.0",
+        "download/0.202.0",
     )
     TESTNET = (
         "source/template/ckb/v120/ckb.toml.j2",
@@ -256,6 +256,15 @@ class CkbNode:
     def start(self):
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(
+                ckb_dir=self.ckb_dir
+            )
+        )
+        # //todo replace by rpc
+        time.sleep(3)
+
+    def start_without_indexer(self):
+        self.ckb_pid = run_command(
+            "cd {ckb_dir} && ./ckb run  --skip-spec-check > node.log 2>&1 &".format(
                 ckb_dir=self.ckb_dir
             )
         )
