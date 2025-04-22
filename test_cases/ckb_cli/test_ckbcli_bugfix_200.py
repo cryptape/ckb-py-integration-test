@@ -95,12 +95,27 @@ class TestCkbCliRpc200(CkbTest):
 
     def test_02_tx_add_input_skip_check(self):
         tmp_tx_file = "/tmp/skip_check.json"
-        api_url = "https://testnet.ckbapp.dev"
         # joyid lock script
-        # https://testnet.explorer.nervos.org/transaction/0x1343ff1daaccd170947b72aa54da121a67a2b06916b9e7caddb882eb878d1152
-        tx_hash = "0x1343ff1daaccd170947b72aa54da121a67a2b06916b9e7caddb882eb878d1152"
-        self.Ckb_cli.tx_init(tmp_tx_file, api_url)
-        self.Ckb_cli.tx_add_input(tx_hash, 0, tmp_tx_file, api_url)
+        address = "ckt1qrfrwcdnvssswdwpn3s9v8fp87emat306ctjwsm3nmlkjg8qyza2cqgqq9cd7mgucy3fgs6et4j7cc2w6lsuulajhy3k08sj"
+        # 1. generate account and build normal tx
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1,
+            address,
+            100000,
+            self.node.getClient().url,
+            "1500000",
+        )
+
+        tx = self.Ckb_cli.get_transaction(tx_hash, api_url=self.node.getClient().url)
+        code_hash_int = tx["transaction"]["outputs"][0]["lock"]["code_hash"]
+        code_hash = hex(code_hash_int)
+        assert (
+            code_hash
+            == "0xd23761b364210735c19c60561d213fb3beae2fd6172743719eff6920e020baac"
+        )
+
+        self.Ckb_cli.tx_init(tmp_tx_file, self.node.getClient().url)
+        self.Ckb_cli.tx_add_input(tx_hash, 0, tmp_tx_file, self.node.getClient().url)
 
         with open(tmp_tx_file, "r") as f:
             data = json.load(f)
