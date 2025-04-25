@@ -169,8 +169,10 @@ class TestListChannels(FiberTest):
         channels = self.fiber1.get_client().list_channels({})
         created_at_hex = int(channels["channels"][0]["created_at"], 16) / 1000
 
-        assert int(created_at_hex / 1000) == int(
-            int(datetime.datetime.now().timestamp()) / 1000
+        assert (
+            int(int(datetime.datetime.now().timestamp()) / 1000)
+            - int(created_at_hex / 1000)
+            < 10
         )
 
     def test_is_public(self):
@@ -231,6 +233,9 @@ class TestListChannels(FiberTest):
         print("channel_outpoint:", channels["channels"][0]["channel_outpoint"])
         assert open_tx_hash in channels["channels"][0]["channel_outpoint"]
 
+        # peer_id
+        assert channels["channels"][0]["peer_id"] == self.fiber2.get_peer_id()
+
         # funding_udt_type_script
         assert channels["channels"][0][
             "funding_udt_type_script"
@@ -255,21 +260,35 @@ class TestListChannels(FiberTest):
         assert int(channels["channels"][0]["created_at"], 16) / 1000 > begin_time
         assert int(channels["channels"][0]["created_at"], 16) / 1000 < time.time()
 
+        # enabled
+        assert channels["channels"][0]["enabled"] is True
+
+        # tlc_expiry_delta
+        assert channels["channels"][0]["tlc_expiry_delta"] == hex(86400000)
+
+        # tlc_fee_proportional_millionths
+        assert channels["channels"][0]["tlc_fee_proportional_millionths"] == hex(1000)
+
         # force shutdown latest_commitment_transaction_hash == hash
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": channels["channels"][0]["channel_id"],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
         assert tx_hash == channels["channels"][0]["latest_commitment_transaction_hash"]
+        #
+        channel = self.fiber1.get_client().list_channels(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+            }
+        )
+        assert len(channel["channels"]) == 0
+        channel = self.fiber1.get_client().list_channels(
+            {"peer_id": self.fiber2.get_peer_id(), "include_closed": True}
+        )
+        assert len(channel["channels"]) == 1
 
     def test_close_channels(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(

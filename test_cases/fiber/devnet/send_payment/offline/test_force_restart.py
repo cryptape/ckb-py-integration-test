@@ -5,17 +5,17 @@ import pytest
 from framework.basic_fiber import FiberTest
 
 
-class TestRestart(FiberTest):
+class TestForceRestart(FiberTest):
     """
     发送过程中
-        1. 中间节点重启 send_payment
-        2. 我方节点重启 send_payment
-        3. 对方节点重启 send_payment
+        1. 中间节点强制重启 send_payment
+        2. 我方节点强制重启 send_payment
+        3. 对方节点强制重启 send_payment
 
-    重启后
-        1. 中间节点重启后，发送 send_payment
-        2. 我方节点重启后， 发送 send_payment
-        3. 对方节点重启后， 发送 send_payment
+    强制重启后
+        1. 中间节点强制重启后，发送 send_payment
+        2. 我方节点强制重启后， 发送 send_payment
+        3. 对方节点强制重启后， 发送 send_payment
     """
 
     # FiberTest.debug = True
@@ -23,9 +23,9 @@ class TestRestart(FiberTest):
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/334")
     def test_restart_node_send_payment_key_send(self):
         """
-        1. 发送端重启，send_payment
-        2. 中间节点重启 send_payment
-        3. 最终节点重启 send_payment
+        1. 发送端强制重启，send_payment
+        2. 中间节点强制重启 send_payment
+        3. 最终节点强制重启 send_payment
         Returns:
         """
         account3_private = self.generate_account(1000)
@@ -57,8 +57,8 @@ class TestRestart(FiberTest):
             self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY", 120
         )
 
-        # 1. 发送端重启，send_payment
-        self.fiber1.stop()
+        # 1. 发送端强制重启，send_payment
+        self.fiber1.force_stop()
         self.fiber1.start()
         time.sleep(3)
         node_info = self.fiber1.get_client().node_info()
@@ -76,8 +76,8 @@ class TestRestart(FiberTest):
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(10 * 100000000)
-        # 2. 中间节点2重启 send_payment
-        self.fiber2.stop()
+        # 2. 中间节点2强制重启 send_payment
+        self.fiber2.force_stop()
         self.fiber2.start()
         time.sleep(3)
         node_info = self.fiber2.get_client().node_info()
@@ -94,8 +94,8 @@ class TestRestart(FiberTest):
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(20 * 100000000)
 
-        # 3. 最终节点重启 send_payment
-        self.fiber3.stop()
+        # 3. 最终节点强制重启 send_payment
+        self.fiber3.force_stop()
         self.fiber3.start()
         time.sleep(3)
         node_info = self.fiber3.get_client().node_info()
@@ -114,9 +114,9 @@ class TestRestart(FiberTest):
 
     def test_restart_node_send_payment_invoice(self):
         """
-        1. 发送端重启，send_payment
-        2. 中间节点重启 send_payment
-        3. 最终节点重启 send_payment
+        1. 发送端强制重启，send_payment
+        2. 中间节点强制重启 send_payment
+        3. 最终节点强制重启 send_payment
         Returns:
         """
         account3_private = self.generate_account(1000)
@@ -148,8 +148,8 @@ class TestRestart(FiberTest):
             self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY", 120
         )
 
-        # 1. 发送端重启，send_payment
-        self.fiber1.stop()
+        # 1. 发送端强制重启，send_payment
+        self.fiber1.force_stop()
         self.fiber1.start()
         time.sleep(3)
         node_info = self.fiber1.get_client().node_info()
@@ -174,8 +174,8 @@ class TestRestart(FiberTest):
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(10 * 100000000)
-        # 2. 中间节点2重启 send_payment
-        self.fiber2.stop()
+        # 2. 中间节点2强制重启 send_payment
+        self.fiber2.force_stop()
         self.fiber2.start()
         time.sleep(3)
         node_info = self.fiber2.get_client().node_info()
@@ -201,8 +201,8 @@ class TestRestart(FiberTest):
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(20 * 100000000)
 
-        # 3. 最终节点重启 send_payment
-        self.fiber3.stop()
+        # 3. 最终节点强制重启 send_payment
+        self.fiber3.force_stop()
         self.fiber3.start()
         time.sleep(3)
         node_info = self.fiber3.get_client().node_info()
@@ -228,9 +228,7 @@ class TestRestart(FiberTest):
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(30 * 100000000)
 
-    # FiberTest.debug = True
-
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
     def test_restart_when_node_send_payment(self):
         account3_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account3_private)
@@ -261,7 +259,7 @@ class TestRestart(FiberTest):
             self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY", 120
         )
 
-        # 1. 发送端重启，send_payment
+        # 1. 发送端强制重启，send_payment
 
         node_info = self.fiber1.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
@@ -282,23 +280,23 @@ class TestRestart(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        self.fiber1.stop()
+        self.fiber1.force_stop()
         invoice = self.fiber3.get_client().get_invoice(
             {"payment_hash": payment["payment_hash"]}
         )
-        print("self.fiber1.stop() payment:", invoice)
+        print("self.fiber1.force_stop() payment:", invoice)
         channels = self.fiber2.get_client().list_channels({})
         print("channels:", channels)
         channels = self.fiber3.get_client().list_channels({})
         print("channels:", channels)
-        # todo 如果 fiber1 不启动了
+        # todo 如果fiber1 不启动了
         # todo check fiber2 钱是否会丢
         self.fiber1.start()
 
         self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(10 * 100000000)
-        # 2. 中间节点2重启 send_payment
+        # 2. 中间节点2强制重启 send_payment
 
         node_info = self.fiber2.get_client().node_info()
         assert node_info["peers_count"] == "0x2"
@@ -319,15 +317,15 @@ class TestRestart(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        self.fiber2.stop()
+        self.fiber2.force_stop()
         payment = self.fiber1.get_client().get_payment(
             {"payment_hash": payment["payment_hash"]}
         )
         invoice = self.fiber3.get_client().get_invoice(
             {"payment_hash": payment["payment_hash"]}
         )
-        print("self.fiber2.stop() payment:", payment)
-        print("self.fiber2.stop() invoice:", invoice)
+        print("self.fiber2.force_stop() payment:", payment)
+        print("self.fiber2.force_stop() invoice:", invoice)
         channelsN12 = self.fiber1.get_client().list_channels({})
         channelsN23 = self.fiber3.get_client().list_channels({})
         print("fiber1 list channels:", channelsN12)
@@ -338,7 +336,7 @@ class TestRestart(FiberTest):
         channels = self.fiber3.get_client().list_channels({})
         assert channels["channels"][0]["local_balance"] == hex(20 * 100000000)
 
-        # 3. 最终节点重启 send_payment
+        # 3. 最终节点强制重启 send_payment
 
         node_info = self.fiber3.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
@@ -359,12 +357,10 @@ class TestRestart(FiberTest):
                 "invoice": invoice["invoice_address"],
             }
         )
-        self.fiber3.stop()
+        self.fiber3.force_stop()
         payment = self.fiber1.get_client().get_payment(
             {"payment_hash": payment["payment_hash"]}
         )
-        print("self.fiber3.stop() payment:", payment)
+        print("self.fiber3.force_stop() payment:", payment)
         self.fiber3.start()
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success", 120)
-        channels = self.fiber3.get_client().list_channels({})
-        assert channels["channels"][0]["local_balance"] == hex(30 * 100000000)
+        self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)

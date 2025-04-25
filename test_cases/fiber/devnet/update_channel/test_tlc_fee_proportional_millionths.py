@@ -181,10 +181,10 @@ class TestTlcFeeProportionalMillionths(FiberTest):
         )
         time.sleep(3)
         graph_channels = self.fiber1.get_client().graph_channels()
-        assert graph_channels["channels"][0]["fee_rate_of_node2"] == hex(
+        assert graph_channels["channels"][0]["update_info_of_node2"]["fee_rate"] == hex(
             340282366920938463
         )
-        assert graph_channels["channels"][0]["fee_rate_of_node1"] == hex(
+        assert graph_channels["channels"][0]["update_info_of_node1"]["fee_rate"] == hex(
             340282366920938463
         )
 

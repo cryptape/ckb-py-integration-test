@@ -53,14 +53,15 @@ class TestPaymentHash(FiberTest):
         payment1 = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
-                    "PayeePublicKey"
+                    "payee_public_key"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),
                 "amount": invoice["invoice"]["amount"],
-                "dry_run": True,
+                # "dry_run": True,
             }
         )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Failed")
 
     def test_rand_hash_Musig2VerifyError(self):
         account_private = self.generate_account(1000)
@@ -105,7 +106,7 @@ class TestPaymentHash(FiberTest):
         payment1 = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
-                    "PayeePublicKey"
+                    "payee_public_key"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),
@@ -116,7 +117,7 @@ class TestPaymentHash(FiberTest):
         payment1 = self.fiber1.get_client().send_payment(
             {
                 "target_pubkey": parse_invoice["invoice"]["data"]["attrs"][3][
-                    "PayeePublicKey"
+                    "payee_public_key"
                 ],
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),

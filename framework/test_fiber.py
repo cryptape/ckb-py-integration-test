@@ -18,19 +18,22 @@ from framework.config import get_tmp_path
 class FiberConfigPath(Enum):
 
     CURRENT_DEV = (
-        "/source/template/fiber/dev_config.yml.j2",
+        "/source/template/fiber/dev_config_2.yml.j2",
         "download/fiber/current/fnn",
     )
     CURRENT_TESTNET = (
-        "/source/template/fiber/config.yml.j2",
-        "download/fiber/0.3.1/fnn",
+        "/source/template/fiber/testnet_config_2.yml.j2",
+        "download/fiber/0.5.0/fnn",
     )
 
+    V042_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.2/fnn")
+    V040_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.0/fnn")
     V031_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.1/fnn")
     V030_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
     V020_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.2.0/fnn")
     V010_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
 
+    V040_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.4.0/fnn")
     V031_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.1/fnn")
     V030_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.0/fnn")
     V021_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.1/fnn")

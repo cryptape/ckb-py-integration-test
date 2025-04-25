@@ -53,6 +53,7 @@ jobs:
         GitBranch: '${{ github.event.inputs.GitBranch }}'
         BuildFIBER: '${{ github.event.inputs.BuildFIBER }}'
 
+        
     - name: Run tests
       run: make fiber_testnet_test
 
