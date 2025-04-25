@@ -52,7 +52,10 @@ jobs:
         GitUrl: '${{ github.event.inputs.GitUrl }}'
         GitBranch: '${{ github.event.inputs.GitBranch }}'
         BuildFIBER: '${{ github.event.inputs.BuildFIBER }}'
-
+        
+    - name: Setup upterm session
+      if: always()
+      uses: lhotari/action-upterm@v1
     - name: Run tests
       run: make fiber_testnet_test
 
