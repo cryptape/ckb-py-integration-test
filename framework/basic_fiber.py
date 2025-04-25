@@ -299,6 +299,7 @@ class FiberTest(CkbTest):
         fiber2_balance,
         fiber1_fee=1000,
         fiber2_fee=1000,
+        udt=None,
     ):
         fiber1.connect_peer(fiber2)
         time.sleep(1)
@@ -335,6 +336,7 @@ class FiberTest(CkbTest):
                 "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
                 "tlc_fee_proportional_millionths": hex(fiber1_fee),
                 "public": True,
+                "funding_udt_type_script": udt,
             }
         )
         self.wait_for_channel_state(
@@ -348,7 +350,7 @@ class FiberTest(CkbTest):
         #         "keysend": True,
         #     }
         # )
-        self.send_payment(fiber1, fiber2, fiber2_balance, True, None, 10)
+        self.send_payment(fiber1, fiber2, fiber2_balance, True, udt, 10)
         fiber2.get_client().update_channel(
             {
                 "channel_id": channels["channels"][0]["channel_id"],
@@ -372,7 +374,6 @@ class FiberTest(CkbTest):
                         "udt_type_script": udt,
                     }
                 )
-                print(f"===debug route:{payment}")
                 if wait:
                     self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
                 return payment["payment_hash"]
@@ -429,22 +430,31 @@ class FiberTest(CkbTest):
 
     def get_fiber_balance(self, fiber):
         channels = fiber.get_client().list_channels({})
+        balance_map = {}
+
         channels_balance = 0
         channels_offered_tlc_balance = 0
         channels_received_tlc_balance = 0
         for i in range(len(channels["channels"])):
             channel = channels["channels"][i]
             if channel["state"]["state_name"] == "CHANNEL_READY":
-                channels_balance += int(channel["local_balance"], 16)
-                channels_offered_tlc_balance += int(channel["offered_tlc_balance"], 16)
-                channels_received_tlc_balance += int(
+                key = "ckb"
+                if channel["funding_udt_type_script"] is not None:
+                    key = channel["funding_udt_type_script"]["args"]
+                if balance_map.get(key) is None:
+                    balance_map[key] = {
+                        "local_balance": 0,
+                        "offered_tlc_balance": 0,
+                        "received_tlc_balance": 0,
+                    }
+                balance_map[key]["local_balance"] += int(channel["local_balance"], 16)
+                balance_map[key]["offered_tlc_balance"] += int(
+                    channel["offered_tlc_balance"], 16
+                )
+                balance_map[key]["received_tlc_balance"] += int(
                     channel["received_tlc_balance"], 16
                 )
-        return {
-            "local_balance": channels_balance,
-            "offered_tlc_balance": channels_offered_tlc_balance,
-            "received_tlc_balance": channels_received_tlc_balance,
-        }
+        return balance_map
 
     def calculate_tx_fee(self, balance, fee_list):
         """
@@ -477,19 +487,22 @@ class FiberTest(CkbTest):
             f"status did not reach state {expected_state} within timeout period."
         )
 
-    def wait_and_check_tx_pool_fee(self, fee_rate, check=True, try_size=120):
+    def wait_and_check_tx_pool_fee(
+        self, fee_rate, check=True, try_size=120, up_and_down_rate=0.1
+    ):
         self.wait_tx_pool(1, try_size)
         pool = self.node.getClient().get_raw_tx_pool()
         pool_tx_detail_info = self.node.getClient().get_pool_tx_detail_info(
             pool["pending"][0]
         )
         if check:
-            assert (
-                int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
-                * 1000
-                / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
-                == fee_rate
-            )
+            assert int(pool_tx_detail_info["score_sortkey"]["fee"], 16) * 1000 / int(
+                pool_tx_detail_info["score_sortkey"]["weight"], 16
+            ) <= fee_rate * (1 + up_and_down_rate)
+
+            assert int(pool_tx_detail_info["score_sortkey"]["fee"], 16) * 1000 / int(
+                pool_tx_detail_info["score_sortkey"]["weight"], 16
+            ) >= fee_rate * (1 - up_and_down_rate)
         return pool["pending"][0]
 
     def wait_invoice_state(

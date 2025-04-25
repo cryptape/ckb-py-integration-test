@@ -58,9 +58,10 @@ class TestPaymentHash(FiberTest):
                 "currency": parse_invoice["invoice"]["currency"],
                 "payment_hash": self.generate_random_preimage(),
                 "amount": invoice["invoice"]["amount"],
-                "dry_run": True,
+                # "dry_run": True,
             }
         )
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Failed")
 
     def test_rand_hash_Musig2VerifyError(self):
         account_private = self.generate_account(1000)

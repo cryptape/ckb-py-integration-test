@@ -206,9 +206,7 @@ class TestHopHint(FiberTest):  # a-b
             print(f"b-a,channel:{channels}")
             ba_channel_outpoint = channels["channels"][0]["channel_outpoint"]
             print(f"b-a, channel_outpoint:{ba_channel_outpoint}")
-            assert (
-                payment["router"]["nodes"][0]["channel_outpoint"] == ba_channel_outpoint
-            )
+            assert payment["router"][0]["channel_outpoint"] == ba_channel_outpoint
         except Exception as e:
             # 如果走的是b-c-d-a，不通过hophit应该发送失败
             error_message = str(e)
@@ -289,8 +287,8 @@ class TestHopHint(FiberTest):  # a-b
                             .node_info()["node_id"],
                             # 填的是 d 的 pubkey，表示在 d 节点使用 channel_outpoint 到 a
                             "channel_outpoint": da_channel_outpoint,
-                            "fee_rate": 1000,
-                            "tlc_expiry_delta": 1000,
+                            "fee_rate": hex(1000),
+                            "tlc_expiry_delta": hex(1000),
                         }
                     ],
                 }
@@ -367,8 +365,8 @@ class TestHopHint(FiberTest):  # a-b
                                 "node_id"
                             ],  # 填的是 d 的 pubkey，表示在 d 节点使用 channel_outpoint 到 a
                             "channel_outpoint": da_channel_outpoint,
-                            "fee_rate": 1000,
-                            "tlc_expiry_delta": 1000,
+                            "fee_rate": hex(1000),
+                            "tlc_expiry_delta": hex(1000),
                         }
                     ],
                 }

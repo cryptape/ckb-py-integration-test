@@ -22,14 +22,11 @@ class TestPublic(FiberTest):
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
-        time.sleep(1)
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
-        time.sleep(5)
+        time.sleep(2)
         # transfer
-        self.fiber1.get_client().graph_channels()
-        self.fiber1.get_client().graph_nodes()
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 100 * 100000000
         invoice = self.fiber2.get_client().new_invoice(
@@ -83,7 +80,8 @@ class TestPublic(FiberTest):
             }
         )
         # todo wait close tx commit
-        time.sleep(20)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"]
         )
@@ -95,19 +93,15 @@ class TestPublic(FiberTest):
         print("after_balance1:", after_balance1)
         print("after_balance2:", after_balance2)
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/170")
     def test_public_false(self):
         """
         https://github.com/nervosnetwork/fiber/issues/268
         https://github.com/nervosnetwork/fiber/issues/170
         public : false
-
-        todo: add check 多路支付会失败
-
         Returns:
         """
         self.fiber1.connect_peer(self.fiber2)
-        time.sleep(5)
+        time.sleep(1)
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
@@ -116,14 +110,16 @@ class TestPublic(FiberTest):
                 # "tlc_fee_proportional_millionths": "0x4B0",
             }
         )
-        time.sleep(1)
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
-        time.sleep(5)
+        time.sleep(2)
+
+        # graph_channels is none
+        channels = self.fiber1.get_client().graph_channels({})
+        assert channels["channels"] == []
+
         # transfer
-        self.fiber1.get_client().graph_channels()
-        self.fiber1.get_client().graph_nodes()
         payment_preimage = self.generate_random_preimage()
         invoice_balance = 100 * 100000000
         invoice = self.fiber2.get_client().new_invoice(
@@ -139,12 +135,13 @@ class TestPublic(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
+
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
             int(before_channel["channels"][0]["local_balance"], 16)
@@ -177,7 +174,9 @@ class TestPublic(FiberTest):
             }
         )
         # todo wait close tx commit
-        time.sleep(20)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"]
         )
@@ -197,7 +196,7 @@ class TestPublic(FiberTest):
 
         """
         self.fiber1.connect_peer(self.fiber2)
-        time.sleep(5)
+        time.sleep(1)
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber2.get_peer_id(),
@@ -229,12 +228,13 @@ class TestPublic(FiberTest):
         )
         before_channel = self.fiber1.get_client().list_channels({})
 
-        self.fiber1.get_client().send_payment(
+        payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
             }
         )
-        time.sleep(10)
+        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
+
         after_channel = self.fiber1.get_client().list_channels({})
         assert (
             int(before_channel["channels"][0]["local_balance"], 16)
@@ -267,7 +267,8 @@ class TestPublic(FiberTest):
             }
         )
         # todo wait close tx commit
-        time.sleep(20)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"]
         )

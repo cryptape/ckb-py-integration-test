@@ -176,8 +176,9 @@ class TestMaxTlcNumberInFlight(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(20)
+
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"]
         )
@@ -273,8 +274,6 @@ class TestMaxTlcNumberInFlight(FiberTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        self.fiber1.get_client().list_channels({})
-        self.fiber2.get_client().list_channels({})
 
     def test_max_tlc_number_in_flight_not_eq_default_other_node(self):
         """

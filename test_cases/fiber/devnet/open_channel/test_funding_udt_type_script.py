@@ -61,7 +61,6 @@ class TestFundingUdtTypeScript(FiberTest):
     def test_funding_udt_type_script_is_white(self):
         """
         1. funding_udt_type_script 在节点上
-        todo: add more check balance
         Returns:
         """
         # open chanel for fiber
@@ -73,7 +72,6 @@ class TestFundingUdtTypeScript(FiberTest):
         )
         # connect  2 fiber
         self.fiber1.connect_peer(self.fiber2)
-        # todo wait peer connet
         time.sleep(1)
         # open channel
         temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -145,8 +143,8 @@ class TestFundingUdtTypeScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(20)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
         after_account1 = self.udtContract.list_cell(
             self.node.getClient(), account["lock_arg"], account["lock_arg"]
@@ -156,9 +154,27 @@ class TestFundingUdtTypeScript(FiberTest):
         )
 
         assert after_account1[-1]["balance"] == 90000000000
-        print(after_account2)
         assert after_account2[-1]["balance"] == 10000000000
-        before_balance1 = self.Ckb_cli.wallet_get_live_cells(
-            account["address"]["testnet"]
-        )
-        print("before_balance1:", before_balance1)
+        tx_message = self.get_tx_message(tx_hash)
+        if tx_message["output_cells"][1]["udt_capacity"] == 90000000000:
+            assert tx_message["output_cells"][1]["udt_capacity"] == 90000000000
+            assert (
+                tx_message["output_cells"][1]["args"]
+                == self.fiber1.get_account()["lock_arg"]
+            )
+            assert tx_message["output_cells"][0]["udt_capacity"] == 10000000000
+            assert (
+                tx_message["output_cells"][0]["args"]
+                == self.fiber2.get_account()["lock_arg"]
+            )
+        else:
+            assert tx_message["output_cells"][0]["udt_capacity"] == 90000000000
+            assert (
+                tx_message["output_cells"][0]["args"]
+                == self.fiber1.get_account()["lock_arg"]
+            )
+            assert tx_message["output_cells"][1]["udt_capacity"] == 10000000000
+            assert (
+                tx_message["output_cells"][1]["args"]
+                == self.fiber2.get_account()["lock_arg"]
+            )

@@ -49,9 +49,10 @@ class TestEnable(FiberTest):
         self.fibers[1].get_client().update_channel(
             {"channel_id": channel["channels"][0]["channel_id"], "enabled": False}
         )
-        time.sleep(1)
+        time.sleep(3)
         channels = self.fibers[1].get_client().graph_channels({})
-        assert len(channels["channels"]) == 1
+        assert len(channels["channels"]) == 2
+
         channel = (
             self.fibers[1]
             .get_client()

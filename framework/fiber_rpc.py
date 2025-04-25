@@ -208,6 +208,9 @@ class FiberRPCClient:
     def get_peer_id(self):
         return self.node_info()["addresses"][0].split("/")[-1]
 
+    def list_peers(self):
+        return self.call("list_peers", [])
+
     def call(self, method, params):
         headers = {"content-type": "application/json"}
         data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}

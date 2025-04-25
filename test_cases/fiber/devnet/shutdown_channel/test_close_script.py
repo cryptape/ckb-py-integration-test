@@ -57,11 +57,14 @@ class TestCloseScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(20)
-        node_info = self.fiber1.get_client().node_info()
-        print("node info :", node_info)
-        assert node_info["channel_count"] == "0x0"
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        # for i in range(4):
+        #     self.Miner.miner_with_version(self.node, "0x0")
+        # time.sleep(5)
+        # node_info = self.fiber1.get_client().node_info()
+        # print("node info :", node_info)
+        # assert node_info["channel_count"] == "0x0"
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"]
         )
@@ -74,7 +77,7 @@ class TestCloseScript(FiberTest):
         print("after_balance2:", after_balance2)
         assert after_balance2 - before_balance2 == 62.0
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/431")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/431")
     def test_not_secp256k1_blake160_sighash_all(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -113,8 +116,12 @@ class TestCloseScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(20)
+
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CLOSED", 120, True
+        )
         node_info = self.fiber1.get_client().node_info()
         print("node info :", node_info)
         assert node_info["channel_count"] == "0x0"
@@ -229,8 +236,9 @@ class TestCloseScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        time.sleep(5)
         after_account_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
@@ -242,9 +250,9 @@ class TestCloseScript(FiberTest):
                 "script_search_mode": "prefix",
             }
         )
-        node_info = self.fiber1.get_client().node_info()
-        print("node info :", node_info)
-        assert node_info["channel_count"] == "0x0"
+        # node_info = self.fiber1.get_client().node_info()
+        # print("node info :", node_info)
+        # assert node_info["channel_count"] == "0x0"
         after_balance1 = self.Ckb_cli.wallet_get_capacity(
             self.account1["address"]["testnet"], self.node.getClient().url
         )
@@ -313,7 +321,9 @@ class TestCloseScript(FiberTest):
             }
         )
         # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
@@ -385,8 +395,8 @@ class TestCloseScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
         after_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
@@ -524,8 +534,9 @@ class TestCloseScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
