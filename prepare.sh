@@ -1,9 +1,16 @@
 set -e
+
+DEFAULT_FIBER_BRANCH="v0.5.0-rc1"
+DEFAULT_FIBER_URL="https://github.com/nervosnetwork/fiber.git"
+
+
+GitFIBERBranch="${GitBranch:-$DEFAULT_FIBER_BRANCH}"
+GitFIBERUrl="${GitUrl:-$DEFAULT_FIBER_URL}"
+
 cp download/0.117.0/ckb-cli ./source/ckb-cli
 cp download/0.110.2/ckb-cli ./source/ckb-cli-old
-git clone https://github.com/nervosnetwork/fiber
+git clone -b $GitFIBERBranch $GitFIBERUrl
 cd fiber
-git checkout v0.5.0-rc1
 cargo build
 cp target/debug/fnn ../download/fiber/current/fnn
 cd migrate
