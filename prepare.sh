@@ -1,4 +1,4 @@
-set -e
+set -ex
 
 DEFAULT_FIBER_BRANCH="v0.5.0-rc1"
 DEFAULT_FIBER_URL="https://github.com/nervosnetwork/fiber.git"
