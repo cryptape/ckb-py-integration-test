@@ -4,6 +4,7 @@ import socket
 from framework.helper.udt_contract import UdtContract, issue_udt_tx
 from framework.test_fiber import Fiber, FiberConfigPath
 from framework.util import generate_account_privakey
+from framework.util import ACCOUNT_PRIVATE_KEY_INDEX
 import time
 import random
 import datetime
@@ -33,6 +34,8 @@ class FiberTest(CkbTest):
         Returns:
 
         """
+        global ACCOUNT_PRIVATE_KEY_INDEX
+        ACCOUNT_PRIVATE_KEY_INDEX = 0
         cls.account1_private_key = cls.Config.ACCOUNT_PRIVATE_1
         cls.account2_private_key = cls.Config.ACCOUNT_PRIVATE_2
         cls.account1 = cls.Ckb_cli.util_key_info_by_private_key(
@@ -676,6 +679,37 @@ class FiberTest(CkbTest):
                 self.logger.debug(f"Received TLC Balance: {received_tlc_balance}")
                 self.logger.debug(f"Created At: {created_at}")
                 self.logger.debug("-" * 40)
+
+    def get_node_hops_info(self, fiber1, fiber2, balance, udt=None):
+        node2_id = fiber2.get_client().node_info()["node_id"]
+        channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
+        hops_info = []
+        for channel in channels["channels"]:
+            if channel["funding_udt_type_script"] != udt:
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:funding_udt_type_script skip"
+                )
+                continue
+            # check balance
+            if int(channel["local_balance"], 16) < balance:
+                self.logger.debug(f"{channel['channel_outpoint']}:local_balance skip")
+                continue
+            # check is true
+            if channel["state"]["state_name"] != "CHANNEL_READY":
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:channel state skip,{channel["state"]["state_name"]}"
+                )
+                continue
+            if not channel["enabled"]:
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:channel state skip,{channel['enabled']}"
+                )
+                continue
+
+            hops_info.append(
+                {"pubkey": node2_id, "channel_outpoint": channel["channel_outpoint"]}
+            )
+        return hops_info
 
     def get_fiber_message(self, fiber):
         channels = fiber.get_client().list_channels({})

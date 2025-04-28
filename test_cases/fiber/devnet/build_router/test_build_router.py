@@ -3,6 +3,7 @@ from framework.basic_fiber import FiberTest
 
 
 class TestBuildRouter(FiberTest):
+    # FiberTest.debug = True
     """
     测试 build_router RPC 的功能：
     1. 基本路由构建
@@ -96,3 +97,118 @@ class TestBuildRouter(FiberTest):
         assert hop["channel_outpoint"] == da_channel_outpoint
         assert hop["target"] == self.fibers[0].get_client().node_info()["node_id"]
         assert hop["amount_received"] == hex(1 + 62 * 100000000)
+
+    def test_amount_invalid(self):
+        """
+        测试build_router对amount参数的有效性检查：
+        1. 测试amount为0时是否会返回错误
+        2. 测试amount超过通道余额时是否会返回错误
+        """
+        # 设置测试网络：a-b-c
+        self.start_new_fiber(self.generate_account(10000))
+        self.start_new_fiber(self.generate_account(10000))
+
+        # 设置通道参数
+        channel_balance = 1000 * 100000000  # 1000 CKB
+        channel_fee = 1000
+
+        # 创建a-b通道
+        self.fibers[0].connect_peer(self.fibers[1])
+        time.sleep(1)
+        self.fibers[0].get_client().open_channel(
+            {
+                "peer_id": self.fibers[1].get_peer_id(),
+                "funding_amount": hex(channel_balance),
+                "tlc_fee_proportional_millionths": hex(channel_fee),
+                "public": True,
+            }
+        )
+        time.sleep(1)
+        self.wait_for_channel_state(
+            self.fibers[0].get_client(), self.fibers[1].get_peer_id(), "CHANNEL_READY"
+        )
+
+        # 获取通道outpoint
+        channels = (
+            self.fibers[0]
+            .get_client()
+            .list_channels({"peer_id": self.fibers[1].get_peer_id()})
+        )
+        channel_outpoint = channels["channels"][0]["channel_outpoint"]
+
+        # 测试1: amount为0时应该返回错误
+        try:
+            self.fibers[0].get_client().build_router(
+                {
+                    "amount": hex(0),  # amount为0
+                    "udt_type_script": None,
+                    "hops_info": [
+                        {
+                            "pubkey": self.fibers[1]
+                            .get_client()
+                            .node_info()["node_id"],
+                            "channel_outpoint": channel_outpoint,
+                        },
+                    ],
+                    "final_tlc_expiry_delta": None,
+                }
+            )
+            self.fail("应该抛出异常，因为amount为0")
+        except Exception as e:
+            print(f"预期的错误: {e}")
+            assert (
+                "amount must be greater than 0" in str(e) or "amount" in str(e).lower()
+            )
+
+        # 测试2: amount超过通道余额时应该返回错误
+        try:
+            self.fibers[0].get_client().build_router(
+                {
+                    "amount": hex(channel_balance + 100 * 100000000),  # 超过通道余额
+                    "udt_type_script": None,
+                    "hops_info": [
+                        {
+                            "pubkey": self.fibers[1]
+                            .get_client()
+                            .node_info()["node_id"],
+                            "channel_outpoint": channel_outpoint,
+                        },
+                    ],
+                    "final_tlc_expiry_delta": None,
+                }
+            )
+            self.fail("应该抛出异常，因为amount超过通道余额")
+        except Exception as e:
+            print(f"预期的错误: {e}")
+            assert (
+                "error: network graph error: pathfind error: no path found"
+                in str(e).lower()
+            )
+
+        # 测试3: 正常的amount应该成功构建路由
+        router_hops = (
+            self.fibers[0]
+            .get_client()
+            .build_router(
+                {
+                    "amount": hex(1 * 100000000),  # 1 CKB，有效金额
+                    "udt_type_script": None,
+                    "hops_info": [
+                        {
+                            "pubkey": self.fibers[1]
+                            .get_client()
+                            .node_info()["node_id"],
+                            "channel_outpoint": channel_outpoint,
+                        },
+                    ],
+                    "final_tlc_expiry_delta": None,
+                }
+            )
+        )
+
+        # 验证返回的路由信息
+        assert "router_hops" in router_hops
+        assert len(router_hops["router_hops"]) == 1
+        hop = router_hops["router_hops"][0]
+        assert hop["channel_outpoint"] == channel_outpoint
+        assert hop["target"] == self.fibers[1].get_client().node_info()["node_id"]
