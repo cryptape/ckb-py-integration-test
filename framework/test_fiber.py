@@ -16,14 +16,13 @@ from framework.config import get_tmp_path
 
 
 class FiberConfigPath(Enum):
-
     CURRENT_DEV = (
         "/source/template/fiber/dev_config_2.yml.j2",
         "download/fiber/current/fnn",
     )
     CURRENT_TESTNET = (
-        "/source/template/fiber/config.yml.j2",
-        "download/fiber/0.4.2/fnn",
+        "/source/template/fiber/testnet_config_2.yml.j2",
+        "download/fiber/0.5.0/fnn",
     )
 
     V042_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.2/fnn")
@@ -106,7 +105,18 @@ class Fiber:
         )
         target_dir = os.path.join(self.tmp_path, "ckb")
         os.makedirs(target_dir, exist_ok=True)  # 创建文件夹，如果已存在则不报错
-        with open(f"{self.tmp_path}/ckb/key", "w") as f:
+        if os.path.exists(
+            f"{get_project_root()}/source/fiber/keys/{self.account_private.replace("0x", "")}"
+        ):
+            shutil.copy(
+                f"{get_project_root()}/source/fiber/keys/{self.account_private.replace("0x", "")}",
+                f"{self.tmp_path}/ckb/key",
+            )
+        else:
+            with open(f"{self.tmp_path}/ckb/key", "w") as f:
+                f.write(self.account_private.replace("0x", ""))
+
+        with open(f"{self.tmp_path}/ckb/key.bak", "w") as f:
             f.write(self.account_private.replace("0x", ""))
         # node
 
@@ -153,7 +163,7 @@ class Fiber:
         return contract_map
 
     def read_ckb_key(self):
-        with open(f"{self.tmp_path}/ckb/key") as f:
+        with open(f"{self.tmp_path}/ckb/key.bak") as f:
             key = f.read()
         self.account_private = f"0x{key}"
         return self.account_private
@@ -171,7 +181,7 @@ class Fiber:
         # for key in env_map:
         #     print(f"{key}={env_map[key]}")
         run_command(
-            f"RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
+            f"FIBER_SECRET_KEY_PASSWORD='password0' RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
             # env=env_map,
         )
         # wait rpc start

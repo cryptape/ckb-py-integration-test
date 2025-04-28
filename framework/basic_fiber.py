@@ -4,6 +4,7 @@ import socket
 from framework.helper.udt_contract import UdtContract, issue_udt_tx
 from framework.test_fiber import Fiber, FiberConfigPath
 from framework.util import generate_account_privakey
+from framework.util import ACCOUNT_PRIVATE_KEY_INDEX
 import time
 import random
 import datetime
@@ -33,6 +34,8 @@ class FiberTest(CkbTest):
         Returns:
 
         """
+        global ACCOUNT_PRIVATE_KEY_INDEX
+        ACCOUNT_PRIVATE_KEY_INDEX = 0
         cls.account1_private_key = cls.Config.ACCOUNT_PRIVATE_1
         cls.account2_private_key = cls.Config.ACCOUNT_PRIVATE_2
         cls.account1 = cls.Ckb_cli.util_key_info_by_private_key(
@@ -299,6 +302,7 @@ class FiberTest(CkbTest):
         fiber2_balance,
         fiber1_fee=1000,
         fiber2_fee=1000,
+        udt=None,
     ):
         fiber1.connect_peer(fiber2)
         time.sleep(1)
@@ -335,6 +339,7 @@ class FiberTest(CkbTest):
                 "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
                 "tlc_fee_proportional_millionths": hex(fiber1_fee),
                 "public": True,
+                "funding_udt_type_script": udt,
             }
         )
         self.wait_for_channel_state(
@@ -348,7 +353,7 @@ class FiberTest(CkbTest):
         #         "keysend": True,
         #     }
         # )
-        self.send_payment(fiber1, fiber2, fiber2_balance, True, None, 10)
+        self.send_payment(fiber1, fiber2, fiber2_balance, True, udt, 10)
         fiber2.get_client().update_channel(
             {
                 "channel_id": channels["channels"][0]["channel_id"],
@@ -428,22 +433,31 @@ class FiberTest(CkbTest):
 
     def get_fiber_balance(self, fiber):
         channels = fiber.get_client().list_channels({})
+        balance_map = {}
+
         channels_balance = 0
         channels_offered_tlc_balance = 0
         channels_received_tlc_balance = 0
         for i in range(len(channels["channels"])):
             channel = channels["channels"][i]
             if channel["state"]["state_name"] == "CHANNEL_READY":
-                channels_balance += int(channel["local_balance"], 16)
-                channels_offered_tlc_balance += int(channel["offered_tlc_balance"], 16)
-                channels_received_tlc_balance += int(
+                key = "ckb"
+                if channel["funding_udt_type_script"] is not None:
+                    key = channel["funding_udt_type_script"]["args"]
+                if balance_map.get(key) is None:
+                    balance_map[key] = {
+                        "local_balance": 0,
+                        "offered_tlc_balance": 0,
+                        "received_tlc_balance": 0,
+                    }
+                balance_map[key]["local_balance"] += int(channel["local_balance"], 16)
+                balance_map[key]["offered_tlc_balance"] += int(
+                    channel["offered_tlc_balance"], 16
+                )
+                balance_map[key]["received_tlc_balance"] += int(
                     channel["received_tlc_balance"], 16
                 )
-        return {
-            "local_balance": channels_balance,
-            "offered_tlc_balance": channels_offered_tlc_balance,
-            "received_tlc_balance": channels_received_tlc_balance,
-        }
+        return balance_map
 
     def calculate_tx_fee(self, balance, fee_list):
         """
@@ -665,6 +679,37 @@ class FiberTest(CkbTest):
                 self.logger.debug(f"Received TLC Balance: {received_tlc_balance}")
                 self.logger.debug(f"Created At: {created_at}")
                 self.logger.debug("-" * 40)
+
+    def get_node_hops_info(self, fiber1, fiber2, balance, udt=None):
+        node2_id = fiber2.get_client().node_info()["node_id"]
+        channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
+        hops_info = []
+        for channel in channels["channels"]:
+            if channel["funding_udt_type_script"] != udt:
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:funding_udt_type_script skip"
+                )
+                continue
+            # check balance
+            if int(channel["local_balance"], 16) < balance:
+                self.logger.debug(f"{channel['channel_outpoint']}:local_balance skip")
+                continue
+            # check is true
+            if channel["state"]["state_name"] != "CHANNEL_READY":
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:channel state skip,{channel["state"]["state_name"]}"
+                )
+                continue
+            if not channel["enabled"]:
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:channel state skip,{channel['enabled']}"
+                )
+                continue
+
+            hops_info.append(
+                {"pubkey": node2_id, "channel_outpoint": channel["channel_outpoint"]}
+            )
+        return hops_info
 
     def get_fiber_message(self, fiber):
         channels = fiber.get_client().list_channels({})
