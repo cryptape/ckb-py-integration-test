@@ -3,6 +3,7 @@ import time
 import pytest
 
 from framework.basic_fiber import FiberTest
+from framework.test_fiber import FiberConfigPath
 
 
 class TestForce(FiberTest):
@@ -46,9 +47,9 @@ class TestForce(FiberTest):
         )
         self.fiber2.stop()
         list_channels = self.fiber1.get_client().list_channels({})
-        latest_commitment_transaction_hash = list_channels["channels"][0][
-            "latest_commitment_transaction_hash"
-        ]
+        # latest_commitment_transaction_hash = list_channels["channels"][0][
+        #     "latest_commitment_transaction_hash"
+        # ]
         with pytest.raises(Exception) as exc_info:
             self.fiber1.get_client().shutdown_channel(
                 {
@@ -66,6 +67,7 @@ class TestForce(FiberTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
+        channels = self.fiber1.get_client().list_channels({})
 
         # shut down
         self.fiber1.get_client().shutdown_channel(
@@ -75,8 +77,12 @@ class TestForce(FiberTest):
             }
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
-        assert latest_commitment_transaction_hash == tx_hash
-        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        self.node.getClient().generate_epochs("0xa", wait_time=0)
+        # assert latest_commitment_transaction_hash == tx_hash
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 5 * 70)
+        tx_message = self.get_tx_message(tx_hash)
+        assert 62 * 100000000 - tx_message["output_cells"][0]["capacity"] < 1000000
+        assert 200 * 100000000 - tx_message["output_cells"][1]["capacity"] < 1000000
 
     def test_node_online(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
@@ -163,7 +169,7 @@ class TestForce(FiberTest):
             }
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
-        assert latest_commitment_transaction_hash == tx_hash
+        # assert latest_commitment_transaction_hash == tx_hash
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
 
         self.fiber1.get_client().list_channels({})

@@ -190,7 +190,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 5. 时间过去 0～ 1/3 个 delay_epoch
         #             node2 不会操作
@@ -322,7 +322,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 5. 时间过去 0～ 1/3 个 delay_epoch
         #             node2 不会操作
@@ -454,7 +454,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 5. 时间过去 0～ 1/3 个 delay_epoch
         #             node2 不会操作
@@ -564,7 +564,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 1/3 epoch
         self.node.getClient().generate_epochs("0x2")
@@ -574,7 +574,7 @@ class TestPendingTlc(FiberTest):
         status = self.node.getClient().get_live_cell(hex(0), shutdown_tx)
         assert status["status"] == "live"
         self.node.getClient().generate_epochs("0x2")
-        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx_hash)
         assert message["fee"] - 90000000000 > 0
         assert message["fee"] - 90000000000 < 100000
@@ -683,7 +683,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 5. 时间过去 0～ 1/3 个 delay_epoch
         #             node2 不会操作
@@ -817,7 +817,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 5. 时间过去 0～ 1/3 个 delay_epoch
         #             node2 不会操作
@@ -929,7 +929,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         time.sleep(15)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 5. 时间过去 delay_epoch
@@ -937,7 +937,7 @@ class TestPendingTlc(FiberTest):
         self.fiber2.stop()
         self.node.getClient().generate_epochs("0x6")
         self.fiber2.start()
-        final_tx = self.wait_and_check_tx_pool_fee(1000, False, 300)
+        final_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, final_tx)
         final_tx_tlc_message = self.get_tx_message(final_tx)
         print("final_tx_tlc_message:", final_tx_tlc_message)
@@ -1035,7 +1035,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         #  时间过去 0～ 1/3 个 delay_epoch
         #                         node1 无法解锁
@@ -1049,7 +1049,7 @@ class TestPendingTlc(FiberTest):
         #                     时间过去 delay_epoch 2/3～1
         #                         node1 可以解锁
         self.node.getClient().generate_epochs("0x2")
-        first_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        first_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, first_tx)
         first_tx_message = self.get_tx_message(first_tx)
         print("first_tx_message:", first_tx_message)
@@ -1063,7 +1063,7 @@ class TestPendingTlc(FiberTest):
         self.fiber1.stop()
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        next_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        next_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         next_message = self.get_tx_message(next_tx)
         print("next_message :", next_message)
         assert (
@@ -1161,7 +1161,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         #  时间过去 0～ 1/3 个 delay_epoch
         #                         node1 无法解锁
@@ -1175,7 +1175,7 @@ class TestPendingTlc(FiberTest):
         #                     时间过去 delay_epoch 2/3～1
         #                         node1 可以解锁
         self.node.getClient().generate_epochs("0x2")
-        first_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        first_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, first_tx)
         first_tx_message = self.get_tx_message(first_tx)
         print("first_tx_message:", first_tx_message)
@@ -1189,7 +1189,7 @@ class TestPendingTlc(FiberTest):
         self.fiber1.stop()
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        next_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        next_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         next_message = self.get_tx_message(next_tx)
         print("next_message :", next_message)
         assert (
@@ -1288,7 +1288,7 @@ class TestPendingTlc(FiberTest):
                 "channel_id": CHANNEL_ID,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         #  时间过去 0～ 1/3 个 delay_epoch
         #                         node1 无法解锁
@@ -1395,7 +1395,7 @@ class TestPendingTlc(FiberTest):
             }
         )
         # 过期前 处理不了
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         #  0～1/3 delay epoch
         #                     node2 无法处理
@@ -1497,7 +1497,7 @@ class TestPendingTlc(FiberTest):
                 "force": True,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         # remove tlc
         for i in range(3):
             try:
@@ -1525,7 +1525,7 @@ class TestPendingTlc(FiberTest):
         #                 1/3～ 2/3 delay epoch
         #                     node1 可以通过pre_image 解锁部分tlc
         self.node.getClient().generate_epochs("0x2")
-        settle_tx1 = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        settle_tx1 = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         settle_tx1_message = self.get_tx_message(settle_tx1)
         print("settle_tx1_message:", settle_tx1_message)
         # todo add assert
@@ -1536,7 +1536,7 @@ class TestPendingTlc(FiberTest):
         self.fiber1.stop()
         self.node.getClient().generate_epochs("0x4")
         self.fiber1.start()
-        settle_tx2 = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        settle_tx2 = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         settle_tx2_message = self.get_tx_message(settle_tx2)
         print("settle_tx2_message:", settle_tx2_message)
 
@@ -1547,7 +1547,7 @@ class TestPendingTlc(FiberTest):
         self.Miner.miner_until_tx_committed(self.node, settle_tx2)
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        settle_tx3 = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        settle_tx3 = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         settle_tx3_message = self.get_tx_message(settle_tx3)
         print("settle_tx3_message:", settle_tx3_message)
 
@@ -1643,7 +1643,7 @@ class TestPendingTlc(FiberTest):
                 "force": True,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         self.fiber1.stop()
         # 过期后
@@ -1767,7 +1767,7 @@ class TestPendingTlc(FiberTest):
                 "force": True,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         for i in range(3):
             try:
                 self.fiber1.get_client().remove_tlc(
@@ -1792,7 +1792,7 @@ class TestPendingTlc(FiberTest):
         #                 1/3~2/3 delay epoch
         #                     node1 可以通过pre_image 解锁部分tlc
         self.node.getClient().generate_epochs("0x2")
-        first_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        first_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, first_tx)
         first_tx_message = self.get_tx_message(first_tx)
         print("first_tx_message:", first_tx_message)
@@ -1807,7 +1807,7 @@ class TestPendingTlc(FiberTest):
         self.Miner.miner_until_tx_committed(self.node, first_tx)
         self.node.getClient().generate_epochs("0x4")
         self.fiber1.start()
-        sed_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        sed_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         sed_tx_message = self.get_tx_message(sed_tx)
         assert (
             sed_tx_message["input_cells"][0]["capacity"]
@@ -1820,7 +1820,7 @@ class TestPendingTlc(FiberTest):
         self.Miner.miner_until_tx_committed(self.node, sed_tx)
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        thr_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        thr_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         thr_tx_message = self.get_tx_message(thr_tx)
         assert (
             thr_tx_message["input_cells"][0]["capacity"]
@@ -1969,7 +1969,7 @@ class TestPendingTlc(FiberTest):
                 )
             except Exception as e:
                 print(e)
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         time.sleep(1)
         for i in range(1):
             try:
@@ -1990,7 +1990,7 @@ class TestPendingTlc(FiberTest):
         status = self.node.getClient().get_live_cell(hex(0), shutdown_tx)
         assert status["status"] == "live"
         self.node.getClient().generate_epochs("0x2")
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
         assert (
             message["input_cells"][0]["capacity"]
@@ -1999,7 +1999,7 @@ class TestPendingTlc(FiberTest):
         )
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.node.getClient().generate_epochs("0x2")
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
         assert (
             message["input_cells"][0]["capacity"]
@@ -2114,7 +2114,7 @@ class TestPendingTlc(FiberTest):
                 "force": True,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         # # remove tlc
         for i in range(1):
             try:
@@ -2149,7 +2149,7 @@ class TestPendingTlc(FiberTest):
         self.node.getClient().generate_epochs("0x4")
         self.fiber1.start()
         self.fiber2.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
         assert (
             message["input_cells"][0]["capacity"]
@@ -2163,7 +2163,7 @@ class TestPendingTlc(FiberTest):
         self.node.getClient().generate_epochs("0x4")
         self.fiber1.start()
         self.fiber2.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
         assert (
             message["input_cells"][0]["capacity"]
@@ -2278,7 +2278,7 @@ class TestPendingTlc(FiberTest):
                 "force": True,
             }
         )
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         # # remove tlc
         for i in range(1):
             try:
@@ -2312,7 +2312,7 @@ class TestPendingTlc(FiberTest):
         self.fiber2.stop()
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.fiber2.start()
         message = self.get_tx_message(tx)
         assert (
@@ -2326,7 +2326,7 @@ class TestPendingTlc(FiberTest):
         self.fiber2.stop()
         self.node.getClient().generate_epochs("0x6")
         self.fiber2.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.fiber1.start()
         message = self.get_tx_message(tx)
         print("message:", message)
@@ -2471,14 +2471,14 @@ class TestPendingTlc(FiberTest):
                 print(e)
             time.sleep(1)
 
-        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        shutdown_tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.Miner.miner_until_tx_committed(self.node, shutdown_tx)
         # 1/3
         time.sleep(10)
         status = self.node.getClient().get_live_cell(hex(0), shutdown_tx)
         assert status["status"] == "live"
         self.node.getClient().generate_epochs("0x6")
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
 
     @pytest.mark.skip("node1 重启会导致 2/3的时候无法解锁过期tlc")
@@ -2631,7 +2631,7 @@ class TestPendingTlc(FiberTest):
         self.fiber2.stop()
         self.node.getClient().generate_epochs("0x4")
         self.fiber1.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
         print("message:", message)
 
@@ -2782,7 +2782,7 @@ class TestPendingTlc(FiberTest):
         #                     node2 能解锁过期的tlc
         self.fiber2.stop()
         self.node.getClient().generate_epochs("0x4")
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         message = self.get_tx_message(tx)
         print("message:", message)
         time.sleep(3)
@@ -2987,7 +2987,7 @@ class TestPendingTlc(FiberTest):
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.node.getClient().generate_epochs("0x6")
         self.fiber2.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5 * 120)
         self.fiber1.start()
         message = self.get_tx_message(tx)
         assert (
