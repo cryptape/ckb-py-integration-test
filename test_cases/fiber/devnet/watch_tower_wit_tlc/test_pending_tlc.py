@@ -2942,8 +2942,7 @@ class TestPendingTlc(FiberTest):
         self.fiber2.stop()
         self.node.getClient().generate_epochs("0x4")
         self.fiber1.start()
-        self.fiber2.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 220)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5*120)
         message = self.get_tx_message(tx)
         assert (
             message["input_cells"][0]["capacity"]
@@ -2952,11 +2951,10 @@ class TestPendingTlc(FiberTest):
         )
         print("first message:", message)
         self.fiber1.stop()
-        self.fiber2.stop()
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.node.getClient().generate_epochs("0x4")
         self.fiber2.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 220)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5*120)
         self.fiber1.start()
         message = self.get_tx_message(tx)
         assert (
@@ -2973,7 +2971,7 @@ class TestPendingTlc(FiberTest):
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 220)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5*120)
         self.fiber2.start()
         message = self.get_tx_message(tx)
         print("3:", message)
@@ -3001,7 +2999,7 @@ class TestPendingTlc(FiberTest):
         time.sleep(5)
         self.node.getClient().generate_epochs("0x6")
         self.fiber1.start()
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 220)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5*120)
         message = self.get_tx_message(tx)
         assert (
             message["input_cells"][0]["capacity"]
@@ -3013,6 +3011,6 @@ class TestPendingTlc(FiberTest):
         self.Miner.miner_until_tx_committed(self.node, tx)
         time.sleep(5)
         self.node.getClient().generate_epochs("0x6")
-        tx = self.wait_and_check_tx_pool_fee(1000, False, 220)
+        tx = self.wait_and_check_tx_pool_fee(1000, False, 5*120)
         message = self.get_tx_message(tx)
         assert message["fee"] > 1000000

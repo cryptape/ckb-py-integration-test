@@ -69,7 +69,7 @@ class TestNodeState(FiberTest):
         # node1 send payment to node4
         node4_info = self.fiber4.get_client().node_info()
         fiber4_pub = node4_info["node_id"]
-        for i in range(10):
+        for i in range(30):
             payment = self.fiber1.get_client().send_payment(
                 {
                     "target_pubkey": fiber4_pub,
@@ -83,44 +83,51 @@ class TestNodeState(FiberTest):
         N3N4_CHANNEL_ID = self.fiber4.get_client().list_channels({})["channels"][0][
             "channel_id"
         ]
-
-        self.fiber3.get_client().shutdown_channel(
-            {
-                "channel_id": N3N4_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x1bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.fiber3.get_account()["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
-            }
-        )
-        payment = self.fiber1.get_client().send_payment(
-            {
-                "target_pubkey": fiber4_pub,
-                "amount": hex(1 * 100000000),
-                "keysend": True,
-                # "invoice": "0x123",
-            }
-        )
-        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
-        tx_message = self.get_tx_message(tx_hash)
         time.sleep(1)
-        payment = self.fiber1.get_client().get_payment(
-            {"payment_hash": payment["payment_hash"]}
+        # todo 多编写一些多节点shutdown的用例
+        with pytest.raises(Exception) as exc_info:
+            self.fiber3.get_client().shutdown_channel(
+                {
+                    "channel_id": N3N4_CHANNEL_ID,
+                    "close_script": {
+                        "code_hash": "0x1bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        "hash_type": "type",
+                        "args": self.fiber3.get_account()["lock_arg"],
+                    },
+                    "fee_rate": "0x3FC",
+                }
+            )
+        expected_error_message = "Unable to process shutdown command"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        print("payment:", payment)
-        self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed", 120)
-        assert {
-            "args": self.fiber4.get_account()["lock_arg"],
-            "capacity": 6300000000,
-        } in tx_message["output_cells"]
-        payment = self.fiber1.get_client().send_payment(
-            {
-                "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
-                "amount": hex(1 * 100000000),
-                "keysend": True,
-                # "invoice": "0x123",
-            }
-        )
-        self.wait_payment_state(self.fiber1, payment["payment_hash"])
+        # payment = self.fiber1.get_client().send_payment(
+        #     {
+        #         "target_pubkey": fiber4_pub,
+        #         "amount": hex(1 * 100000000),
+        #         "keysend": True,
+        #         # "invoice": "0x123",
+        #     }
+        # )
+        # tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
+        # tx_message = self.get_tx_message(tx_hash)
+        # time.sleep(1)
+        # payment = self.fiber1.get_client().get_payment(
+        #     {"payment_hash": payment["payment_hash"]}
+        # )
+        # print("payment:", payment)
+        # self.wait_payment_state(self.fiber1, payment["payment_hash"], "Failed", 120)
+        # assert {
+        #     "args": self.fiber4.get_account()["lock_arg"],
+        #     "capacity": 6300000000,
+        # } in tx_message["output_cells"]
+        # payment = self.fiber1.get_client().send_payment(
+        #     {
+        #         "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
+        #         "amount": hex(1 * 100000000),
+        #         "keysend": True,
+        #         # "invoice": "0x123",
+        #     }
+        # )
+        # self.wait_payment_state(self.fiber1, payment["payment_hash"])

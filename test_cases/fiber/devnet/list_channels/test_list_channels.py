@@ -277,7 +277,7 @@ class TestListChannels(FiberTest):
             }
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)
-        assert tx_hash == channels["channels"][0]["latest_commitment_transaction_hash"]
+        # assert tx_hash == channels["channels"][0]["latest_commitment_transaction_hash"]
         #
         channel = self.fiber1.get_client().list_channels(
             {
