@@ -3,9 +3,12 @@ import time
 import pytest
 
 from framework.basic_fiber import FiberTest
+from framework.test_fiber import FiberConfigPath
 
 
 class TestPendingTlc(FiberTest):
+    fiber_version = FiberConfigPath.CURRENT_DEV_DEBUG
+
     """
     pending tlc + watch tower,node1 force shutdown
     node1 和node2 都没有tlc

@@ -3,10 +3,12 @@ import time
 import pytest
 
 from framework.basic_fiber import FiberTest
+from framework.test_fiber import FiberConfigPath
 
 
 class TestHtlcExpired(FiberTest):
     start_fiber_config = {"fiber_watchtower_check_interval_seconds": 5}
+    fiber_version = FiberConfigPath.CURRENT_DEV_DEBUG
 
     def test_ready_status(self):
         """

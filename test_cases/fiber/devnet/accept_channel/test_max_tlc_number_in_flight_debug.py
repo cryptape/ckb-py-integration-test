@@ -3,9 +3,11 @@ import time
 import pytest
 
 from framework.basic_fiber import FiberTest
+from framework.test_fiber import FiberConfigPath
 
 
-class TestMaxTlcNumberInFlight(FiberTest):
+class TestMaxTlcNumberInFlightDebug(FiberTest):
+    fiber_version = FiberConfigPath.CURRENT_DEV_DEBUG
 
     def test_max_tlc_number_in_flight(self):
         """

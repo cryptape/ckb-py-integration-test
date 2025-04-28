@@ -292,6 +292,8 @@ class TestFundingFeeRate(FiberTest):
             }
         )
         time.sleep(1)
-        self.wait_for_channel_state(
-            fiber.get_client(), self.fiber2.get_peer_id(), "NEGOTIATING_FUNDING", 120
-        )
+        channels = fiber.get_client().list_channels({})
+        assert channels["channels"] == []
+        # self.wait_for_channel_state(
+        #     fiber.get_client(), self.fiber2.get_peer_id(), "NEGOTIATING_FUNDING", 120
+        # )
