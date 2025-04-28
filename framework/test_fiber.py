@@ -18,8 +18,14 @@ from framework.config import get_tmp_path
 class FiberConfigPath(Enum):
     CURRENT_DEV = (
         "/source/template/fiber/dev_config_2.yml.j2",
-        "download/fiber/current/fnn",
+        "download/fiber/0.5.1.r/fnn",
     )
+
+    CURRENT_DEV_DEBUG = (
+        "/source/template/fiber/dev_config_2.yml.j2",
+        "download/fiber/0.5.1.r/fnn.debug",
+    )
+
     CURRENT_TESTNET = (
         "/source/template/fiber/testnet_config_2.yml.j2",
         "download/fiber/0.5.0/fnn",
@@ -105,16 +111,18 @@ class Fiber:
         )
         target_dir = os.path.join(self.tmp_path, "ckb")
         os.makedirs(target_dir, exist_ok=True)  # 创建文件夹，如果已存在则不报错
-        if os.path.exists(
-            f"{get_project_root()}/source/fiber/keys/{self.account_private.replace("0x", "")}"
-        ):
-            shutil.copy(
-                f"{get_project_root()}/source/fiber/keys/{self.account_private.replace("0x", "")}",
-                f"{self.tmp_path}/ckb/key",
-            )
-        else:
-            with open(f"{self.tmp_path}/ckb/key", "w") as f:
-                f.write(self.account_private.replace("0x", ""))
+        # if os.path.exists(
+        #     f"{get_project_root()}/source/fiber/keys/{self.account_private.replace('0x', '')}"
+        # ):
+        #     shutil.copy(
+        #         f"{get_project_root()}/source/fiber/keys/{self.account_private.replace('0x', '')}",
+        #         f"{self.tmp_path}/ckb/key",
+        #     )
+        # else:
+        #     with open(f"{self.tmp_path}/ckb/key", "w") as f:
+        #         f.write(self.account_private.replace("0x", ""))
+        with open(f"{self.tmp_path}/ckb/key", "w") as f:
+            f.write(self.account_private.replace("0x", ""))
 
         with open(f"{self.tmp_path}/ckb/key.bak", "w") as f:
             f.write(self.account_private.replace("0x", ""))

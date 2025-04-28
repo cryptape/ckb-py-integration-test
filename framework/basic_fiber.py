@@ -22,6 +22,7 @@ class FiberTest(CkbTest):
     fiber2: Fiber
     debug = False
     first_debug = False
+    fiber_version = FiberConfigPath.CURRENT_DEV
     logger = logging.getLogger(__name__)
     start_fiber_config = {}
 
@@ -76,14 +77,14 @@ class FiberTest(CkbTest):
         cls.fibers = []
         cls.new_fibers = []
         cls.fiber1 = Fiber.init_by_port(
-            FiberConfigPath.CURRENT_DEV,
+            cls.fiber_version,
             cls.account1_private_key,
             "fiber/node1",
             "8228",
             "8227",
         )
         cls.fiber2 = Fiber.init_by_port(
-            FiberConfigPath.CURRENT_DEV,
+            cls.fiber_version,
             cls.account2_private_key,
             "fiber/node2",
             "8229",
@@ -204,7 +205,7 @@ class FiberTest(CkbTest):
         self,
         account_private_key,
         config=None,
-        fiber_version=FiberConfigPath.CURRENT_DEV,
+        fiber_version=fiber_version,
     ):
         i = len(self.new_fibers)
         fiber = Fiber.init_by_port(

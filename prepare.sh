@@ -12,7 +12,9 @@ cp download/0.110.2/ckb-cli ./source/ckb-cli-old
 git clone -b $GitFIBERBranch $GitFIBERUrl
 cd fiber
 cargo build
-cp target/debug/fnn ../download/fiber/current/fnn
+cp target/debug/fnn ../download/fiber/current/fnn.debug
+cargo build --release
+cp target/release/fnn ../download/fiber/current/fnn
 cd migrate
 cargo build
 cp target/debug/fnn-migrate ../../download/fiber/current/fnn-migrate
