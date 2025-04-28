@@ -697,7 +697,7 @@ class FiberTest(CkbTest):
             # check is true
             if channel["state"]["state_name"] != "CHANNEL_READY":
                 self.logger.debug(
-                    f"{channel['channel_outpoint']}:channel state skip,{channel["state"]["state_name"]}"
+                    f"{channel['channel_outpoint']}:channel state skip,{channel['state']['state_name']}"
                 )
                 continue
             if not channel["enabled"]:
