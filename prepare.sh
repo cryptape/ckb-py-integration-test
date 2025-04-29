@@ -1,7 +1,7 @@
 set -ex
 
-DEFAULT_FIBER_BRANCH="develop"
-DEFAULT_FIBER_URL="https://github.com/nervosnetwork/fiber.git"
+DEFAULT_FIBER_BRANCH="yukang-fix-normal-shutdown-balance-issue"
+DEFAULT_FIBER_URL="https://github.com/chenyukang/fiber.git"
 
 
 GitFIBERBranch="${GitBranch:-$DEFAULT_FIBER_BRANCH}"

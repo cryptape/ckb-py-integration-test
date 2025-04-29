@@ -25,55 +25,31 @@ class TestNodeState(FiberTest):
         Returns:
 
         """
-        account_private_3 = self.generate_account(1000)
-        account_private_4 = self.generate_account(1000)
+        account_private_3 = self.generate_account(10000)
+        account_private_4 = self.generate_account(10000)
         self.fiber3 = self.start_new_fiber(account_private_3)
         self.fiber4 = self.start_new_fiber(account_private_4)
         self.fiber2.connect_peer(self.fiber3)
         self.fiber3.connect_peer(self.fiber4)
         self.fiber4.connect_peer(self.fiber1)
         # node1 open channel node2
-        self.fiber1.get_client().open_channel(
-            {
-                "peer_id": self.fiber2.get_peer_id(),
-                "funding_amount": hex(200 * 100000000),
-                "public": True,
-            }
-        )
-        self.wait_for_channel_state(
-            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
-        )
+        self.open_channel(self.fiber1, self.fiber2, 2000 * 100000000, 1, 0, 0)
+
         # node2 open channel node3
-        self.fiber2.get_client().open_channel(
-            {
-                "peer_id": self.fiber3.get_peer_id(),
-                "funding_amount": hex(200 * 100000000),
-                "public": True,
-            }
-        )
-        self.wait_for_channel_state(
-            self.fiber2.get_client(), self.fiber3.get_peer_id(), "CHANNEL_READY", 120
-        )
+        self.open_channel(self.fiber2, self.fiber3, 2000 * 100000000, 1, 0, 0)
+
         # node3 open channel node4
-        self.fiber3.get_client().open_channel(
-            {
-                "peer_id": self.fiber4.get_peer_id(),
-                "funding_amount": hex(200 * 100000000),
-                "public": True,
-            }
-        )
-        self.wait_for_channel_state(
-            self.fiber3.get_client(), self.fiber4.get_peer_id(), "CHANNEL_READY", 120
-        )
+        self.open_channel(self.fiber3, self.fiber4, 2000 * 100000000, 1, 0, 0)
+
         time.sleep(3)
         # node1 send payment to node4
         node4_info = self.fiber4.get_client().node_info()
         fiber4_pub = node4_info["node_id"]
-        for i in range(30):
+        for i in range(50):
             payment = self.fiber1.get_client().send_payment(
                 {
                     "target_pubkey": fiber4_pub,
-                    "amount": hex(1 * 100000000),
+                    "amount": hex(10 * 100000000),
                     "keysend": True,
                     # "invoice": "0x123",
                 }
@@ -83,25 +59,52 @@ class TestNodeState(FiberTest):
         N3N4_CHANNEL_ID = self.fiber4.get_client().list_channels({})["channels"][0][
             "channel_id"
         ]
-        time.sleep(1)
-        # todo 多编写一些多节点shutdown的用例
-        with pytest.raises(Exception) as exc_info:
-            self.fiber3.get_client().shutdown_channel(
-                {
-                    "channel_id": N3N4_CHANNEL_ID,
-                    "close_script": {
-                        "code_hash": "0x1bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                        "hash_type": "type",
-                        "args": self.fiber3.get_account()["lock_arg"],
-                    },
-                    "fee_rate": "0x3FC",
-                }
-            )
-        expected_error_message = "Unable to process shutdown command"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
+        self.get_fibers_balance_message()
+        fiber4_before_ckb_balance = self.Ckb_cli.wallet_get_capacity(
+            self.fiber4.get_account()["address"]["testnet"]
         )
+        # todo 多编写一些多节点shutdown的用例
+        for i in range(10):
+            try:
+                self.fiber3.get_client().shutdown_channel(
+                    {
+                        "channel_id": N3N4_CHANNEL_ID,
+                        "close_script": {
+                            "code_hash": "0x1bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                            "hash_type": "type",
+                            "args": self.fiber3.get_account()["lock_arg"],
+                        },
+                        "fee_rate": "0x3FC",
+                    }
+                )
+                break
+            except Exception as e:
+                print("e:", e)
+                time.sleep(1)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        fiber4_after_ckb_balance = self.Ckb_cli.wallet_get_capacity(
+            self.fiber4.get_account()["address"]["testnet"]
+        )
+
+        msg = self.get_tx_message(tx_hash)
+        if msg["output_cells"][0]["args"] == self.fibers[3].get_account()["lock_arg"]:
+            fiber4_balance = msg["output_cells"][0]["capacity"]
+        else:
+            fiber4_balance = msg["output_cells"][1]["capacity"]
+        time.sleep(20)
+        fiber_balance = self.get_fiber_balance(self.fiber1)
+        fiber1_send_balance = 2000 * 100000000 - fiber_balance["ckb"]["local_balance"]
+        fiber4_receive_balance = fiber4_balance - 62 * 100000000 - 1
+        channels = self.fibers[3].get_client().list_channels({"include_closed": True})
+        print("fiber4_before_ckb_balance:", fiber4_before_ckb_balance)
+        print("fiber4_after_ckb_balance:", fiber4_after_ckb_balance)
+        print("fiber1_send_balance:", fiber1_send_balance)
+        print("fiber_balance:", fiber_balance)
+        print("channels:", channels)
+        assert channels["channels"][0]["received_tlc_balance"] == "0x0"
+        assert fiber1_send_balance == fiber4_receive_balance
+
         # payment = self.fiber1.get_client().send_payment(
         #     {
         #         "target_pubkey": fiber4_pub,
