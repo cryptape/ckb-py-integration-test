@@ -18,12 +18,13 @@ from framework.config import get_tmp_path
 class FiberConfigPath(Enum):
     CURRENT_DEV = (
         "/source/template/fiber/dev_config_2.yml.j2",
-        "download/fiber/current/fnn",
+        # "download/fiber/0.5.0/fnn",
+        "download/fiber/951bd/fnn",
     )
 
     CURRENT_DEV_DEBUG = (
         "/source/template/fiber/dev_config_2.yml.j2",
-        "download/fiber/current/fnn.debug",
+        "download/fiber/0.0a1e98c.0/fnn.debug",
     )
 
     CURRENT_TESTNET = (
@@ -181,7 +182,7 @@ class Fiber:
             f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
         )
 
-    def start(self, node=None):
+    def start(self, password="password0"):
         # env_map = dict(os.environ)  # Make a copy of the current environment
         # if node:
         #     contract_map = self.get_contract_env_map(node)
@@ -189,7 +190,7 @@ class Fiber:
         # for key in env_map:
         #     print(f"{key}={env_map[key]}")
         run_command(
-            f"FIBER_SECRET_KEY_PASSWORD='password0' RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
+            f"FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
             # env=env_map,
         )
         # wait rpc start

@@ -130,10 +130,10 @@ class FiberTest(CkbTest):
         update_config.update(cls.start_fiber_config)
 
         cls.fiber1.prepare(update_config=update_config)
-        cls.fiber1.start(cls.node)
+        cls.fiber1.start()
 
         cls.fiber2.prepare(update_config=update_config)
-        cls.fiber2.start(cls.node)
+        cls.fiber2.start()
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
@@ -255,7 +255,7 @@ class FiberTest(CkbTest):
         self.fibers.append(fiber)
         self.new_fibers.append(fiber)
         fiber.prepare(update_config=update_config)
-        fiber.start(self.node)
+        fiber.start()
         return fiber
 
     def wait_for_channel_state(

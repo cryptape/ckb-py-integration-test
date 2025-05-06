@@ -32,7 +32,6 @@ class TestSendPaymentWithRouter(FiberTest):
        - 验证每个节点的金额和通道信息
     """
 
-
     def test_base_send_payment_with_router(self):
         """
         b-c-d-私-a网络
