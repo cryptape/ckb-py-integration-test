@@ -19,12 +19,12 @@ class FiberConfigPath(Enum):
     CURRENT_DEV = (
         "/source/template/fiber/dev_config_2.yml.j2",
         # "download/fiber/0.5.0/fnn",
-        "download/fiber/951bd/fnn",
+        "download/fiber/current/fnn",
     )
 
     CURRENT_DEV_DEBUG = (
         "/source/template/fiber/dev_config_2.yml.j2",
-        "download/fiber/0.0a1e98c.0/fnn.debug",
+        "download/fiber/current/fnn.debug",
     )
 
     CURRENT_TESTNET = (
