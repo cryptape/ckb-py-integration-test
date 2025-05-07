@@ -1,6 +1,6 @@
 set -ex
 
-DEFAULT_FIBER_BRANCH="yukang-fix-normal-shutdown-balance-issue"
+DEFAULT_FIBER_BRANCH="reconnect-two-times"
 DEFAULT_FIBER_URL="https://github.com/chenyukang/fiber.git"
 
 
