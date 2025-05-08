@@ -311,7 +311,7 @@ class TestForceRestart(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
-        time.sleep(1)
+        time.sleep(5)
         payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
@@ -351,7 +351,7 @@ class TestForceRestart(FiberTest):
                 "hash_algorithm": "sha256",
             }
         )
-        time.sleep(1)
+        time.sleep(5)
         payment = self.fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],

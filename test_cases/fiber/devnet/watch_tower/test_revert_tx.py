@@ -1,4 +1,5 @@
 import shutil
+import time
 
 from framework.basic_fiber import FiberTest
 
@@ -14,6 +15,7 @@ class RevertTx(FiberTest):
             f"{self.fiber1.tmp_path}/fiber", f"{self.fiber1.tmp_path}/fiber.bak"
         )
         self.fiber1.start()
+        time.sleep(5)
         # # restart fiber 1
         payment = self.fiber1.get_client().send_payment(
             {
@@ -58,6 +60,7 @@ class RevertTx(FiberTest):
             f"{self.fiber1.tmp_path}/fiber", f"{self.fiber1.tmp_path}/fiber.bak"
         )
         self.fiber1.start()
+        time.sleep(5)
         # # restart fiber 1
         payment = self.fiber2.get_client().send_payment(
             {
