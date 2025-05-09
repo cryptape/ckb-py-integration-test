@@ -32,7 +32,7 @@ SYSTEMS = {
     "Linux": {
         "x86_64": {
             "url": "https://github.com/nervosnetwork/fiber/releases/download/v{version}/fnn_v{"
-            "version}-x86_64-linux.tar.gz",
+            "version}-x86_64-portable.tar.gz",
             "ext": ".tar.gz",
         },
     },
