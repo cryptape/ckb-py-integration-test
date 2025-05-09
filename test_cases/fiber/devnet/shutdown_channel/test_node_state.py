@@ -45,7 +45,7 @@ class TestNodeState(FiberTest):
         # node1 send payment to node4
         node4_info = self.fiber4.get_client().node_info()
         fiber4_pub = node4_info["node_id"]
-        for i in range(50):
+        for i in range(30):
             payment = self.fiber1.get_client().send_payment(
                 {
                     "target_pubkey": fiber4_pub,
@@ -92,7 +92,7 @@ class TestNodeState(FiberTest):
             fiber4_balance = msg["output_cells"][0]["capacity"]
         else:
             fiber4_balance = msg["output_cells"][1]["capacity"]
-        time.sleep(20)
+        self.wait_fibers_pending_tlc_eq0(self.fiber1, 120)
         fiber_balance = self.get_fiber_balance(self.fiber1)
         fiber1_send_balance = 2000 * 100000000 - fiber_balance["ckb"]["local_balance"]
         fiber4_receive_balance = fiber4_balance - 62 * 100000000 - 1

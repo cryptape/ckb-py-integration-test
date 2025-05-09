@@ -159,6 +159,7 @@ class TestFiber(CkbTest):
         self.fiber2.stop()
         self.fiber1.start()
         self.fiber2.start()
+        time.sleep(5)
         begin = time.time()
         send_payment(
             self.fiber1.get_client(), self.fiber2.get_client(), 1000, None, 20 * 60
@@ -258,6 +259,7 @@ class TestFiber(CkbTest):
         self.fiber2.stop()
         self.fiber1.start()
         self.fiber2.start()
+        time.sleep(5)
         begin = time.time()
         # wait dry_run success
 
