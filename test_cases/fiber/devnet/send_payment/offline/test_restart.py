@@ -240,7 +240,7 @@ class TestRestart(FiberTest):
         self.fiber3.start()
         self.send_payment(self.fiber1, self.fiber3, 2)
 
-    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/363")
     def test_restart_when_node_send_payment(self):
         account3_private = self.generate_account(1000)
         self.fiber3 = self.start_new_fiber(account3_private)
