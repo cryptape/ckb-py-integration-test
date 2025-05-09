@@ -55,10 +55,16 @@ def miner_until_tx_committed(node, tx_hash, with_unknown=False):
 # support > 0x0 when ckb2023 active
 def miner_with_version(node, version):
     # get_block_template
-    block = node.getClient().get_block_template()
-    node.getClient().submit_block(
-        block["work_id"], block_template_transfer_to_submit_block(block, version)
-    )
+    for i in range(10):
+        try:
+            block = node.getClient().get_block_template()
+            node.getClient().submit_block(
+                block["work_id"],
+                block_template_transfer_to_submit_block(block, version),
+            )
+            break
+        except Exception as e:
+            time.sleep(1)
     pool = node.getClient().tx_pool_info()
     header = node.getClient().get_tip_header()
     print(

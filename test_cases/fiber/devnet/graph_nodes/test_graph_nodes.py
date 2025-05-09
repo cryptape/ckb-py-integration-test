@@ -3,6 +3,7 @@ import time
 import pytest
 
 from framework.basic_fiber import FiberTest
+from framework.util import generate_account_privakey
 
 
 class TestGraphNodes(FiberTest):
@@ -24,18 +25,18 @@ class TestGraphNodes(FiberTest):
         """
         # add nodes
         new_fibers = []
-        current_fiber = self.start_new_fiber(self.generate_random_preimage())
+        current_fiber = self.start_new_fiber(generate_account_privakey())
         for i in range(10):
-            new_fiber = self.start_new_fiber(self.generate_random_preimage())
+            new_fiber = self.start_new_fiber(generate_account_privakey())
             current_fiber.connect_peer(new_fiber)
             new_fibers.append(new_fiber)
             current_fiber = new_fiber
         time.sleep(1)
         current_fiber.connect_peer(self.fiber1)
 
-        current_fiber1 = self.start_new_fiber(self.generate_random_preimage())
+        current_fiber1 = self.start_new_fiber(generate_account_privakey())
         current_fiber1.connect_peer(self.fiber2)
-        current_fiber2 = self.start_new_fiber(self.generate_random_preimage())
+        current_fiber2 = self.start_new_fiber(generate_account_privakey())
         current_fiber2.connect_peer(current_fiber)
         # wait fiber3 nodes == 15
         self.wait_graph_nodes(self.fibers[3], 15)

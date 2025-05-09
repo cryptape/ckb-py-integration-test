@@ -52,7 +52,7 @@ class TestPrivateChannel(FiberTest):
         self.wait_for_channel_state(
             self.fibers[3].get_client(), self.fibers[0].get_peer_id(), "CHANNEL_READY"
         )
-
+        time.sleep(1)
         for i in range(1, len(self.fibers)):
             self.send_payment(self.fibers[0], self.fibers[i], 1 * 100000000)
 

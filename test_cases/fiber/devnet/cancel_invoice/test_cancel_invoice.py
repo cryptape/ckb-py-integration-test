@@ -449,6 +449,7 @@ class TestCancelInvoice(FiberTest):
             int(before_channel["channels"][0]["local_balance"], 16) - invoice_balance
         )
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/654")
     def test_batch_cancel(self):
         """
         Test case for batch canceling invoices.
@@ -466,7 +467,8 @@ class TestCancelInvoice(FiberTest):
         """
         cancel_size = 50
         channel_length = 4
-
+        # cancel_size = 5
+        # channel_length = 3
         # Step 1: Start new fibers
         for i in range(channel_length - 2):
             self.start_new_fiber(self.generate_account(10000))

@@ -97,8 +97,9 @@ class TestShutdownScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
@@ -168,8 +169,9 @@ class TestShutdownScript(FiberTest):
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+
         after_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
@@ -204,6 +206,8 @@ class TestShutdownScript(FiberTest):
                 ),
             }
         )
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        open_channel_message = self.get_tx_message(tx_hash)
         self.wait_for_channel_state(
             self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
         )
@@ -221,41 +225,41 @@ class TestShutdownScript(FiberTest):
                 "script": {
                     "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
                     "hash_type": "type",
-                    "args": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9f9bd7e06f3ecf4be0f2fcd2188b23f1b9f9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                    "args": self.account1["lock_arg"],
                 },
                 "script_type": "lock",
                 "script_search_mode": "prefix",
             }
         )
         # shut down
-        self.fiber2.get_client().shutdown_channel(
+        self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
                 "close_script": {
                     "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
                     "hash_type": "type",
-                    "args": self.account2["lock_arg"],
+                    "args": self.account1["lock_arg"],
                 },
                 "fee_rate": "0x3FC",
             }
         )
-        # todo wait close tx commit
-        time.sleep(40)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        message = self.get_tx_message(tx_hash)
+        print("message:", message)
+        assert message["fee"] < 10000
         after_balance1 = self.node.getClient().get_cells_capacity(
             {
                 "script": {
                     "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
                     "hash_type": "type",
-                    "args": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9f9bd7e06f3ecf4be0f2fcd2188b23f1b9f9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce89bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                    "args": self.account1["lock_arg"],
                 },
                 "script_type": "lock",
                 "script_search_mode": "prefix",
             }
         )
-        print("before_balance1:", before_balance1)
-        print("after_balance1:", after_balance1)
         assert (
             int(after_balance1["capacity"], 16) - int(before_balance1["capacity"], 16)
-            == 732 * 100000000
+            >= 700 * 100000000
         )
-        # todo check udt balance

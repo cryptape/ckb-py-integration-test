@@ -561,20 +561,24 @@ class TestFundingAmount(FiberTest):
         account2_capacity = self.Ckb_cli.wallet_get_capacity(
             self.fiber2.get_account()["address"]["testnet"]
         )
-
+        channels = self.fiber1.get_client().list_channels({})
+        print("before channels:", channels)
         self.fiber2.get_client().accept_channel(
             {
                 "temporary_channel_id": temporary_channel["temporary_channel_id"],
                 "funding_amount": hex((int(account2_capacity) + 1) * 100000000),
             }
         )
+        time.sleep(1)
+        channels = self.fiber1.get_client().list_channels({})
+        assert len(channels["channels"]) == 0
 
-        self.wait_for_channel_state(
-            self.fiber1.get_client(),
-            self.fiber2.get_peer_id(),
-            "COLLABORATING_FUNDING_TX",
-            120,
-        )
+        # self.wait_for_channel_state(
+        #     self.fiber1.get_client(),
+        #     self.fiber2.get_peer_id(),
+        #     "COLLABORATING_FUNDING_TX",
+        #     120,
+        # )
         # 失败了, 好像不能再次accept_channel
         with pytest.raises(Exception) as exc_info:
             self.fiber2.get_client().accept_channel(
@@ -652,13 +656,16 @@ class TestFundingAmount(FiberTest):
                 "funding_amount": hex(100000 * 100000000 + 1),
             }
         )
+
+        channels = self.fiber2.get_client().list_channels({})
+        assert len(channels["channels"]) == 0
         # todo add check
-        self.wait_for_channel_state(
-            self.fiber1.get_client(),
-            self.fiber2.get_peer_id(),
-            "COLLABORATING_FUNDING_TX",
-            120,
-        )
+        # self.wait_for_channel_state(
+        #     self.fiber1.get_client(),
+        #     self.fiber2.get_peer_id(),
+        #     "COLLABORATING_FUNDING_TX",
+        #     120,
+        # )
 
     @pytest.mark.skip(
         "dev 的fiber 在测试 accept_channel(udt>0)  的时候发现构造的交易 cellDep 只有xudt ,导致ScriptNotFound"

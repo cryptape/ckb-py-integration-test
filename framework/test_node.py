@@ -281,8 +281,10 @@ class CkbNode:
         # run_command("kill {pid}".format(pid=self.ckb_pid))
         # self.ckb_pid = -1
         port = self.rpcUrl.split(":")[-1]
-
-        run_command(f"kill $(lsof -t -i:{port})", check_exit_code=False)
+        run_command(
+            f"kill $(lsof -i:{port} | grep LISTEN | awk '{{print $2}}')",
+            check_exit_code=False,
+        )
         self.ckb_pid = -1
         time.sleep(3)
 
@@ -318,7 +320,7 @@ class CkbNode:
                     root_path=get_project_root(),
                     spec_path=self.ckb_config_path.ckb_spec_path,
                 ),
-                self.ckb_dir,
+                "{ckb_dir}/dev.toml".format(ckb_dir=self.ckb_dir),
             )
 
         shutil.copy(

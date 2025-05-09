@@ -4,6 +4,7 @@ import socket
 from framework.helper.udt_contract import UdtContract, issue_udt_tx
 from framework.test_fiber import Fiber, FiberConfigPath
 from framework.util import generate_account_privakey
+from framework.util import ACCOUNT_PRIVATE_KEY_INDEX
 import time
 import random
 import datetime
@@ -21,7 +22,9 @@ class FiberTest(CkbTest):
     fiber2: Fiber
     debug = False
     first_debug = False
+    fiber_version = FiberConfigPath.CURRENT_DEV
     logger = logging.getLogger(__name__)
+    start_fiber_config = {}
 
     @classmethod
     def setup_class(cls):
@@ -32,6 +35,8 @@ class FiberTest(CkbTest):
         Returns:
 
         """
+        global ACCOUNT_PRIVATE_KEY_INDEX
+        ACCOUNT_PRIVATE_KEY_INDEX = 0
         cls.account1_private_key = cls.Config.ACCOUNT_PRIVATE_1
         cls.account2_private_key = cls.Config.ACCOUNT_PRIVATE_2
         cls.account1 = cls.Ckb_cli.util_key_info_by_private_key(
@@ -72,14 +77,14 @@ class FiberTest(CkbTest):
         cls.fibers = []
         cls.new_fibers = []
         cls.fiber1 = Fiber.init_by_port(
-            FiberConfigPath.CURRENT_DEV,
+            cls.fiber_version,
             cls.account1_private_key,
             "fiber/node1",
             "8228",
             "8227",
         )
         cls.fiber2 = Fiber.init_by_port(
-            FiberConfigPath.CURRENT_DEV,
+            cls.fiber_version,
             cls.account2_private_key,
             "fiber/node2",
             "8229",
@@ -113,32 +118,22 @@ class FiberTest(CkbTest):
         cls.node.start_miner()
         # deploy fiber
         # start 2 fiber with xudt
+        update_config = {
+            "ckb_rpc_url": cls.node.rpcUrl,
+            "ckb_udt_whitelist": True,
+            "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
+                deploy_hash, deploy_index, True, cls.node.rpcUrl
+            ),
+            "xudt_cell_deps_tx_hash": deploy_hash,
+            "xudt_cell_deps_index": deploy_index,
+        }
+        update_config.update(cls.start_fiber_config)
 
-        cls.fiber1.prepare(
-            update_config={
-                "ckb_rpc_url": cls.node.rpcUrl,
-                "ckb_udt_whitelist": True,
-                "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
-                    deploy_hash, deploy_index, True, cls.node.rpcUrl
-                ),
-                "xudt_cell_deps_tx_hash": deploy_hash,
-                "xudt_cell_deps_index": deploy_index,
-            }
-        )
-        cls.fiber1.start(cls.node)
+        cls.fiber1.prepare(update_config=update_config)
+        cls.fiber1.start()
 
-        cls.fiber2.prepare(
-            update_config={
-                "ckb_rpc_url": cls.node.rpcUrl,
-                "ckb_udt_whitelist": True,
-                "xudt_script_code_hash": cls.Contract.get_ckb_contract_codehash(
-                    deploy_hash, deploy_index, True, cls.node.rpcUrl
-                ),
-                "xudt_cell_deps_tx_hash": deploy_hash,
-                "xudt_cell_deps_index": deploy_index,
-            }
-        )
-        cls.fiber2.start(cls.node)
+        cls.fiber2.prepare(update_config=update_config)
+        cls.fiber2.start()
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
@@ -210,7 +205,7 @@ class FiberTest(CkbTest):
         self,
         account_private_key,
         config=None,
-        fiber_version=FiberConfigPath.CURRENT_DEV,
+        fiber_version=fiber_version,
     ):
         i = len(self.new_fibers)
         fiber = Fiber.init_by_port(
@@ -246,6 +241,7 @@ class FiberTest(CkbTest):
                 "xudt_cell_deps_tx_hash": deploy_hash,
                 "xudt_cell_deps_index": deploy_index,
             }
+        update_config.update(self.start_fiber_config)
 
         i = len(self.new_fibers)
         # start fiber3
@@ -259,7 +255,7 @@ class FiberTest(CkbTest):
         self.fibers.append(fiber)
         self.new_fibers.append(fiber)
         fiber.prepare(update_config=update_config)
-        fiber.start(self.node)
+        fiber.start()
         return fiber
 
     def wait_for_channel_state(
@@ -307,6 +303,7 @@ class FiberTest(CkbTest):
         fiber2_balance,
         fiber1_fee=1000,
         fiber2_fee=1000,
+        udt=None,
     ):
         fiber1.connect_peer(fiber2)
         time.sleep(1)
@@ -343,6 +340,7 @@ class FiberTest(CkbTest):
                 "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
                 "tlc_fee_proportional_millionths": hex(fiber1_fee),
                 "public": True,
+                "funding_udt_type_script": udt,
             }
         )
         self.wait_for_channel_state(
@@ -356,7 +354,7 @@ class FiberTest(CkbTest):
         #         "keysend": True,
         #     }
         # )
-        self.send_payment(fiber1, fiber2, fiber2_balance, True, None, 10)
+        self.send_payment(fiber1, fiber2, fiber2_balance, True, udt, 10)
         fiber2.get_client().update_channel(
             {
                 "channel_id": channels["channels"][0]["channel_id"],
@@ -367,6 +365,43 @@ class FiberTest(CkbTest):
         # channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
         # assert channels["channels"][0]["remote_balance"] == hex(fiber2_balance)
+
+    def send_invoice_payment(
+        self, fiber1, fiber2, amount, wait=True, udt=None, try_count=5
+    ):
+        invoice = fiber2.get_client().new_invoice(
+            {
+                "amount": hex(amount),
+                "currency": "Fibd",
+                "description": "test invoice generated by node2",
+                "expiry": "0xe10",
+                "final_cltv": "0x28",
+                "payment_preimage": self.generate_random_preimage(),
+                "hash_algorithm": "sha256",
+                "udt_type_script": udt,
+            }
+        )
+        for i in range(try_count):
+            try:
+                payment = fiber1.get_client().send_payment(
+                    {
+                        "invoice": invoice["invoice_address"],
+                    }
+                )
+                if wait:
+                    self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+                return payment["payment_hash"]
+            except Exception as e:
+                time.sleep(1)
+                continue
+        payment = fiber1.get_client().send_payment(
+            {
+                "invoice": invoice["invoice_address"],
+            }
+        )
+        if wait:
+            self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+        return payment["payment_hash"]
 
     def send_payment(self, fiber1, fiber2, amount, wait=True, udt=None, try_count=5):
         for i in range(try_count):
@@ -407,14 +442,14 @@ class FiberTest(CkbTest):
             "args": account1["lock_arg"],
         }
 
-    def wait_payment_state(self, client, payment_hash, status="Success", timeout=120):
+    def wait_payment_state(self, client, payment_hash, status="Success", timeout=360):
         for i in range(timeout):
             result = client.get_client().get_payment({"payment_hash": payment_hash})
             if result["status"] == status:
                 return
             time.sleep(1)
         raise TimeoutError(
-            f"status did not reach state {expected_state} within timeout period."
+            f"status did not reach state: {status} within timeout period."
         )
 
     def wait_payment_finished(self, client, payment_hash, timeout=120):
@@ -436,22 +471,31 @@ class FiberTest(CkbTest):
 
     def get_fiber_balance(self, fiber):
         channels = fiber.get_client().list_channels({})
+        balance_map = {}
+
         channels_balance = 0
         channels_offered_tlc_balance = 0
         channels_received_tlc_balance = 0
         for i in range(len(channels["channels"])):
             channel = channels["channels"][i]
             if channel["state"]["state_name"] == "CHANNEL_READY":
-                channels_balance += int(channel["local_balance"], 16)
-                channels_offered_tlc_balance += int(channel["offered_tlc_balance"], 16)
-                channels_received_tlc_balance += int(
+                key = "ckb"
+                if channel["funding_udt_type_script"] is not None:
+                    key = channel["funding_udt_type_script"]["args"]
+                if balance_map.get(key) is None:
+                    balance_map[key] = {
+                        "local_balance": 0,
+                        "offered_tlc_balance": 0,
+                        "received_tlc_balance": 0,
+                    }
+                balance_map[key]["local_balance"] += int(channel["local_balance"], 16)
+                balance_map[key]["offered_tlc_balance"] += int(
+                    channel["offered_tlc_balance"], 16
+                )
+                balance_map[key]["received_tlc_balance"] += int(
                     channel["received_tlc_balance"], 16
                 )
-        return {
-            "local_balance": channels_balance,
-            "offered_tlc_balance": channels_offered_tlc_balance,
-            "received_tlc_balance": channels_received_tlc_balance,
-        }
+        return balance_map
 
     def calculate_tx_fee(self, balance, fee_list):
         """
@@ -484,19 +528,22 @@ class FiberTest(CkbTest):
             f"status did not reach state {expected_state} within timeout period."
         )
 
-    def wait_and_check_tx_pool_fee(self, fee_rate, check=True, try_size=120):
+    def wait_and_check_tx_pool_fee(
+        self, fee_rate, check=True, try_size=120, up_and_down_rate=0.1
+    ):
         self.wait_tx_pool(1, try_size)
         pool = self.node.getClient().get_raw_tx_pool()
         pool_tx_detail_info = self.node.getClient().get_pool_tx_detail_info(
             pool["pending"][0]
         )
         if check:
-            assert (
-                int(pool_tx_detail_info["score_sortkey"]["fee"], 16)
-                * 1000
-                / int(pool_tx_detail_info["score_sortkey"]["weight"], 16)
-                == fee_rate
-            )
+            assert int(pool_tx_detail_info["score_sortkey"]["fee"], 16) * 1000 / int(
+                pool_tx_detail_info["score_sortkey"]["weight"], 16
+            ) <= fee_rate * (1 + up_and_down_rate)
+
+            assert int(pool_tx_detail_info["score_sortkey"]["fee"], 16) * 1000 / int(
+                pool_tx_detail_info["score_sortkey"]["weight"], 16
+            ) >= fee_rate * (1 - up_and_down_rate)
         return pool["pending"][0]
 
     def wait_invoice_state(
@@ -576,7 +623,16 @@ class FiberTest(CkbTest):
                 }
             )
         print({"input_cells": input_cells, "output_cells": output_cells})
-        return {"input_cells": input_cells, "output_cells": output_cells}
+        input_cap = 0
+        for i in range(len(input_cells)):
+            input_cap = input_cap + input_cells[i]["capacity"]
+        for i in range(len(output_cells)):
+            input_cap = input_cap - output_cells[i]["capacity"]
+        return {
+            "input_cells": input_cells,
+            "output_cells": output_cells,
+            "fee": input_cap,
+        }
 
     def get_fiber_env(self, new_fiber_count=0):
         # self.logger.debug ckb tip number
@@ -662,6 +718,37 @@ class FiberTest(CkbTest):
                 self.logger.debug(f"Created At: {created_at}")
                 self.logger.debug("-" * 40)
 
+    def get_node_hops_info(self, fiber1, fiber2, balance, udt=None):
+        node2_id = fiber2.get_client().node_info()["node_id"]
+        channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
+        hops_info = []
+        for channel in channels["channels"]:
+            if channel["funding_udt_type_script"] != udt:
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:funding_udt_type_script skip"
+                )
+                continue
+            # check balance
+            if int(channel["local_balance"], 16) < balance:
+                self.logger.debug(f"{channel['channel_outpoint']}:local_balance skip")
+                continue
+            # check is true
+            if channel["state"]["state_name"] != "CHANNEL_READY":
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:channel state skip,{channel['state']['state_name']}"
+                )
+                continue
+            if not channel["enabled"]:
+                self.logger.debug(
+                    f"{channel['channel_outpoint']}:channel state skip,{channel['enabled']}"
+                )
+                continue
+
+            hops_info.append(
+                {"pubkey": node2_id, "channel_outpoint": channel["channel_outpoint"]}
+            )
+        return hops_info
+
     def get_fiber_message(self, fiber):
         channels = fiber.get_client().list_channels({})
         channels = channels["channels"]
@@ -715,6 +802,18 @@ class FiberTest(CkbTest):
         for _ in range(num):
             hash_str += hex(random.randint(0, 15))[2:]
         return hash_str
+
+    def wait_fibers_pending_tlc_eq0(self, fiber, wait_times=30):
+        for i in range(wait_times):
+            fiber_balance = self.get_fiber_balance(fiber)
+            if fiber_balance["ckb"]["offered_tlc_balance"] != 0:
+                time.sleep(1)
+                continue
+            if fiber_balance["ckb"]["received_tlc_balance"] != 0:
+                time.sleep(1)
+                continue
+            return
+        raise TimeoutError(f"{fiber_balance}")
 
 
 def check_port(port):

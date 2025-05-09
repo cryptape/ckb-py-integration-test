@@ -106,6 +106,49 @@ class TestTlcFeeProportionalMillionths(FiberTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
+    def test_tlc_fee_proportional_millionths_100_100000000_1000_1000(self):
+        """
+        tlc_fee_proportional_millionths ：100 * 100000000 * 1000 * 1000
+        发送 1，收取100ckb的手续费
+        Returns:
+        """
+        temporary_channel_id = self.fiber2.get_client().open_channel(
+            {
+                "peer_id": self.fiber1.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+                # "tlc_min_value": hex(2 * 100000000)
+                # "funding_fee_rate": "0xffff",
+                "tlc_fee_proportional_millionths": hex(100 * 100000000 * 1000 * 1000),
+            }
+        )
+        self.wait_for_channel_state(
+            self.fiber2.get_client(), self.fiber1.get_peer_id(), "CHANNEL_READY", 120
+        )
+        channel = self.fiber1.get_client().list_channels({})
+        assert channel["channels"][0]["tlc_fee_proportional_millionths"] == "0x3e8"
+        channel = self.fiber2.get_client().list_channels({})
+        assert channel["channels"][0]["tlc_fee_proportional_millionths"] == hex(
+            100 * 100000000 * 1000000
+        )
+        fiber3 = self.start_new_fiber(self.generate_account(10000))
+        fiber3.connect_peer(self.fiber2)
+        time.sleep(1)
+        fiber3.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+                # "tlc_min_value": hex(2 * 100000000)
+                # "funding_fee_rate": "0xffff",
+                "tlc_fee_proportional_millionths": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+            }
+        )
+        self.wait_for_channel_state(
+            fiber3.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
+        )
+        self.send_payment(fiber3, self.fiber1, 1)
+
     def test_ckb_tlc_fee_proportional_millionths_not_eq_default(self):
         """
         tlc_fee_proportional_millionths != default
@@ -577,4 +620,45 @@ class TestTlcFeeProportionalMillionths(FiberTest):
             after_channel_12["channels"][0]["local_balance"], 16
         ) == int(invoice_balance, 16)
 
-    # todo tlc_fee_proportional_millionths add more test case
+    def test_ckb_tlc_fee_proportional_millionths_is_zero(self):
+        """
+        tlc_fee_proportional_millionths == 0
+
+        Returns:
+        """
+        account3_private_key = self.generate_account(1000)
+        new_fiber = self.start_new_fiber(account3_private_key)
+        self.fiber2.connect_peer(new_fiber)
+        time.sleep(1)
+        temporary_channel_id = self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(500 * 100000000),
+                "public": True,
+                # "funding_fee_rate": "0xffff",
+                # "tlc_fee_proportional_millionths": hex(1000000),
+            }
+        )
+        time.sleep(1)
+        self.wait_for_channel_state(
+            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
+        )
+        fiber2_tlc_fee = 0
+        temporary_channel_id = self.fiber2.get_client().open_channel(
+            {
+                "peer_id": new_fiber.get_peer_id(),
+                "funding_amount": hex(1000 * 100000000),
+                "public": True,
+                "tlc_fee_proportional_millionths": hex(fiber2_tlc_fee),
+                # "tlc_min_value": hex(2 * 100000000)
+                # "funding_fee_rate": "0xffff",
+                # "tlc_fee_proportional_millionths": "0x4B0",
+            }
+        )
+        time.sleep(1)
+        self.wait_for_channel_state(
+            self.fiber2.get_client(), new_fiber.get_peer_id(), "CHANNEL_READY", 120
+        )
+        payment_hash = self.send_payment(self.fiber1, new_fiber, 100 * 100000000)
+        payment = self.fiber1.get_client().get_payment({"payment_hash": payment_hash})
+        assert payment["fee"] == "0x0"

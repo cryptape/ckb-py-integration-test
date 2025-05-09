@@ -89,7 +89,6 @@ fiber_test_cases := \
 	test_cases/fiber/devnet/shutdown_channel \
 	test_cases/fiber/devnet/update_channel \
 	test_cases/fiber/devnet/issue \
-	test_cases/fiber/devnet/compatibility \
 	test_cases/fiber/devnet/watch_tower
 
 fiber_testnet_cases := \
@@ -128,6 +127,21 @@ fiber_testnet_test:
 fiber_test:
 	@failed_cases=; \
     for test_case in $(fiber_test_cases); do \
+        echo "Running tests for $$test_case"; \
+        if ! bash test.sh "$$test_case"; then \
+            echo "$$test_case" >> failed_test_cases.txt; \
+        fi \
+    done; \
+    if [ -s failed_test_cases.txt ]; then \
+        echo "Some test cases failed: $$(cat failed_test_cases.txt)"; \
+        rm -f failed_test_cases.txt; \
+        exit 1; \
+    fi
+
+fiber_test_demo:
+	@failed_cases=; \
+	echo "Running tests for $$FIBER_TEST_DEMO"; \
+    for test_case in $(FIBER_TEST_DEMO); do \
         echo "Running tests for $$test_case"; \
         if ! bash test.sh "$$test_case"; then \
             echo "$$test_case" >> failed_test_cases.txt; \

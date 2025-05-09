@@ -204,7 +204,7 @@ class FindPath(FiberTest):
                     raise Exception("payment failed")
         for i in range(len(self.fibers)):
             channels_balance = self.get_fiber_balance(self.fibers[i])
-            assert channels_balance["offered_tlc_balance"] == 0
-            assert channels_balance["received_tlc_balance"] == 0
+            assert channels_balance["ckb"]["offered_tlc_balance"] == 0
+            assert channels_balance["ckb"]["received_tlc_balance"] == 0
 
     # FiberTest.debug = True

@@ -12,6 +12,7 @@ H256_ZEROS = "0x0000000000000000000000000000000000000000000000000000000000000000
 
 U128_MIN_COMPATIBLE = 0  # Adjust according to your definition
 U128_MAX_COMPATIBLE = 2**128 - 1
+ACCOUNT_PRIVATE_KEY_INDEX = 0
 import random
 
 import logging
@@ -203,13 +204,12 @@ def generate_random_preimage():
 
 
 def generate_account_privakey():
-    hash_str = "0x"
-    for _ in range(64):
-        hash_str += hex(random.randint(0, 15))[2:]
-    return hash_str
+    global ACCOUNT_PRIVATE_KEY_INDEX
+    ACCOUNT_PRIVATE_KEY_INDEX = ACCOUNT_PRIVATE_KEY_INDEX + 1
+    return f"{ACCOUNT_PRIVATE_KEY_INDEX}".zfill(64)
 
 
 if __name__ == "__main__":
-    ret = to_big_uint128_le_compatible(100000)
-    ret1 = to_int_from_big_uint128_le(ret)
-    LOGGER.debug(ret1)
+    for i in range(100):
+        account = generate_account_privakey()
+        print(account)

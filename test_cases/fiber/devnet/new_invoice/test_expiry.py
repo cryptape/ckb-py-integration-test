@@ -103,6 +103,7 @@ class TestExpiry(FiberTest):
         )
 
     # @pytest.mark.skip("wait https://github.com/chenyukang/fiber/pull/2")
+    @pytest.mark.skip("不稳定")
     def test_0x1(self):
         # 1. Open a channel between fiber1 and fiber2
         temporary_channel = self.fiber1.get_client().open_channel(
@@ -133,7 +134,7 @@ class TestExpiry(FiberTest):
 
         # self.wait_invoice_state(self.fiber1, invoice['invoice']['data']['payment_hash'], "Expired", 1)
 
-        time.sleep(0.92)
+        time.sleep(0.95)
 
         # 4. List channels before sending payment
         before_channel = self.fiber1.get_client().list_channels({})

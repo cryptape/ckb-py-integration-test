@@ -1,4 +1,5 @@
 import shutil
+import time
 
 from framework.basic_fiber import FiberTest
 
@@ -14,6 +15,7 @@ class RevertTx(FiberTest):
             f"{self.fiber1.tmp_path}/fiber", f"{self.fiber1.tmp_path}/fiber.bak"
         )
         self.fiber1.start()
+        time.sleep(5)
         # # restart fiber 1
         payment = self.fiber1.get_client().send_payment(
             {
@@ -36,12 +38,6 @@ class RevertTx(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -64,6 +60,7 @@ class RevertTx(FiberTest):
             f"{self.fiber1.tmp_path}/fiber", f"{self.fiber1.tmp_path}/fiber.bak"
         )
         self.fiber1.start()
+        time.sleep(5)
         # # restart fiber 1
         payment = self.fiber2.get_client().send_payment(
             {
@@ -86,12 +83,6 @@ class RevertTx(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )

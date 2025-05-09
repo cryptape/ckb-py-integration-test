@@ -46,12 +46,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -80,7 +74,7 @@ class TestWatchTower(FiberTest):
         self.fiber1.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # 11. Wait for node2 splits  the transaction to be committed and check the transaction message.
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -152,12 +146,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -186,7 +174,7 @@ class TestWatchTower(FiberTest):
         self.fiber1.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 11: Wait for node2 splits the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -249,12 +237,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -283,7 +265,7 @@ class TestWatchTower(FiberTest):
         self.fiber2.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 11: Wait for node1 splits the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -346,12 +328,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -380,7 +356,7 @@ class TestWatchTower(FiberTest):
         self.fiber2.stop()
 
         # Step 10: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 11: Wait for node1 splits the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -450,12 +426,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -484,7 +454,7 @@ class TestWatchTower(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -551,12 +521,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -585,7 +549,7 @@ class TestWatchTower(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -654,12 +618,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -688,7 +646,7 @@ class TestWatchTower(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -755,12 +713,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -789,7 +741,7 @@ class TestWatchTower(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -865,12 +817,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -899,7 +845,7 @@ class TestWatchTower(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -969,12 +915,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -1001,9 +941,11 @@ class TestWatchTower(FiberTest):
 
         # Step 10: Stop node1
         self.fiber1.stop()
+        self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
+        self.fiber2.start()
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1072,12 +1014,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -1106,7 +1042,7 @@ class TestWatchTower(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1175,12 +1111,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -1209,7 +1139,7 @@ class TestWatchTower(FiberTest):
         self.fiber1.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1277,12 +1207,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account1["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -1311,7 +1235,7 @@ class TestWatchTower(FiberTest):
         self.fiber2.stop()
 
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
+        self.node.getClient().generate_epochs("0x6", 0)
 
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
@@ -1383,12 +1307,6 @@ class TestWatchTower(FiberTest):
                 "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
                     "channel_id"
                 ],
-                "close_script": {
-                    "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.account2["lock_arg"],
-                },
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
@@ -1415,10 +1333,10 @@ class TestWatchTower(FiberTest):
 
         # Step 10: Stop node1
         self.fiber1.stop()
-
+        self.fiber2.stop()
         # Step 11: Generate epochs
-        self.node.getClient().generate_epochs("0xa")
-
+        self.node.getClient().generate_epochs("0x6", 0)
+        self.fiber2.start()
         # Step 12: Wait for the transaction to be committed and check the transaction message
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1000)
         tx_message = self.get_tx_message(tx_hash)
