@@ -382,4 +382,3 @@ class TestAllowSelfPayment(FiberTest):
             }
         )
         self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
-        # after fix todo add check

@@ -276,33 +276,33 @@ class TestGraphChannels(FiberTest):
         node_info = self.fiber1.get_client().node_info()
         print("node1_channels:", node1_channels)
         key = (
-            "fee_rate_of_node1"
+            "update_info_of_node1"
             if node3_channels["channels"][0]["node1"] == node_info["node_id"]
-            else "fee_rate_of_node2"
+            else "update_info_of_node2"
         )
         print("key:", key)
         assert (
-            node1_channels["channels"][0][key]
+            node1_channels["channels"][0][key]["fee_rate"]
             == update_channel_param["tlc_fee_proportional_millionths"]
         )
         print("node2_channels", node2_channels)
         key = (
-            "fee_rate_of_node1"
+            "update_info_of_node1"
             if node3_channels["channels"][0]["node1"] == node_info["node_id"]
-            else "fee_rate_of_node2"
+            else "update_info_of_node2"
         )
         assert (
-            node2_channels["channels"][0][key]
+            node2_channels["channels"][0][key]["fee_rate"]
             == update_channel_param["tlc_fee_proportional_millionths"]
         )
         print("node3_channels", node3_channels)
         key = (
-            "fee_rate_of_node1"
+            "update_info_of_node1"
             if node3_channels["channels"][0]["node1"] == node_info["node_id"]
-            else "fee_rate_of_node2"
+            else "update_info_of_node2"
         )
         assert (
-            node3_channels["channels"][0][key]
+            node3_channels["channels"][0][key]["fee_rate"]
             == update_channel_param["tlc_fee_proportional_millionths"]
         )
 
@@ -365,29 +365,29 @@ class TestGraphChannels(FiberTest):
         # created_timestamp
         # fee_rate_of_node2
         assert (
-            node1_channels["channels"][0]["fee_rate_of_node2"]
+            node1_channels["channels"][0]["update_info_of_node2"]["fee_rate"]
             == node2_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node2_channels["channels"][0]["fee_rate_of_node2"]
+            node2_channels["channels"][0]["update_info_of_node2"]["fee_rate"]
             == node2_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node3_channels["channels"][0]["fee_rate_of_node2"]
+            node3_channels["channels"][0]["update_info_of_node2"]["fee_rate"]
             == node2_info["tlc_fee_proportional_millionths"]
         )
 
         # fee_rate_of_node1
         assert (
-            node1_channels["channels"][0]["fee_rate_of_node1"]
+            node1_channels["channels"][0]["update_info_of_node1"]["fee_rate"]
             == node1_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node2_channels["channels"][0]["fee_rate_of_node1"]
+            node2_channels["channels"][0]["update_info_of_node1"]["fee_rate"]
             == node1_info["tlc_fee_proportional_millionths"]
         )
         assert (
-            node3_channels["channels"][0]["fee_rate_of_node1"]
+            node3_channels["channels"][0]["update_info_of_node1"]["fee_rate"]
             == node1_info["tlc_fee_proportional_millionths"]
         )
 

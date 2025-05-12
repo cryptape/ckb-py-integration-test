@@ -7,6 +7,7 @@ from framework.basic_fiber import FiberTest
 
 class TestNodeInfo(FiberTest):
 
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/631")
     def test_commit_hash(self):
         """
 
@@ -69,6 +70,7 @@ class TestNodeInfo(FiberTest):
         assert node_info["tlc_min_value"] == hex(0)
 
         # tlc_max_value
+        # https://github.com/nervosnetwork/fiber/issues/631
         assert node_info["tlc_max_value"] == hex(0)
 
         # tlc_fee_proportional_millionths
@@ -148,11 +150,11 @@ class TestNodeInfo(FiberTest):
             == int(after_node1_info["channel_count"], 16) - 1
         )
 
-    def test_pending_channel_count(self):
-        """
-        check pending_channel_count
-        Returns:
-        """
+    # def test_pending_channel_count(self):
+    #     """
+    #     check pending_channel_count
+    #     Returns:
+    #     """
 
     @pytest.mark.skip("")
     def test_network_sync_status(self):

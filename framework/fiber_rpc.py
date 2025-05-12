@@ -16,6 +16,15 @@ class FiberRPCClient:
     def send_btc(self, btc_pay_req):
         return self.call("send_btc", [btc_pay_req])
 
+    def build_router(self, param):
+        return self.call("build_router", [param])
+
+    def send_payment_with_router(self, param):
+        return self.call("send_payment_with_router", [param])
+
+    def abandon_channel(self, param):
+        return self.call("abandon_channel", [param])
+
     def open_channel(self, param):
         """
         curl --location 'http://127.0.0.1:8227' --header 'Content-Type: application/json' --data '{
@@ -193,8 +202,14 @@ class FiberRPCClient:
         """
         return self.call("graph_channels", [param])
 
+    def remove_watch_channel(self, param):
+        return self.call("remove_watch_channel", [param])
+
     def get_peer_id(self):
         return self.node_info()["addresses"][0].split("/")[-1]
+
+    def list_peers(self):
+        return self.call("list_peers", [])
 
     def call(self, method, params):
         headers = {"content-type": "application/json"}
@@ -204,7 +219,7 @@ class FiberRPCClient:
                 url=self.url, data=json.dumps(data, indent=4)
             )
         )
-        for i in range(100):
+        for i in range(200):
             try:
                 response = requests.post(
                     self.url, data=json.dumps(data), headers=headers
