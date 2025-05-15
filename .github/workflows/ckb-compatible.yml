@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       ckb_version:
-        description: 'CKB Version (e.g., v0.200.0-rc1)'
+        description: 'CKB Version (e.g., v0.201.0)'
         required: true
-        default: 'v0.200.0-rc1'
+        default: 'v0.201.0'
 
 jobs:
   ckb-start-validation:
@@ -20,20 +20,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm64, centos-8, windows-latest]
+        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm, centos-stream9, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
-          - os: ubuntu-24.04-arm64
+          - os: ubuntu-24.04-arm
             arch: arm64
-            runs-on: [self-hosted, ubuntu-24.04-arm64, ARM64, Linux]
           - os: macos-13
             arch: x86
           - os: macos-14
             arch: arm64
-          - os: centos-8
+          - os: centos-stream9
             arch: x64
-            runs-on: [self-hosted, centos8, X64, Linux]
+            container: quay.io/centos/centos:stream9  # Use CentOS Stream 9 container
           - os: windows-latest
             arch: x64
 
@@ -51,12 +50,17 @@ jobs:
         shell: pwsh
         run: |
           $env:CKB_RELEASE_URL = "https://github.com/nervosnetwork/ckb/releases/download/${{ github.event.inputs.ckb_version }}"
-          # Ensure GITHUB_ENV is correctly set
           if ($env:GITHUB_ENV) {
               echo "CKB_RELEASE_URL=$env:CKB_RELEASE_URL" | Out-File -FilePath $env:GITHUB_ENV -Append
           } else {
               Write-Error "GITHUB_ENV is not set."
           }
+
+      - name: Install curl (CentOS Stream 9)
+        if: matrix.os == 'centos-stream9'
+        run: |
+          dnf install -y curl
+        shell: bash
 
       - name: Download and extract CKB (Linux and macOS)
         if: runner.os != 'Windows'
@@ -66,7 +70,7 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu.tar.gz
               tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu.tar.gz
               ;;
-            "ubuntu-24.04-arm64-arm64")
+            "ubuntu-24.04-arm-arm64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
               tar -xzf ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
               ;;
@@ -78,7 +82,7 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
               unzip ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
               ;;
-            "centos-8-x64")
+            "centos-stream9-x64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
               tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
               ;;
@@ -87,27 +91,28 @@ jobs:
               exit 1
               ;;
           esac
+        shell: bash
 
       - name: Download and extract CKB (Windows)
         if: runner.os == 'Windows'
         run: |
           curl -LO $env:CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip
           Expand-Archive -Path ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip -DestinationPath .
+        shell: pwsh
 
       - name: Run CKB node (Linux and macOS)
         if: runner.os != 'Windows'
         run: |
           echo "Current OS: $(uname -s)"
           echo "Current Architecture: $(uname -m)"
-
           case "${{ matrix.os }}" in
             "ubuntu-22.04")
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu/ckb init 
               ;;
-            "ubuntu-24.04-arm64")
+            "ubuntu-24.04-arm")
               ./ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu/ckb init 
               ;;
-            "centos-8")
+            "centos-stream9")
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable/ckb init 
               ;;
             "macos-13")
@@ -121,6 +126,7 @@ jobs:
               exit 1
               ;;
           esac
+        shell: bash
 
       - name: Run CKB node (Windows)
         if: runner.os == 'Windows'
