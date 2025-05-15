@@ -32,9 +32,7 @@ jobs:
             arch: arm64
           - os: centos-8
             arch: x64
-            container: 
-              image: centos:8  # Use CentOS 8 container
-              options: --user root
+            container: docker.io/jiangxianliang/centos:centos8
           - os: windows-latest
             arch: x64
 
@@ -57,12 +55,6 @@ jobs:
           } else {
               Write-Error "GITHUB_ENV is not set."
           }
-
-      - name: Install curl (CentOS 8)
-        if: matrix.os == 'centos-8'
-        run: |
-          yum install -y --setopt=install_weak_deps=False curl
-        shell: bash  # Ensure bash for yum command in CentOS 8 container
 
       - name: Download and extract CKB (Linux and macOS)
         if: runner.os != 'Windows'
