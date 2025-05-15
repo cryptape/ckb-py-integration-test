@@ -32,7 +32,9 @@ jobs:
             arch: arm64
           - os: centos-8
             arch: x64
-            container: centos:8  # Use CentOS 8 container
+            container: 
+              image: centos:8  # Use CentOS 8 container
+              options: --user root
           - os: windows-latest
             arch: x64
 
@@ -59,7 +61,7 @@ jobs:
       - name: Install curl (CentOS 8)
         if: matrix.os == 'centos-8'
         run: |
-          sudo yum install -y --setopt=install_weak_deps=False curl
+          yum install -y --setopt=install_weak_deps=False curl
         shell: bash  # Ensure bash for yum command in CentOS 8 container
 
       - name: Download and extract CKB (Linux and macOS)
