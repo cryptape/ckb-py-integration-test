@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm, centos-stream9, windows-latest]
+        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm, centos-8, windows-latest]
         include:
           - os: ubuntu-22.04
             arch: x64
@@ -30,9 +30,9 @@ jobs:
             arch: x86
           - os: macos-14
             arch: arm64
-          - os: centos-stream9
+          - os: centos-8
             arch: x64
-            container: quay.io/centos/centos:stream9  # Use CentOS Stream 9 container
+            container: centos:8  # Use CentOS 8 container
           - os: windows-latest
             arch: x64
 
@@ -56,11 +56,11 @@ jobs:
               Write-Error "GITHUB_ENV is not set."
           }
 
-      - name: Install curl (CentOS Stream 9)
-        if: matrix.os == 'centos-stream9'
+      - name: Install curl (CentOS 8)
+        if: matrix.os == 'centos-8'
         run: |
-          dnf install -y curl
-        shell: bash
+          yum install -y curl
+        shell: bash  # Ensure bash for yum command in CentOS 8 container
 
       - name: Download and extract CKB (Linux and macOS)
         if: runner.os != 'Windows'
@@ -82,7 +82,7 @@ jobs:
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
               unzip ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
               ;;
-            "centos-stream9-x64")
+            "centos-8-x64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
               tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
               ;;
@@ -112,7 +112,7 @@ jobs:
             "ubuntu-24.04-arm")
               ./ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu/ckb init 
               ;;
-            "centos-stream9")
+            "centos-8")
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable/ckb init 
               ;;
             "macos-13")
