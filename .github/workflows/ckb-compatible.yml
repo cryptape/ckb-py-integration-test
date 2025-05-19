@@ -62,15 +62,6 @@ jobs:
               Write-Error "GITHUB_ENV is not set."
           }
 
-      - name: Debug CentOS 8 environment
-        if: matrix.os == 'centos-8'
-        run: |
-          whoami  # Expect: root
-          id  # Expect: uid=0(root)
-          cat /etc/centos-release  # Expect: CentOS Linux release 8.x
-          command -v curl && echo "curl installed" || echo "curl not installed"
-        shell: bash
-
       - name: Download and extract CKB (Linux and macOS)
         if: matrix.os != 'windows-latest'
         run: |
@@ -102,13 +93,6 @@ jobs:
           esac
         shell: bash
 
-      - name: Download and extract CKB (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          curl -LO $env:CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip
-          Expand-Archive -Path ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip -DestinationPath .
-        shell: pwsh
-
       - name: Run CKB node (Linux and macOS)
         if: matrix.os != 'windows-latest'
         run: |
@@ -136,6 +120,13 @@ jobs:
               ;;
           esac
         shell: bash
+
+      - name: Download and extract CKB (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl -LO $env:CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip
+          Expand-Archive -Path ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip -DestinationPath .
+        shell: pwsh
 
       - name: Run CKB node (Windows)
         if: matrix.os == 'windows-latest'
