@@ -36,7 +36,6 @@ jobs:
             os: macos-14
           - runner: ubuntu-latest
             arch: x64
-            container: docker.io/jiangxianliang/centos:centos8
             os: centos-8
           - runner: windows-latest
             arch: x64
@@ -62,29 +61,24 @@ jobs:
               Write-Error "GITHUB_ENV is not set."
           }
 
-      - name: Download and extract CKB (Linux and macOS)
+      - name: Download CKB (Linux and macOS)
         if: matrix.os != 'windows-latest'
         run: |
           case "${{ matrix.os }}-${{ matrix.arch }}" in
             "ubuntu-22.04-x64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu.tar.gz
-              tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu.tar.gz
               ;;
             "ubuntu-24.04-arm-arm64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
-              tar -xzf ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
               ;;
             "macos-13-x86")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable.zip
-              unzip ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable.zip
               ;;
             "macos-14-arm64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
-              unzip ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
               ;;
             "centos-8-x64")
               curl -LO $CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
-              tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
               ;;
             *)
               echo "Unsupported OS or architecture: ${{ matrix.os }} ${{ matrix.arch }}"
@@ -93,25 +87,33 @@ jobs:
           esac
         shell: bash
 
-      - name: Run CKB node (Linux and macOS)
-        if: matrix.os != 'windows-latest'
+      - name: Extract and run CKB in CentOS 8 container
+        if: matrix.os == 'centos-8'
+        run: |
+          tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable.tar.gz
+          docker run --rm -i -w /ckb -v $(pwd):/ckb docker.io/jiangxianliang/centos:centos8 bash -c "cd ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable && ./ckb init"
+        shell: bash
+
+      - name: Extract and run CKB (Linux and macOS, non-CentOS)
+        if: matrix.os != 'windows-latest' && matrix.os != 'centos-8'
         run: |
           echo "Current OS: $(uname -s)"
           echo "Current Architecture: $(uname -m)"
           case "${{ matrix.os }}" in
             "ubuntu-22.04")
+              tar -xzf ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu.tar.gz
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-linux-gnu/ckb init 
               ;;
             "ubuntu-24.04-arm")
+              tar -xzf ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu.tar.gz
               ./ckb_${{ github.event.inputs.ckb_version }}_aarch64-unknown-linux-gnu/ckb init 
               ;;
-            "centos-8")
-              ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-unknown-centos-gnu-portable/ckb init 
-              ;;
             "macos-13")
+              unzip ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable.zip
               ./ckb_${{ github.event.inputs.ckb_version }}_x86_64-apple-darwin-portable/ckb init 
               ;;
             "macos-14")
+              unzip ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable.zip
               ./ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable/ckb init 
               ;;
             *)
