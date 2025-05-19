@@ -16,25 +16,31 @@ on:
 
 jobs:
   ckb-start-validation:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm, centos-8, windows-latest]
+        runner: [macos-13, macos-14, ubuntu-22.04, ubuntu-24.04-arm, ubuntu-latest, windows-latest]
         include:
-          - os: ubuntu-22.04
+          - runner: ubuntu-22.04
             arch: x64
-          - os: ubuntu-24.04-arm
+            os: ubuntu-22.04
+          - runner: ubuntu-24.04-arm
             arch: arm64
-          - os: macos-13
+            os: ubuntu-24.04-arm
+          - runner: macos-13
             arch: x86
-          - os: macos-14
+            os: macos-13
+          - runner: macos-14
             arch: arm64
-          - os: centos-8
+            os: macos-14
+          - runner: ubuntu-latest
             arch: x64
             container: docker.io/jiangxianliang/centos:centos8
-          - os: windows-latest
+            os: centos-8
+          - runner: windows-latest
             arch: x64
+            os: windows-latest
 
     steps:
       - name: Checkout code
@@ -43,10 +49,10 @@ jobs:
       - name: Set CKB Release URL
         run: |
           echo "CKB_RELEASE_URL=https://github.com/nervosnetwork/ckb/releases/download/${{ github.event.inputs.ckb_version }}" >> $GITHUB_ENV
-        shell: bash  # Linux and macOS use bash
+        shell: bash
 
       - name: Set CKB Release URL for Windows
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $env:CKB_RELEASE_URL = "https://github.com/nervosnetwork/ckb/releases/download/${{ github.event.inputs.ckb_version }}"
@@ -56,8 +62,17 @@ jobs:
               Write-Error "GITHUB_ENV is not set."
           }
 
+      - name: Debug CentOS 8 environment
+        if: matrix.os == 'centos-8'
+        run: |
+          whoami  # Expect: root
+          id  # Expect: uid=0(root)
+          cat /etc/centos-release  # Expect: CentOS Linux release 8.x
+          command -v curl && echo "curl installed" || echo "curl not installed"
+        shell: bash
+
       - name: Download and extract CKB (Linux and macOS)
-        if: runner.os != 'Windows'
+        if: matrix.os != 'windows-latest'
         run: |
           case "${{ matrix.os }}-${{ matrix.arch }}" in
             "ubuntu-22.04-x64")
@@ -88,14 +103,14 @@ jobs:
         shell: bash
 
       - name: Download and extract CKB (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         run: |
           curl -LO $env:CKB_RELEASE_URL/ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip
           Expand-Archive -Path ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc.zip -DestinationPath .
         shell: pwsh
 
       - name: Run CKB node (Linux and macOS)
-        if: runner.os != 'Windows'
+        if: matrix.os != 'windows-latest'
         run: |
           echo "Current OS: $(uname -s)"
           echo "Current Architecture: $(uname -m)"
@@ -114,7 +129,7 @@ jobs:
               ;;
             "macos-14")
               ./ckb_${{ github.event.inputs.ckb_version }}_aarch64-apple-darwin-portable/ckb init 
-              ;;              
+              ;;
             *)
               echo "Unsupported OS: ${{ matrix.os }}"
               exit 1
@@ -123,7 +138,7 @@ jobs:
         shell: bash
 
       - name: Run CKB node (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         run: |
           powershell -Command "./ckb_${{ github.event.inputs.ckb_version }}_x86_64-pc-windows-msvc/ckb.exe init"
           if ($LASTEXITCODE -ne 0) {
