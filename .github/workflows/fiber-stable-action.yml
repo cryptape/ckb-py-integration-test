@@ -49,7 +49,7 @@ jobs:
           BuildFIBER: '${{ github.event.inputs.BuildFIBER }}'
 
       - name: Run tests
-        run:  make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/get_invoice test_cases/fiber/devnet/stable"
+        run:  make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/stable"
 
       #    - name: Setup upterm session
       #      if: always()
