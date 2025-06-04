@@ -182,7 +182,7 @@ class Fiber:
             f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
         )
 
-    def start(self, password="password0"):
+    def start(self, password="password0", fnn_log_level="debug"):
         # env_map = dict(os.environ)  # Make a copy of the current environment
         # if node:
         #     contract_map = self.get_contract_env_map(node)
@@ -190,7 +190,7 @@ class Fiber:
         # for key in env_map:
         #     print(f"{key}={env_map[key]}")
         run_command(
-            f"FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
+            f"FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn={fnn_log_level} {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
             # env=env_map,
         )
         # wait rpc start
@@ -198,7 +198,10 @@ class Fiber:
         print("start fiber client ")
 
     def stop(self):
-        run_command(f"kill $(lsof -t -i:{self.rpc_port})", False)
+        run_command(
+            "kill $(lsof -i:" + self.rpc_port + " | grep LISTEN | awk '{print $2}')",
+            False,
+        )
         time.sleep(1)
 
     def force_stop(self):
