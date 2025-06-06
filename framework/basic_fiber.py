@@ -25,6 +25,7 @@ class FiberTest(CkbTest):
     fiber_version = FiberConfigPath.CURRENT_DEV
     logger = logging.getLogger(__name__)
     start_fiber_config = {}
+    fnn_log_level = "debug"
 
     @classmethod
     def setup_class(cls):
@@ -130,10 +131,10 @@ class FiberTest(CkbTest):
         update_config.update(cls.start_fiber_config)
 
         cls.fiber1.prepare(update_config=update_config)
-        cls.fiber1.start()
+        cls.fiber1.start(fnn_log_level=cls.fnn_log_level)
 
         cls.fiber2.prepare(update_config=update_config)
-        cls.fiber2.start()
+        cls.fiber2.start(fnn_log_level=cls.fnn_log_level)
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
@@ -255,7 +256,7 @@ class FiberTest(CkbTest):
         self.fibers.append(fiber)
         self.new_fibers.append(fiber)
         fiber.prepare(update_config=update_config)
-        fiber.start()
+        fiber.start(fnn_log_level=self.fnn_log_level)
         return fiber
 
     def wait_for_channel_state(
@@ -416,7 +417,9 @@ class FiberTest(CkbTest):
                     }
                 )
                 if wait:
-                    self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+                    self.wait_payment_state(
+                        fiber1, payment["payment_hash"], "Success", 600, 0.1
+                    )
                 return payment["payment_hash"]
             except Exception as e:
                 time.sleep(1)
@@ -431,7 +434,9 @@ class FiberTest(CkbTest):
             }
         )
         if wait:
-            self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+            self.wait_payment_state(
+                fiber1, payment["payment_hash"], "Success", 600, 0.1
+            )
         return payment["payment_hash"]
 
     def get_account_script(self, account_private_key):
@@ -442,14 +447,16 @@ class FiberTest(CkbTest):
             "args": account1["lock_arg"],
         }
 
-    def wait_payment_state(self, client, payment_hash, status="Success", timeout=360):
+    def wait_payment_state(
+        self, client, payment_hash, status="Success", timeout=360, interval=1
+    ):
         for i in range(timeout):
             result = client.get_client().get_payment({"payment_hash": payment_hash})
             if result["status"] == status:
                 return
-            time.sleep(1)
+            time.sleep(interval)
         raise TimeoutError(
-            f"status did not reach state: {status} within timeout period."
+            f"payment:{payment_hash} status did not reach state: {result['status']}, expected:{status} , within timeout period."
         )
 
     def wait_payment_finished(self, client, payment_hash, timeout=120):
