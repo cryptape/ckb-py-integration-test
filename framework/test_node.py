@@ -19,14 +19,14 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/v118/specs/dev.toml",
-        "download/0.120.0",
+        "download/0.201.0",
     )
 
     CURRENT_FIBER = (
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/fiber/dev.toml",
-        "download/0.119.0",
+        "download/0.201.0",
     )
     TESTNET = (
         "source/template/ckb/v118/ckb.toml.j2",
