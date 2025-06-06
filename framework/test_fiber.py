@@ -32,19 +32,10 @@ class FiberConfigPath(Enum):
         "download/fiber/0.5.1/fnn",
     )
 
-    V042_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.2/fnn")
-    V040_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.0/fnn")
-    V031_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.1/fnn")
-    V030_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
-    V020_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.2.0/fnn")
-    V010_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
-
-    V040_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.4.0/fnn")
-    V031_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.1/fnn")
-    V030_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.0/fnn")
-    V021_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.1/fnn")
-    V020_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.0/fnn")
-    V010_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
+    V050_DEV = (
+        "/source/template/fiber/dev_config_2.yml.j2",
+        "download/fiber/0.5.0/fnn",
+    )
 
     def __init__(self, fiber_config_path, fiber_bin_path):
         self.fiber_config_path = fiber_config_path
