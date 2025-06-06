@@ -13,7 +13,8 @@ from tqdm import tqdm
 
 versions = [
     "0.110.2",
-    "0.117.0" "0.201.0",
+    "0.117.0",
+    "0.201.0",
 ]  # Replace with your versions
 
 DOWNLOAD_DIR = "download"

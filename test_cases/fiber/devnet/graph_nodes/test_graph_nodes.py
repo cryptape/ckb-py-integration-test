@@ -100,6 +100,11 @@ class TestGraphNodes(FiberTest):
             # udt_cfg_infos
             assert node["udt_cfg_infos"] == node_info["udt_cfg_infos"]
 
+            # features
+            assert (
+                node["features"] == node_info["features"]
+            ), f"node:{node}, node_info:{node_info}"
+
     # @pytest.mark.skip("其他节点的graph_nodes 不一定会更新")
     def test_change_node_info(self):
         """
