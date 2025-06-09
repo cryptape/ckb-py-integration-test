@@ -67,11 +67,20 @@ class TestHelperContract(CkbTest):
         cls.node.prepare()
         cls.node.start()
         cls.Miner.make_tip_height_number(cls.node, 2000)
+        cls.node1 = cls.CkbNode.init_dev_by_port(
+            cls.CkbNodeConfigPath.v200, "contract/node1", 8116, 8117
+        )
+        cls.node1.prepare()
+        cls.node1.start()
+        cls.node1.connected(cls.node)
+        cls.Node.wait_node_height(cls.node1, 2000,200)
 
     @classmethod
     def teardown_class(cls):
         cls.node.stop()
         cls.node.clean()
+        cls.node1.stop()
+        cls.node1.clean()
 
     @parameterized.expand(success_files)
     # @pytest.mark.skip
@@ -80,7 +89,9 @@ class TestHelperContract(CkbTest):
         1. Retrieve the paths of successful files from `project_root/source/contract/test_cases` by excluding the files specified in `files_list`.
         2. deploy and invoke contract
         """
-        return self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
+        self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
+        tip_number = self.node.getClient().get_tip_block_number()
+        self.Node.wait_node_height(self.node1, tip_number,200)
 
     @parameterized.expand(failed_files)
     def test_02_deploy_and_invoke_demo_failed(self, path):
@@ -94,6 +105,8 @@ class TestHelperContract(CkbTest):
             self.fail("Did not raise an exception as expected!")
         except Exception as e:
             print(e)
+        tip_number = self.node.getClient().get_tip_block_number()
+        self.Node.wait_node_height(self.node1, tip_number, 200)
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
         if try_count < 0:
