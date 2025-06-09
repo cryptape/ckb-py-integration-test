@@ -388,7 +388,7 @@ def tx_add_input(tx_hash, index, tx_file, api_url="http://127.0.0.1:8114"):
 
 def tx_add_multisig_config(ckb_address, tx_file, api_url="http://127.0.0.1:8114"):
     """
-    ./ckb-cli tx add-multisig-config --sighash-address ckt1qyqdfjzl8ju2vfwjtl4mttx6me09hayzfldq8m3a0y --tx-file tx.txt
+    ./ckb-cli tx add-multisig-config   --multisig-code-hash legacy  --sighash-address ckt1qyqdfjzl8ju2vfwjtl4mttx6me09hayzfldq8m3a0y --tx-file tx.txt
     status: success
     MacBook-Pro-4 0.111.0 % cat tx.txt
     {
@@ -421,7 +421,7 @@ def tx_add_multisig_config(ckb_address, tx_file, api_url="http://127.0.0.1:8114"
 
     """
     cmd = (
-        f"export API_URL={api_url} && {cli_path} tx add-multisig-config --sighash-address  {ckb_address} "
+        f"export API_URL={api_url} && {cli_path} tx add-multisig-config --multisig-code-hash legacy --sighash-address  {ckb_address} "
         f"--tx-file {tx_file}"
     )
     return run_command(cmd)
