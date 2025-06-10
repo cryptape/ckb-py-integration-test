@@ -3,6 +3,7 @@ import time
 import pytest
 
 from framework.basic import CkbTest
+from framework.util import get_project_root
 
 
 class TestOom(CkbTest):
@@ -39,7 +40,7 @@ class TestOom(CkbTest):
     def test_spawn(self):
         with pytest.raises(Exception) as exc_info:
             self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_1,
-                                   f"/Users/guopenglin/RustroverProjects/nervosnetwork/ckb-test-contracts/rust/acceptance-contracts/build/release/spawn_oom",
+                                   f"{get_project_root()}/source/contract/test_cases/spawn_oom",
                                    self.node,"type"
                                    )
         expected_error_message = "MemOutOfStack"
@@ -52,7 +53,7 @@ class TestOom(CkbTest):
     def test_exec(self):
         with pytest.raises(Exception) as exc_info:
             self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_1,
-                                   "/Users/guopenglin/RustroverProjects/nervosnetwork/ckb-test-contracts/rust/acceptance-contracts/build/release/exec_oom",
+                                   f"{get_project_root()}/source/contract/test_cases/exec_oom",
                                    self.node
                                    )
         expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"

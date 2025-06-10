@@ -4,6 +4,7 @@ import pytest
 
 from framework.basic import CkbTest
 from framework.helper.spawn_arg import SpawnArgContract
+from framework.util import get_project_root
 
 
 class MemoryLimitTest(CkbTest):
@@ -45,7 +46,7 @@ class MemoryLimitTest(CkbTest):
     def test_spawn(self):
         with pytest.raises(Exception) as exc_info:
             self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_1,
-                                   "/Users/guopenglin/RustroverProjects/nervosnetwork/ckb-test-contracts/rust/acceptance-contracts/build/release/spawn_oom",
+                                   f"{get_project_root()}/source/contract/test_cases/spawn_oom",
                                    self.node
                                    )
         # expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"
@@ -431,10 +432,6 @@ class MemoryLimitTest(CkbTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-
-    # def test_0000(self):
-    #     path = "/Users/guopenglin/RustroverProjects/nervosnetwork/ckb-test-contracts/rust/acceptance-contracts/build/release/spawn_limit"
-    #     self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_2, path, self.node)
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
         if try_count < 0:
