@@ -48,6 +48,5 @@ class TestExceededMaximumCycles(CkbTest):
 
         expected_error_message = "ExceededMaximumCycles"
         assert (
-                expected_error_message in exc_info.value.args[0]
+            expected_error_message in exc_info.value.args[0]
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
-

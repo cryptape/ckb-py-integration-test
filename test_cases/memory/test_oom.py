@@ -39,10 +39,12 @@ class TestOom(CkbTest):
 
     def test_spawn(self):
         with pytest.raises(Exception) as exc_info:
-            self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_1,
-                                   f"{get_project_root()}/source/contract/test_cases/spawn_oom",
-                                   self.node,"type"
-                                   )
+            self.deploy_and_invoke(
+                self.Config.ACCOUNT_PRIVATE_1,
+                f"{get_project_root()}/source/contract/test_cases/spawn_oom",
+                self.node,
+                "type",
+            )
         expected_error_message = "MemOutOfStack"
         # expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"
         assert expected_error_message in exc_info.value.args[0], (
@@ -52,10 +54,11 @@ class TestOom(CkbTest):
 
     def test_exec(self):
         with pytest.raises(Exception) as exc_info:
-            self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_1,
-                                   f"{get_project_root()}/source/contract/test_cases/exec_oom",
-                                   self.node
-                                   )
+            self.deploy_and_invoke(
+                self.Config.ACCOUNT_PRIVATE_1,
+                f"{get_project_root()}/source/contract/test_cases/exec_oom",
+                self.node,
+            )
         expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "

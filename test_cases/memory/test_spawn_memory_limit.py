@@ -45,10 +45,11 @@ class MemoryLimitTest(CkbTest):
 
     def test_spawn(self):
         with pytest.raises(Exception) as exc_info:
-            self.deploy_and_invoke(self.Config.ACCOUNT_PRIVATE_1,
-                                   f"{get_project_root()}/source/contract/test_cases/spawn_oom",
-                                   self.node
-                                   )
+            self.deploy_and_invoke(
+                self.Config.ACCOUNT_PRIVATE_1,
+                f"{get_project_root()}/source/contract/test_cases/spawn_oom",
+                self.node,
+            )
         # expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"
         expected_error_message = "MemOutOfStack"
         assert expected_error_message in exc_info.value.args[0], (
@@ -64,7 +65,9 @@ class MemoryLimitTest(CkbTest):
 
         # oom
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(1024 * 8 * 2, 0, 0)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                1024 * 8 * 2, 0, 0
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -155,7 +158,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 895 + 32, 92)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 895 + 32, 92
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -178,7 +183,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 895 + 32, 92)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 895 + 32, 92
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -216,7 +223,9 @@ class MemoryLimitTest(CkbTest):
         )
         deploy_hash, deploy_index = self.spawnArgContract.get_deploy_hash_and_index()
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 9949, 2300 + 36)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 9949, 2300 + 36
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -245,7 +254,9 @@ class MemoryLimitTest(CkbTest):
         deploy_hash, deploy_index = self.spawnArgContract.get_deploy_hash_and_index()
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 895 + 32, 93)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 895 + 32, 93
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -268,7 +279,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 895 + 32, 93)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 895 + 32, 93
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -292,7 +305,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 9949, 2300 + 36)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 9949, 2300 + 36
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -315,7 +330,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(3, 9949, 2300 + 36)
+            invoke_arg, invoke_data = self.spawnArgContract.get_test_data(
+                3, 9949, 2300 + 36
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,

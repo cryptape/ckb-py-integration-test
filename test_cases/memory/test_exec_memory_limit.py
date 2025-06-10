@@ -93,7 +93,6 @@ class MemoryLimitTest(CkbTest):
         response = self.node119.getClient().get_transaction(tx_hash)
         assert response["tx_status"]["status"] == "unknown"
 
-
     def test_block_err_type(self):
         account2 = self.Ckb_cli.util_key_info_by_private_key(
             self.Config.MINER_PRIVATE_1
@@ -120,9 +119,6 @@ class MemoryLimitTest(CkbTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-
-
-
 
     def test_tx_pool_err(self):
         account2 = self.Ckb_cli.util_key_info_by_private_key(
@@ -151,7 +147,6 @@ class MemoryLimitTest(CkbTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-
     def test_oom(self):
         account2 = self.Ckb_cli.util_key_info_by_private_key(
             self.Config.MINER_PRIVATE_1
@@ -159,7 +154,9 @@ class MemoryLimitTest(CkbTest):
         deploy_hash, deploy_index = self.execArgContract.get_deploy_hash_and_index()
         print("deploy_hash:", deploy_hash)
         print("deploy_index:", deploy_index)
-        invoke_arg, invoke_data = self.execArgContract.get_test_data(1024 * 8 * 2, 0, 111)
+        invoke_arg, invoke_data = self.execArgContract.get_test_data(
+            1024 * 8 * 2, 0, 111
+        )
         with pytest.raises(Exception) as exc_info:
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
@@ -187,7 +184,9 @@ class MemoryLimitTest(CkbTest):
         deploy_hash, deploy_index = self.execArgContract.get_deploy_hash_and_index()
         print("deploy_hash:", deploy_hash)
         print("deploy_index:", deploy_index)
-        invoke_arg, invoke_data = self.execArgContract.get_test_data(1024 * 8 * 2, 0, 111)
+        invoke_arg, invoke_data = self.execArgContract.get_test_data(
+            1024 * 8 * 2, 0, 111
+        )
         with pytest.raises(Exception) as exc_info:
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.MINER_PRIVATE_1,
@@ -216,7 +215,9 @@ class MemoryLimitTest(CkbTest):
         deploy_hash, deploy_index = self.execArgContract.get_deploy_hash_and_index()
         # 合法交易边界
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 895 + 32, 93)
+            invoke_arg, invoke_data = self.execArgContract.get_test_data(
+                3, 895 + 32, 93
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.ACCOUNT_PRIVATE_2,
                 contract_out_point_tx_hash=deploy_hash,
@@ -239,7 +240,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 895 + 32, 93)
+            invoke_arg, invoke_data = self.execArgContract.get_test_data(
+                3, 895 + 32, 93
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.ACCOUNT_PRIVATE_2,
                 contract_out_point_tx_hash=deploy_hash,
@@ -285,7 +288,9 @@ class MemoryLimitTest(CkbTest):
         # )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 9949, 2300 + 36)
+            invoke_arg, invoke_data = self.execArgContract.get_test_data(
+                3, 9949, 2300 + 36
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.ACCOUNT_PRIVATE_2,
                 contract_out_point_tx_hash=deploy_hash,
@@ -305,7 +310,6 @@ class MemoryLimitTest(CkbTest):
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
-
     def test_MemWriteOnExecutablePage_type(self):
         self.Miner.miner_with_version(self.node, "0x0")
         account2 = self.Ckb_cli.util_key_info_by_private_key(
@@ -314,7 +318,9 @@ class MemoryLimitTest(CkbTest):
         deploy_hash, deploy_index = self.execArgContract.get_deploy_hash_and_index()
         # 合法交易边界
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 895 + 32, 93)
+            invoke_arg, invoke_data = self.execArgContract.get_test_data(
+                3, 895 + 32, 93
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.ACCOUNT_PRIVATE_2,
                 contract_out_point_tx_hash=deploy_hash,
@@ -337,7 +343,9 @@ class MemoryLimitTest(CkbTest):
         )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 895 + 32, 93)
+            invoke_arg, invoke_data = self.execArgContract.get_test_data(
+                3, 895 + 32, 93
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.ACCOUNT_PRIVATE_2,
                 contract_out_point_tx_hash=deploy_hash,
@@ -384,7 +392,9 @@ class MemoryLimitTest(CkbTest):
         # )
 
         with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 9949, 2300 + 36)
+            invoke_arg, invoke_data = self.execArgContract.get_test_data(
+                3, 9949, 2300 + 36
+            )
             tx_hash = self.Contract.invoke_ckb_contract(
                 account_private=self.Config.ACCOUNT_PRIVATE_2,
                 contract_out_point_tx_hash=deploy_hash,
@@ -495,7 +505,6 @@ class MemoryLimitTest(CkbTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-
 
     def deploy_and_invoke(self, account, path, node, try_count=5):
         if try_count < 0:

@@ -73,7 +73,7 @@ class TestHelperContract(CkbTest):
         cls.node1.prepare()
         cls.node1.start()
         cls.node1.connected(cls.node)
-        cls.Node.wait_node_height(cls.node1, 2000,200)
+        cls.Node.wait_node_height(cls.node1, 2000, 200)
 
     @classmethod
     def teardown_class(cls):
@@ -91,7 +91,7 @@ class TestHelperContract(CkbTest):
         """
         self.deploy_and_invoke(self.Config.MINER_PRIVATE_1, path, self.node)
         tip_number = self.node.getClient().get_tip_block_number()
-        self.Node.wait_node_height(self.node1, tip_number,200)
+        self.Node.wait_node_height(self.node1, tip_number, 200)
 
     @parameterized.expand(failed_files)
     def test_02_deploy_and_invoke_demo_failed(self, path):
