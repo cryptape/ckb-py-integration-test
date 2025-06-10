@@ -31,7 +31,7 @@ def get_successful_files():
         "exec_with_block_opcode",
         "rfc49_atomic",
         "exec_oom",
-        "spawn_oom"
+        "spawn_oom",
     ]
     return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
 
@@ -53,7 +53,7 @@ def get_failed_files():
         "exec_with_block_opcode",
         "rfc49_atomic",
         "exec_oom",
-        "spawn_oom"
+        "spawn_oom",
     ]
     # return [s for s in files if not any(s.endswith(suffix) for suffix in files_list)]
     return [f"{project_root}/source/contract/test_cases/{x}" for x in files_list]
