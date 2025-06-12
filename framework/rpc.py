@@ -168,6 +168,9 @@ class RPCClient:
     def send_transaction(self, tx, outputs_validator="passthrough"):
         return self.call("send_transaction", [tx, outputs_validator])
 
+    def send_test_transaction(self, tx, outputs_validator="passthrough"):
+        return self.call("send_test_transaction", [tx, outputs_validator])
+
     def get_raw_tx_pool(self, verbose=None):
         return self.call("get_raw_tx_pool", [verbose])
 
