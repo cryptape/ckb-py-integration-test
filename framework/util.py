@@ -8,6 +8,8 @@ import struct
 
 import hashlib
 
+from framework import segwit_addr as sa
+
 H256_ZEROS = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 U128_MIN_COMPATIBLE = 0  # Adjust according to your definition
@@ -197,6 +199,53 @@ def generate_random_preimage():
     for _ in range(64):
         hash_str += hex(random.randint(0, 15))[2:]
     return hash_str
+
+
+# ref: https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0021-ckb-address-format/0021-ckb-address-format.md
+FORMAT_TYPE_FULL = 0x00
+FORMAT_TYPE_SHORT = 0x01
+FORMAT_TYPE_FULL_DATA = 0x02
+FORMAT_TYPE_FULL_TYPE = 0x04
+
+CODE_INDEX_SECP256K1_SINGLE = 0x00
+CODE_INDEX_SECP256K1_MULTI = 0x01
+CODE_INDEX_ACP = 0x02
+
+BECH32_CONST = 1
+BECH32M_CONST = 0x2BC830A3
+
+
+def decodeAddress(addr, network="mainnet"):
+    hrp = {"mainnet": "ckb", "testnet": "ckt"}[network]
+    hrpgot, data, spec = sa.bech32_decode(addr)
+    if hrpgot != hrp or data == None:
+        return False
+    decoded = sa.convertbits(data, 5, 8, False)
+    if decoded == None:
+        return False
+    payload = bytes(decoded)
+    format_type = payload[0]
+    if format_type == FORMAT_TYPE_FULL:
+        ptr = 1
+        code_hash = "0x" + payload[ptr : ptr + 32].hex()
+        ptr += 32
+        hash_type = payload[ptr : ptr + 1].hex()
+        ptr += 1
+        args = "0x" + payload[ptr:].hex()
+        return ("full", code_hash, hash_type, args)
+    elif format_type == FORMAT_TYPE_SHORT:
+        code_index = payload[1]
+        pk = "0x" + payload[2:].hex()
+        return ("short", code_index, pk)
+    elif format_type == FORMAT_TYPE_FULL_DATA or format_type == FORMAT_TYPE_FULL_TYPE:
+        full_type = {FORMAT_TYPE_FULL_DATA: "Data", FORMAT_TYPE_FULL_TYPE: "Type"}[
+            format_type
+        ]
+        ptr = 1
+        code_hash = payload[ptr : ptr + 32].hex()
+        ptr += 32
+        args = payload[ptr:].hex()
+        return ("deprecated full", full_type, code_hash, args)
 
 
 if __name__ == "__main__":
