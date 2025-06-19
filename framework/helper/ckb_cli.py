@@ -181,6 +181,54 @@ def version():
     return output
 
 
+def tx_build_multisig_address(
+    addresses,
+    threshold=None,
+    multisig_code_hash="legacy",
+    api_url="http://127.0.0.1:8114",
+):
+    """
+    Build a multisig address using ckb-cli tx build-multisig-address command.
+
+    Args:
+        addresses (list): List of sighash addresses, at least two addresses required (e.g., ["ckt1qz...", "ckt1qz..."]).
+        threshold (int, optional): Number of signatures required. Defaults to len(addresses).
+        multisig_code_hash (str, optional): Multisig code hash. Defaults to "legacy".
+        cli_path (str): Path to ckb-cli executable. Defaults to "ckb-cli".
+
+    Returns:
+        str: Output of the ckb-cli command.
+
+    Example:
+        addresses = [
+            "ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqvm4mmpqw7vp4alvjuls8lxqz0jtvd47mqg0estw",
+            "ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqtmcfut7hfzcpcjx5m2c6ylrnfkckyvldcu8d67f"
+        ]
+        output = build_multisig_address(addresses, threshold=2, multisig_code_hash="legacy")
+    """
+    if threshold is None:
+        threshold = len(addresses)
+
+    if len(addresses) < 2:
+        raise ValueError("At least two addresses are required.")
+    if threshold < 2 or threshold > len(addresses):
+        raise ValueError(f"Threshold must be between 2 and {len(addresses)}.")
+
+    cmd = f"export API_URL={api_url} && {cli_path} tx build-multisig-address"
+    for addr in addresses:
+        cmd += f" --sighash-address {addr}"
+    cmd += f" --threshold {threshold} --multisig-code-hash {multisig_code_hash}"
+    cmd += f" --output-format json"
+
+    output = run_command(cmd)
+
+    # print("\n=============== Multisig Address Output ===============")
+    # print(output.strip())
+    # print("=======================================================\n")
+
+    return json.loads(output)
+
+
 def deploy_gen_txs(
     from_address, deployment_config_path, tx_info_path, api_url="http://127.0.0.1:8114"
 ):
@@ -386,6 +434,34 @@ def tx_add_input(tx_hash, index, tx_file, api_url="http://127.0.0.1:8114"):
     return run_command(cmd)
 
 
+def tx_add_output_multisig(
+    address, capacity, tx_file, is_multisig=False, api_url="http://127.0.0.1:8114"
+):
+    """
+    Add output to transaction.
+    Args:
+        address: recipient CKB address
+        capacity: capacity in CKB (1 CKB = 10^8 shannons)
+        tx_file: transaction file path
+        is_multisig: whether the address is a short multisig address
+        api_url: CKB node RPC URL
+    Returns:
+        command execution result
+    """
+    address_flag = (
+        "--to-short-multisig-address" if is_multisig else "--to-sighash-address"
+    )
+
+    cmd = (
+        f"export API_URL={api_url} && "
+        f"{cli_path} tx add-output "
+        f"{address_flag} {address} "
+        f"--capacity {capacity} "
+        f"--tx-file {tx_file}"
+    )
+    return run_command(cmd)
+
+
 def tx_add_multisig_config(ckb_address, tx_file, api_url="http://127.0.0.1:8114"):
     """
     ./ckb-cli tx add-multisig-config   --multisig-code-hash legacy  --sighash-address ckt1qyqdfjzl8ju2vfwjtl4mttx6me09hayzfldq8m3a0y --tx-file tx.txt
@@ -424,6 +500,31 @@ def tx_add_multisig_config(ckb_address, tx_file, api_url="http://127.0.0.1:8114"
         f"export API_URL={api_url} && {cli_path} tx add-multisig-config --multisig-code-hash legacy --sighash-address  {ckb_address} "
         f"--tx-file {tx_file}"
     )
+    return run_command(cmd)
+
+
+def tx_add_multisig_config_for_addr_list(
+    addresses,
+    tx_file,
+    threshold=None,
+    multisig_code_hash="legacy",
+    api_url="http://127.0.0.1:8114",
+):
+    if not addresses:
+        raise ValueError("At least two addresses are required.")
+
+    threshold = threshold or len(addresses)
+    sighash_addresses = " ".join(f"--sighash-address {addr}" for addr in addresses)
+
+    cmd = (
+        f"export API_URL={api_url} && "
+        f"{cli_path} tx add-multisig-config "
+        f"{sighash_addresses} "
+        f"--threshold {threshold} "
+        f"--multisig-code-hash {multisig_code_hash} "
+        f"--tx-file {tx_file}"
+    )
+
     return run_command(cmd)
 
 
