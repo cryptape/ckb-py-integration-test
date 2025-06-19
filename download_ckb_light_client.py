@@ -22,6 +22,7 @@ versions = [
     "0.3.5",
     "0.3.6",
     "0.4.1",
+    "0.5.0",
 ]  # Replace with your versions
 
 DOWNLOAD_DIR = "download"
@@ -34,7 +35,7 @@ SYSTEMS = {
     "Linux": {
         "x86_64": {
             "url": "https://github.com/nervosnetwork/ckb-light-client/releases/download/v{version}/ckb-light-client_v{"
-            "version}-x86_64-linux.tar.gz",
+            "version}-x86_64-linux-portable.tar.gz",
             "ext": ".tar.gz",
         },
     },

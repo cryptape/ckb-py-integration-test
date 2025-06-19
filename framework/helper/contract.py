@@ -302,7 +302,8 @@ def build_invoke_ckb_contract(
         )
     # get input_cell
     account = util_key_info_by_private_key(account_private)
-    account_address = account["address"]["testnet"]
+    net = "testnet" if RPCClient(api_url).get_consensus()["id"] != "ckb" else "mainnet"
+    account_address = account["address"][net]
     account_live_cells = wallet_get_live_cells(account_address, api_url=api_url)
     assert len(account_live_cells["live_cells"]) > 0
     input_cell_out_points = []
