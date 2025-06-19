@@ -22,6 +22,7 @@ versions = [
     "0.3.5",
     "0.3.6",
     "0.4.1",
+    "0.5.0",
 ]  # Replace with your versions
 
 DOWNLOAD_DIR = "download"
