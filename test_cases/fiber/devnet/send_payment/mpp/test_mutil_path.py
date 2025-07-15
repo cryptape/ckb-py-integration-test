@@ -42,8 +42,8 @@ class MutilPathTestCase(FiberTest):
         self.open_channel(
             self.fibers[1], self.fibers[2], 2000 * 100000000, 1000 * 100000000,0,0
         )
-
-        self.send_invoice_payment(self.fibers[0], self.fibers[2], 4000 * 100000000)
+        time.sleep(10)
+        self.send_invoice_payment(self.fibers[0], self.fibers[2], 3000 * 100000000)
 
     def test_mutil_to_one_2(self):
         self.start_new_fiber(
