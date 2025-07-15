@@ -17,13 +17,13 @@ from framework.config import get_tmp_path
 
 class FiberConfigPath(Enum):
     CURRENT_DEV = (
-        "/source/template/fiber/dev_config_2.yml.j2",
+        "/source/fiber/dev_config.yml.j2",
         # "download/fiber/0.5.0/fnn",
         "download/fiber/current/fnn",
     )
 
     CURRENT_DEV_DEBUG = (
-        "/source/template/fiber/dev_config_2.yml.j2",
+        "/source/fiber/dev_config.yml.j2",
         "download/fiber/current/fnn.debug",
     )
 
@@ -96,9 +96,7 @@ class Fiber:
             self.fiber_config_path,
         )
         shutil.copy(
-            "{root_path}/source/template/ckb/fiber/dev.toml".format(
-                root_path=get_project_root()
-            ),
+            "{root_path}/source/fiber/dev.toml".format(root_path=get_project_root()),
             self.tmp_path,
         )
         target_dir = os.path.join(self.tmp_path, "ckb")
@@ -173,19 +171,19 @@ class Fiber:
             f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
         )
 
-    def start(self, password="password0", fnn_log_level="debug"):
+    def start(self, password="password0", fnn_log_level="trace"):
         # env_map = dict(os.environ)  # Make a copy of the current environment
-        # if node:
+        # if node:,
         #     contract_map = self.get_contract_env_map(node)
         #     env_map.update(contract_map)
         # for key in env_map:
         #     print(f"{key}={env_map[key]}")
         run_command(
-            f"FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn={fnn_log_level} {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
+            f" FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn={fnn_log_level} {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} >> {self.tmp_path}/node.log 2>&1 &"
             # env=env_map,
         )
         # wait rpc start
-        time.sleep(1)
+        time.sleep(0.1)
         print("start fiber client ")
 
     def stop(self):

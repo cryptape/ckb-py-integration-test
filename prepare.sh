@@ -1,7 +1,7 @@
 set -ex
 
-DEFAULT_FIBER_BRANCH="yukang-trivial-fix-on-funding"
-DEFAULT_FIBER_URL="https://github.com/chenyukang/fiber.git"
+DEFAULT_FIBER_BRANCH="basic-mpp"
+DEFAULT_FIBER_URL="https://github.com/nervosnetwork/fiber.git"
 
 GitFIBERBranch="${GitBranch:-$DEFAULT_FIBER_BRANCH}"
 GitFIBERUrl="${GitUrl:-$DEFAULT_FIBER_URL}"
