@@ -406,12 +406,16 @@ class FiberTest(CkbTest):
                     "invoice": invoice["invoice_address"],
                     "allow_self_payment": True,
                     "dry_run": True,
+                    "max_parts":"0x40",
                 }
             )
             try:
                 payment = fiber1.get_client().send_payment(
                     {
                         "invoice": invoice["invoice_address"],
+                        "allow_self_payment": True,
+                        "max_parts": "0x40",
+
                     }
                 )
                 if wait:
@@ -423,6 +427,8 @@ class FiberTest(CkbTest):
         payment = fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
+                "allow_self_payment": True,
+                "max_parts": "0x40",
             }
         )
         if wait:
