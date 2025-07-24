@@ -398,7 +398,9 @@ jobs:
       - name: Run fiber_test_demo
         run: |
           git clone https://github.com/gpBlockchain/fiber-wasm-demo.git
+          cd fiber-wasm-demo
           xvfb-run --auto-servernum bash prepare.sh
+          cd ../
       - name: Run fiber_test_demo
         run: |
           xvfb-run --auto-servernum make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/wasm"
