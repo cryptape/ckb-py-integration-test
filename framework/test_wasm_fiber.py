@@ -3,11 +3,16 @@ from framework.fiber_rpc import FiberRPCClient
 
 class WasmFiber:
 
-    def __init__(self, private_key, peer_id, type="devnet", debug=False):
+    def __init__(
+        self, private_key, peer_id, type="devnet", debug=False, databasePrefix="default"
+    ):
         self.private_key = private_key
         self.peerId = peer_id
         self.type = type
-        self.rppcClient = FiberRPCClient("http://localhost:9000")
+        self.rppcClient = FiberRPCClient(
+            "http://localhost:9000", {"databaseprefix": databasePrefix}
+        )
+        self.databasePrefix = databasePrefix
         if debug:
             return
         if type == "testnet":
@@ -17,6 +22,7 @@ class WasmFiber:
                     {
                         "privateKey": self.private_key,
                         "peerId": self.peerId,
+                        "databasePrefix": self.databasePrefix,
                     }
                 ],
             )
@@ -28,6 +34,7 @@ class WasmFiber:
                         "privateKey": self.private_key,
                         "peerId": self.peerId,
                         "devConfig": "dev-config.yml",
+                        "databasePrefix": self.databasePrefix,
                     }
                 ],
             )
@@ -39,6 +46,7 @@ class WasmFiber:
                         "privateKey": self.private_key,
                         "peerId": self.peerId,
                         "devConfig": "dev-config-watch-tower.yml",
+                        "databasePrefix": self.databasePrefix,
                     }
                 ],
             )
@@ -57,6 +65,7 @@ class WasmFiber:
                     {
                         "privateKey": self.private_key,
                         "peerId": self.peerId,
+                        "databasePrefix": self.databasePrefix,
                     }
                 ],
             )
@@ -68,6 +77,7 @@ class WasmFiber:
                         "privateKey": self.private_key,
                         "peerId": self.peerId,
                         "devConfig": "dev-config.yml",
+                        "databasePrefix": self.databasePrefix,
                     }
                 ],
             )
@@ -79,6 +89,7 @@ class WasmFiber:
                         "privateKey": self.private_key,
                         "peerId": self.peerId,
                         "devConfig": "dev-config-watch-tower.yml",
+                        "databasePrefix": self.databasePrefix,
                     }
                 ],
             )
@@ -98,3 +109,11 @@ class WasmFiber:
                 "address": "/".join(addresses),
             }
         )
+
+    @classmethod
+    def reset(cls, url="http://localhost:9000"):
+        """
+        Reset the WasmFiber client.
+        """
+        client = FiberRPCClient(url)
+        client.call("reset", [])

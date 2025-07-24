@@ -320,6 +320,7 @@ class FiberTest(CkbTest):
         fiber1_fee=1000,
         fiber2_fee=1000,
         udt=None,
+        other_config={},
     ):
         fiber1.connect_peer(fiber2)
         time.sleep(1)
@@ -329,14 +330,14 @@ class FiberTest(CkbTest):
             ],
             16,
         ):
-            temporary_channel = fiber1.get_client().open_channel(
-                {
-                    "peer_id": fiber2.get_peer_id(),
-                    "funding_amount": hex(fiber1_balance + 62 * 100000000),
-                    "tlc_fee_proportional_millionths": hex(fiber1_fee),
-                    "public": True,
-                }
-            )
+            open_channel_config = {
+                "peer_id": fiber2.get_peer_id(),
+                "funding_amount": hex(fiber1_balance + 62 * 100000000),
+                "tlc_fee_proportional_millionths": hex(fiber1_fee),
+                "public": True,
+            }
+            open_channel_config.update(other_config)
+            temporary_channel = fiber1.get_client().open_channel(open_channel_config)
             time.sleep(1)
             fiber2.get_client().accept_channel(
                 {
@@ -350,15 +351,15 @@ class FiberTest(CkbTest):
                 fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
             )
             return
-        fiber1.get_client().open_channel(
-            {
-                "peer_id": fiber2.get_peer_id(),
-                "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
-                "tlc_fee_proportional_millionths": hex(fiber1_fee),
-                "public": True,
-                "funding_udt_type_script": udt,
-            }
-        )
+        open_channel_config = {
+            "peer_id": fiber2.get_peer_id(),
+            "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
+            "tlc_fee_proportional_millionths": hex(fiber1_fee),
+            "public": True,
+            "funding_udt_type_script": udt,
+        }
+        open_channel_config.update(other_config)
+        fiber1.get_client().open_channel(open_channel_config)
         self.wait_for_channel_state(
             fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
         )
@@ -401,17 +402,20 @@ class FiberTest(CkbTest):
             }
         )
         for i in range(try_count):
-            payment = fiber1.get_client().send_payment(
-                {
-                    "invoice": invoice["invoice_address"],
-                    "allow_self_payment": True,
-                    "dry_run": True,
-                }
-            )
+            # payment = fiber1.get_client().send_payment(
+            #     {
+            #         "invoice": invoice["invoice_address"],
+            #         "allow_self_payment": True,
+            #         "dry_run": True,
+            #         "max_parts":"0x40",
+            #     }
+            # )
             try:
                 payment = fiber1.get_client().send_payment(
                     {
                         "invoice": invoice["invoice_address"],
+                        "allow_self_payment": True,
+                        "max_parts": "0x40",
                     }
                 )
                 if wait:
@@ -423,6 +427,8 @@ class FiberTest(CkbTest):
         payment = fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
+                "allow_self_payment": True,
+                "max_parts": "0x40",
             }
         )
         if wait:
@@ -499,7 +505,7 @@ class FiberTest(CkbTest):
         for fiber in self.fibers:
             messages.append(self.get_fiber_balance(fiber))
         for i in range(len(messages)):
-            self.logger.debug(f"fiber{i} balance:{messages[i]}")
+            self.logger.info(f"fiber{i} balance:{messages[i]}")
 
     def get_fiber_graph_balance(self):
         """显示fiber网络中所有通道的余额信息"""

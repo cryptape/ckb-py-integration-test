@@ -171,7 +171,7 @@ class Fiber:
             f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
         )
 
-    def start(self, password="password0", fnn_log_level="trace"):
+    def start(self, password="password0", fnn_log_level="debug"):
         # env_map = dict(os.environ)  # Make a copy of the current environment
         # if node:,
         #     contract_map = self.get_contract_env_map(node)
