@@ -380,6 +380,10 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.12"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
       - name: Install dependencies
         run: |
@@ -395,15 +399,15 @@ jobs:
       - name: Extract tarball and restore permissions
         run: |
           tar -xzf prepare-backup.tar.gz
-      - name: Run fiber_test_demo
+      - name: prepare wasm env
         run: |
           git clone https://github.com/gpBlockchain/fiber-wasm-demo.git
           cd fiber-wasm-demo
-          xvfb-run --auto-servernum bash prepare.sh
+          bash prepare.sh
           cd ../
       - name: Run fiber_test_demo
         run: |
-          xvfb-run --auto-servernum make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/wasm"
+           make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/wasm"
 
       - name: Publish reports
         if: failure()
