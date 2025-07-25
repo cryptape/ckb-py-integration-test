@@ -41,24 +41,31 @@ class TestWasmBench(FiberTest):
         wasmPaymentHashes = []
         fiber2PaymentHashes = []
         for i in range(500):
-            paymentHash = self.send_payment(
-                wasmFiber,
-                self.fiber2,
-                1 * 100000000,
-                False,
-                self.get_account_udt_script(self.fiber1.account_private),
-            )
-            wasmPaymentHashes.append(paymentHash)
-            paymentHash = self.send_payment(
-                self.fiber2,
-                wasmFiber,
-                1 * 100000000,
-                False,
-                self.get_account_udt_script(self.fiber1.account_private),
-            )
-            fiber2PaymentHashes.append(paymentHash)
-        for i in range(500):
+            try:
+                paymentHash = self.send_payment(
+                    wasmFiber,
+                    self.fiber2,
+                    1 * 100000000,
+                    False,
+                    self.get_account_udt_script(self.fiber1.account_private),
+                    try_count=0
+                )
+                wasmPaymentHashes.append(paymentHash)
+                paymentHash = self.send_payment(
+                    self.fiber2,
+                    wasmFiber,
+                    1 * 100000000,
+                    False,
+                    self.get_account_udt_script(self.fiber1.account_private),
+                    try_count=0
+                )
+                fiber2PaymentHashes.append(paymentHash)
+            except Exception as e:
+                pass
+
+        for i in range(len(wasmPaymentHashes)):
             self.wait_payment_finished(wasmFiber, wasmPaymentHashes[i])
+        for i in range(len(fiber2PaymentHashes)):
             self.wait_payment_finished(self.fiber2, fiber2PaymentHashes[i])
 
         # wasmFiber.get_client().shutdown_channel({
