@@ -10,8 +10,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class FiberRPCClient:
-    def __init__(self, url):
+    def __init__(self, url, other_params={}):
         self.url = url
+        self.other_params = other_params
 
     def send_btc(self, btc_pay_req):
         return self.call("send_btc", [btc_pay_req])
@@ -213,6 +214,7 @@ class FiberRPCClient:
 
     def call(self, method, params):
         headers = {"content-type": "application/json"}
+        headers.update(self.other_params)
         data = {"id": 42, "jsonrpc": "2.0", "method": method, "params": params}
         LOGGER.debug(
             "curl --location '{url}' --header 'Content-Type: application/json' --data '{data}'".format(
