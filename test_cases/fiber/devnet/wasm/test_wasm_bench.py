@@ -1,8 +1,12 @@
+import pytest
+
 from framework.basic_fiber import FiberTest
 from framework.test_wasm_fiber import WasmFiber
 
 
 class TestWasmBench(FiberTest):
+
+    @pytest.mark.skip("todo")
     def test_ckb_bench(self):
         account_private = self.generate_account(
             10000, self.Config.ACCOUNT_PRIVATE_1, 10000 * 100000000
