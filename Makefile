@@ -169,12 +169,10 @@ develop_test:
 
 
 clean:
-	pkill ckb
-	rm -rf tmp
-	rm -rf download
-	rm -rf report
-	rm -rf source/ckb-cli*
-	rm -rf ckb-*
+	- pkill ckb
+	- pkill fnn
+	- rm -rf tmp
+	- rm -rf report
 
 docs:
 	python -m pytest --docs=docs/soft.md --doc-type=md test_cases/soft_fork

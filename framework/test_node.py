@@ -9,7 +9,6 @@ from framework.util import (
 from framework.config import get_tmp_path, CKB_DEFAULT_CONFIG, CKB_MINER_CONFIG
 from framework.rpc import RPCClient
 import shutil
-import telnetlib
 from websocket import create_connection, WebSocket
 import toml
 
@@ -19,14 +18,14 @@ class CkbNodeConfigPath(Enum):
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/v118/specs/dev.toml",
-        "download/0.120.0",
+        "download/0.201.0",
     )
 
     CURRENT_FIBER = (
         "source/template/ckb/v118/ckb.toml.j2",
         "source/template/ckb/v118/ckb-miner.toml.j2",
         "source/template/ckb/fiber/dev.toml",
-        "download/0.119.0",
+        "download/0.201.0",
     )
     TESTNET = (
         "source/template/ckb/v118/ckb.toml.j2",
@@ -379,31 +378,32 @@ class CkbNode:
         data = toml.loads(ret)
         return data
 
-    def subscribe_telnet(self, topic, other_url=None) -> telnetlib.Telnet:
+    def subscribe_telnet(self, topic, other_url=None):
+        pass
         # new_tip_header | new_tip_block | new_transaction | proposed_transaction | rejected_transaction
-        if "ckb_tcp_listen_address" not in self.ckb_config.keys():
-            raise Exception("not set ckb_ws_listen_address")
-        ckb_tcp_listen_address = self.ckb_config["ckb_tcp_listen_address"]
-        if other_url is not None:
-            ckb_tcp_listen_address = other_url
-        # get host
-        host = ckb_tcp_listen_address.split(":")[0]
-        # get port
-        port = ckb_tcp_listen_address.split(":")[1]
-        #  new telnet
-        tn = telnetlib.Telnet(host, int(port))
-        print("----")
-        topic_str = (
-            '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
-            + topic
-            + '"]}'
-        )
-        tn.write(topic_str.encode("utf-8") + b"\n")
-        data = tn.read_until(b"}\n")
-        if data:
-            output = data.decode("utf-8")
-            print("telnet read:", output)
-        return tn
+        # if "ckb_tcp_listen_address" not in self.ckb_config.keys():
+        #     raise Exception("not set ckb_ws_listen_address")
+        # ckb_tcp_listen_address = self.ckb_config["ckb_tcp_listen_address"]
+        # if other_url is not None:
+        #     ckb_tcp_listen_address = other_url
+        # # get host
+        # host = ckb_tcp_listen_address.split(":")[0]
+        # # get port
+        # port = ckb_tcp_listen_address.split(":")[1]
+        # #  new telnet
+        # tn = telnetlib.Telnet(host, int(port))
+        # print("----")
+        # topic_str = (
+        #     '{"id": 2, "jsonrpc": "2.0", "method": "subscribe", "params": ["'
+        #     + topic
+        #     + '"]}'
+        # )
+        # tn.write(topic_str.encode("utf-8") + b"\n")
+        # data = tn.read_until(b"}\n")
+        # if data:
+        #     output = data.decode("utf-8")
+        #     print("telnet read:", output)
+        # return tn
 
     def subscribe_websocket(self, topic, other_url=None) -> WebSocket:
         if other_url is None and "ckb_ws_listen_address" not in self.ckb_config.keys():
