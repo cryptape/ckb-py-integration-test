@@ -6,7 +6,7 @@ from framework.test_wasm_fiber import WasmFiber
 
 class TestWasmBench(FiberTest):
 
-    @pytest.mark.skip("todo")
+    # @pytest.mark.skip("todo")
     def test_ckb_bench(self):
         account_private = self.generate_account(
             10000, self.Config.ACCOUNT_PRIVATE_1, 10000 * 100000000
@@ -44,7 +44,7 @@ class TestWasmBench(FiberTest):
         )
         wasmPaymentHashes = []
         fiber2PaymentHashes = []
-        for i in range(500):
+        for i in range(50):
             try:
                 paymentHash = self.send_payment(
                     wasmFiber,
@@ -52,7 +52,7 @@ class TestWasmBench(FiberTest):
                     1 * 100000000,
                     False,
                     self.get_account_udt_script(self.fiber1.account_private),
-                    try_count=0
+                    try_count=0,
                 )
                 wasmPaymentHashes.append(paymentHash)
                 paymentHash = self.send_payment(
@@ -61,7 +61,7 @@ class TestWasmBench(FiberTest):
                     1 * 100000000,
                     False,
                     self.get_account_udt_script(self.fiber1.account_private),
-                    try_count=0
+                    try_count=0,
                 )
                 fiber2PaymentHashes.append(paymentHash)
             except Exception as e:
