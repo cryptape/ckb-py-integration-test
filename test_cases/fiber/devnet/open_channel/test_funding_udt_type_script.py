@@ -27,6 +27,7 @@ class TestFundingUdtTypeScript(FiberTest):
             account3_private, {"ckb_rpc_url": self.node.getClient().url}
         )
         self.fiber3.connect_peer(self.fiber1)
+        time.sleep(1)
         self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber3.get_peer_id(),

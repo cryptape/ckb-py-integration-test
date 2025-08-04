@@ -7,7 +7,7 @@ from framework.basic_fiber import FiberTest
 
 class TestStopMidNode(FiberTest):
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/464")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/464")
     def test_stop_mid_node(self):
         """
 

@@ -60,7 +60,7 @@ class TestRestart(FiberTest):
         # 1. 发送端重启，send_payment
         self.fiber1.stop()
         self.fiber1.start()
-        time.sleep(3)
+        time.sleep(5)
         node_info = self.fiber1.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
         node3_info = self.fiber3.get_client().node_info()
@@ -79,7 +79,7 @@ class TestRestart(FiberTest):
         # 2. 中间节点2重启 send_payment
         self.fiber2.stop()
         self.fiber2.start()
-        time.sleep(3)
+        time.sleep(5)
         node_info = self.fiber2.get_client().node_info()
         assert node_info["peers_count"] == "0x2"
         payment = self.fiber1.get_client().send_payment(
@@ -97,7 +97,7 @@ class TestRestart(FiberTest):
         # 3. 最终节点重启 send_payment
         self.fiber3.stop()
         self.fiber3.start()
-        time.sleep(3)
+        time.sleep(5)
         node_info = self.fiber3.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
         payment = self.fiber1.get_client().send_payment(
