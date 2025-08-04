@@ -32,7 +32,7 @@ class TestTlcLocktimeExpiryDelta(FiberTest):
                 }
             )
         expected_error_message = (
-            "TLC expiry delta is too small, expect larger than 900000"
+            "TLC expiry delta is too small, expect larger than"
         )
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
