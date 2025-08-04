@@ -1,7 +1,7 @@
 set -ex
 
-DEFAULT_FIBER_BRANCH="wasm-db-implementation"
-DEFAULT_FIBER_URL="https://github.com/Officeyutong/fiber.git"
+DEFAULT_FIBER_BRANCH="yukang-fix-epoch-checks"
+DEFAULT_FIBER_URL="https://github.com/chenyukang/fiber.git"
 
 GitFIBERBranch="${GitBranch:-$DEFAULT_FIBER_BRANCH}"
 GitFIBERUrl="${GitUrl:-$DEFAULT_FIBER_URL}"
