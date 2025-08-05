@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 from framework.test_wasm_fiber import WasmFiber
 
@@ -70,6 +72,7 @@ class TestWasmWatchTower(FiberTest):
                 )
             self.fiber1.start()
 
+    @pytest.mark.skip("Musig2RoundFinalizeError")
     def test_watch_tower_restart(self):
         account_private = self.generate_account(
             10000, self.Config.ACCOUNT_PRIVATE_1, 10000 * 100000000

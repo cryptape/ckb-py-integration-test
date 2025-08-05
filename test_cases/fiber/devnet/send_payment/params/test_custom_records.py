@@ -133,7 +133,7 @@ class TestCustomRecords(FiberTest):
                     "keysend": True,
                     "allow_self_payment": True,
                     "custom_records": {
-                        "0x12": self.generate_random_str(4096+2),
+                        "0x12": self.generate_random_str(4096 + 2),
                         # "0x0": "0x5678",
                     },
                 }

@@ -10,9 +10,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class FiberRPCClient:
-    def __init__(self, url, other_params={}):
+    def __init__(self, url, other_params={}, try_count=200):
         self.url = url
         self.other_params = other_params
+        self.try_count = try_count
 
     def send_btc(self, btc_pay_req):
         return self.call("send_btc", [btc_pay_req])
@@ -221,7 +222,7 @@ class FiberRPCClient:
                 url=self.url, data=json.dumps(data, indent=4)
             )
         )
-        for i in range(200):
+        for i in range(self.try_count):
             try:
                 response = requests.post(
                     self.url, data=json.dumps(data), headers=headers
