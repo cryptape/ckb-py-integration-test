@@ -1,7 +1,7 @@
 set -ex
 
-DEFAULT_FIBER_BRANCH="migrate-unit-tests-to-wasm"
-DEFAULT_FIBER_URL="https://github.com/Officeyutong/fiber.git"
+DEFAULT_FIBER_BRANCH="v0.6.1-rc1"
+DEFAULT_FIBER_URL="https://github.com/nervosnetwork/fiber.git"
 
 GitFIBERBranch="${GitBranch:-$DEFAULT_FIBER_BRANCH}"
 GitFIBERUrl="${GitUrl:-$DEFAULT_FIBER_URL}"
