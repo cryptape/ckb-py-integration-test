@@ -29,7 +29,7 @@ class FiberConfigPath(Enum):
 
     CURRENT_TESTNET = (
         "/source/template/fiber/testnet_config_2.yml.j2",
-        "download/fiber/0.5.1/fnn",
+        "download/fiber/0.6.0/fnn",
     )
 
     V050_DEV = (
@@ -171,15 +171,25 @@ class Fiber:
             f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
         )
 
-    def start(self, password="password0", fnn_log_level="debug"):
+    def start(
+        self,
+        password="password0",
+        fnn_log_level="debug",
+        rpc_biscuit_public_key=None,
+    ):
         # env_map = dict(os.environ)  # Make a copy of the current environment
         # if node:,
         #     contract_map = self.get_contract_env_map(node)
         #     env_map.update(contract_map)
         # for key in env_map:
         #     print(f"{key}={env_map[key]}")
+        rpc_biscuit_public_key_option = ""
+        if rpc_biscuit_public_key != None:
+            rpc_biscuit_public_key_option = (
+                f" --rpc-biscuit-public-key {rpc_biscuit_public_key}"
+            )
         run_command(
-            f" FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn={fnn_log_level} {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} >> {self.tmp_path}/node.log 2>&1 &"
+            f" FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn={fnn_log_level} {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} {rpc_biscuit_public_key_option}  >> {self.tmp_path}/node.log 2>&1 &"
             # env=env_map,
         )
         # wait rpc start
