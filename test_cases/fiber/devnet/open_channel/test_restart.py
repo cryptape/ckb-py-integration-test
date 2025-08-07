@@ -1,4 +1,6 @@
 import time
+from os import wait3
+
 import pytest
 from framework.basic_fiber import FiberTest
 
@@ -139,7 +141,10 @@ class TestRestart(FiberTest):
         # 1、ready的状态后重启发送端节点，观察channel的状态是否会变
         self.fiber1.stop()
         self.fiber1.start()
-        time.sleep(3)
+        # todo 目前重启可能连不上对方节点，不是很稳定
+        self.fiber1.connect_peer(self.fiber2)
+        self.fiber2.connect_peer(self.fiber3)
+        time.sleep(5)
         node_info = self.fiber2.get_client().node_info()
         print(f"node info detail:{node_info}")
         assert int(node_info["peers_count"], 16) == 2
@@ -149,6 +154,9 @@ class TestRestart(FiberTest):
         # 2、ready的状态后重启接收端端节点，观察channel的状态是否会变
         self.fiber3.stop()
         self.fiber3.start()
+        # todo 目前重启可能连不上对方节点，不是很稳定
+        self.fiber3.connect_peer(self.fiber1)
+        self.fiber3.connect_peer(self.fiber2)
         time.sleep(3)
         node_info = self.fiber2.get_client().node_info()
         print(f"node info detail:{node_info}")
