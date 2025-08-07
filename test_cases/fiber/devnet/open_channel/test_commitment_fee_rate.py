@@ -32,11 +32,11 @@ class TestCommitmentFeeRate(FiberTest):
         )
 
     # @pytest.mark.skip("todo")
-    def test_commitment_fee_rate_exist(self):
-        """
-        commitment_fee_rate != default.value
-        Returns:
-        """
+    # def test_commitment_fee_rate_exist(self):
+    #     """
+    #     commitment_fee_rate != default.value
+    #     Returns:
+    #     """
 
     def test_commitment_fee_rate_zero(self):
         """

@@ -63,7 +63,7 @@ class TestAmount(FiberTest):
                     "invoice": invoice["invoice_address"],
                 }
             )
-        expected_error_message = "Failed to build route"
+        expected_error_message = "amount must be greater than 0"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"

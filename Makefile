@@ -24,7 +24,7 @@ prepare_fiber_testnet:
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
 	python3 -m download_fiber
-	cp download/0.119.0/ckb-cli ./source/ckb-cli
+	cp download/0.201.0/ckb-cli ./source/ckb-cli
 	cp download/0.110.2/ckb-cli ./source/ckb-cli-old
 
 prepare_develop_testnet:
@@ -37,7 +37,7 @@ prepare_develop_testnet:
 
 	echo "install fiber"
 	python3 -m download_fiber
-	cp download/0.119.0/ckb-cli ./source/ckb-cli
+	cp download/0.201.0/ckb-cli ./source/ckb-cli
 	cp download/0.110.2/ckb-cli ./source/ckb-cli-old
 	bash develop_fiber.sh
 
@@ -169,12 +169,10 @@ develop_test:
 
 
 clean:
-	pkill ckb
-	rm -rf tmp
-	rm -rf download
-	rm -rf report
-	rm -rf source/ckb-cli*
-	rm -rf ckb-*
+	- pkill ckb
+	- pkill fnn
+	- rm -rf tmp
+	- rm -rf report
 
 docs:
 	python -m pytest --docs=docs/soft.md --doc-type=md test_cases/soft_fork
