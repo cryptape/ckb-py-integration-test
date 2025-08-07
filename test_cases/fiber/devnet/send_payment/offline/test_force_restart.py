@@ -303,7 +303,6 @@ class TestForceRestart(FiberTest):
             for payment in payments:
                 self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)
 
-
     def test_restart_when_node_send_payment_mid_node(self):
 
         self.fiber3 = self.start_new_fiber(self.generate_account(1000))

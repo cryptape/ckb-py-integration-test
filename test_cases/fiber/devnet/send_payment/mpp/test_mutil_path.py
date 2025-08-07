@@ -480,7 +480,7 @@ class MutilPathTestCase(FiberTest):
                     except Exception as e:
                         pass
         assert resend == True
-
+        time.sleep(200)
         for fiber in self.fibers:
             balance = self.get_fiber_balance(fiber)
             print(balance)
