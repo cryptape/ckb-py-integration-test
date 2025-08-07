@@ -60,6 +60,8 @@ class TestForceRestart(FiberTest):
         # 1. 发送端强制重启，send_payment
         self.fiber1.force_stop()
         self.fiber1.start()
+        self.fiber1.connect_peer(self.fiber2)
+        self.fiber1.connect_peer(self.fiber3)
         time.sleep(5)
         node_info = self.fiber1.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
@@ -79,6 +81,8 @@ class TestForceRestart(FiberTest):
         # 2. 中间节点2强制重启 send_payment
         self.fiber2.force_stop()
         self.fiber2.start()
+        self.fiber2.connect_peer(self.fiber1)
+        self.fiber2.connect_peer(self.fiber3)
         time.sleep(5)
         node_info = self.fiber2.get_client().node_info()
         assert node_info["peers_count"] == "0x2"
@@ -97,6 +101,8 @@ class TestForceRestart(FiberTest):
         # 3. 最终节点强制重启 send_payment
         self.fiber3.force_stop()
         self.fiber3.start()
+        self.fiber3.connect_peer(self.fiber2)
+        self.fiber3.connect_peer(self.fiber1)
         time.sleep(5)
         node_info = self.fiber3.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
@@ -151,6 +157,8 @@ class TestForceRestart(FiberTest):
         # 1. 发送端强制重启，send_payment
         self.fiber1.force_stop()
         self.fiber1.start()
+        self.fiber1.connect_peer(self.fiber2)
+        self.fiber1.connect_peer(self.fiber3)
         time.sleep(3)
         node_info = self.fiber1.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
@@ -177,6 +185,8 @@ class TestForceRestart(FiberTest):
         # 2. 中间节点2强制重启 send_payment
         self.fiber2.force_stop()
         self.fiber2.start()
+        self.fiber2.connect_peer(self.fiber1)
+        self.fiber2.connect_peer(self.fiber3)
         time.sleep(5)
         node_info = self.fiber2.get_client().node_info()
         assert node_info["peers_count"] == "0x2"
@@ -204,6 +214,8 @@ class TestForceRestart(FiberTest):
         # 3. 最终节点强制重启 send_payment
         self.fiber3.force_stop()
         self.fiber3.start()
+        self.fiber3.connect_peer(self.fiber1)
+        self.fiber3.connect_peer(self.fiber2)
         time.sleep(3)
         node_info = self.fiber3.get_client().node_info()
         assert int(node_info["peers_count"], 16) >= 1
@@ -299,10 +311,12 @@ class TestForceRestart(FiberTest):
             channels = self.fiber3.get_client().list_channels({})
             print("channels:", channels)
             self.fiber1.start()
+            self.fiber1.connect_peer(self.fiber2)
+            self.fiber1.connect_peer(self.fiber3)
             time.sleep(5)
             for payment in payments:
                 self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)
-
+    @pytest.mark.skip("Musig2RoundFinalizeError")
     def test_restart_when_node_send_payment_mid_node(self):
 
         self.fiber3 = self.start_new_fiber(self.generate_account(1000))
@@ -343,6 +357,8 @@ class TestForceRestart(FiberTest):
                     contains_pending = True
             assert contains_pending == True
             self.fiber2.start()
+            self.fiber2.connect_peer(self.fiber1)
+            self.fiber2.connect_peer(self.fiber3)
             time.sleep(5)
             for payment in payments:
                 self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)

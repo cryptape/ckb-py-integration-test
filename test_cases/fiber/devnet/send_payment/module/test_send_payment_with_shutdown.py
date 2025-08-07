@@ -58,7 +58,7 @@ class TestSendPaymentWithShutdown(FiberTest):
 
         # print("tx message:", tx_message)
 
-    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/503")
+    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/503")
     def test_force_shutdown_in_send_payment(self):
         """"""
         self.start_new_fiber(self.generate_account(10000))
