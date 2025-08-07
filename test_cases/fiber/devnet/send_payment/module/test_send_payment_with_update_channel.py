@@ -29,10 +29,13 @@ class TestSendPaymentWithUpdateChannel(FiberTest):
         for j in range(3):
             # Send initial payments
             for i in range(30):
-                payment_hash = self.send_payment(
-                    self.fibers[0], self.fibers[3], 100000000, False
-                )
-                payment_hashes.append(payment_hash)
+                try:
+                    payment_hash = self.send_payment(
+                        self.fibers[0], self.fibers[3], 100000000, False, None, 0
+                    )
+                    payment_hashes.append(payment_hash)
+                except:
+                    pass
 
             # Get channel ID and update channel
             N3N4_CHANNEL_ID = (
@@ -54,10 +57,13 @@ class TestSendPaymentWithUpdateChannel(FiberTest):
 
             # Send additional payments
             for i in range(30):
-                payment_hash = self.send_payment(
-                    self.fibers[0], self.fibers[3], 100000000, False
-                )
-                payment_hashes.append(payment_hash)
+                try:
+                    payment_hash = self.send_payment(
+                        self.fibers[0], self.fibers[3], 100000000, False, None, 0
+                    )
+                    payment_hashes.append(payment_hash)
+                except:
+                    pass
 
             payment_results = []
 

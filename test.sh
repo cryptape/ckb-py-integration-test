@@ -21,7 +21,7 @@ run_test() {
         return 1
     fi
 
-    if grep -q " ERROR " <<< "$pytest_output"; then
+    if grep -q "ERROR test_cases" <<< "$pytest_output"; then
         # Handle failed test case
         echo "Test case $1 error"
         error_cases+=" $1"

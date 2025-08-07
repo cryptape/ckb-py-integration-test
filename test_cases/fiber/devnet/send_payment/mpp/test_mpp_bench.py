@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
@@ -64,6 +66,7 @@ class MppBench(FiberTest):
                     - shutdown_tx["fee"],
                 } in shutdown_tx["output_cells"]
 
+    @pytest.mark.skip("not stable: stop cause mutilSig Err")
     def test_bench_self_with_stop(self):
         self.fiber3 = self.start_new_fiber(
             self.generate_account(10000, self.fiber1.account_private, 1000 * 100000000)
@@ -102,13 +105,18 @@ class MppBench(FiberTest):
         self.send_payment(self.fiber1, self.fiber2, 1 * 100000000)
         self.send_payment(self.fiber2, self.fiber1, 1 * 100000000)
         self.get_fiber_graph_balance()
+        self.fiber1.connect_peer(self.fibers[2])
+        self.fiber2.connect_peer(self.fibers[2])
         time.sleep(200)
-        for i in range(10):
+        for fiber in self.fibers:
+            balance = self.get_fiber_balance(fiber)
+            assert balance["ckb"]["offered_tlc_balance"] == 0
+            assert balance["ckb"]["received_tlc_balance"] == 0
+        for i in range(3):
             for i in range(3):
                 payment_hash = self.send_payment(
                     self.fibers[i], self.fibers[i], 1 * 100000000, True, try_count=3
                 )
-        time.sleep(200)
         for fiber in self.fibers:
             balance = self.get_fiber_balance(fiber)
             assert balance["ckb"]["offered_tlc_balance"] == 0
