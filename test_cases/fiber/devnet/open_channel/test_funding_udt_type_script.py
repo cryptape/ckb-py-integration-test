@@ -27,6 +27,7 @@ class TestFundingUdtTypeScript(FiberTest):
             account3_private, {"ckb_rpc_url": self.node.getClient().url}
         )
         self.fiber3.connect_peer(self.fiber1)
+        time.sleep(1)
         self.fiber1.get_client().open_channel(
             {
                 "peer_id": self.fiber3.get_peer_id(),
@@ -178,3 +179,126 @@ class TestFundingUdtTypeScript(FiberTest):
                 tx_message["output_cells"][1]["args"]
                 == self.fiber2.get_account()["lock_arg"]
             )
+
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/pull/720")
+    def test_node1_2_udt_gt_u128_max(self):
+        self.faucet(
+            self.fiber1.account_private,
+            0,
+            self.fiber2.account_private,
+            340282366920938463463374607431768211400,
+        )
+        self.faucet(
+            self.fiber1.account_private, 0, self.fiber2.account_private, 1 * 100000000
+        )
+        # self.open_channel(self.fiber1, self.fiber2, 340282366920938463463374607431768211400 + 1 - 62 * 100000000, 1,
+        #                   1000, 1000,
+        #                   self.get_account_udt_script(self.fiber2.account_private))
+        temporary_channel = self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(340282366920938463463374607431768211400 + 1),
+                "tlc_fee_proportional_millionths": hex(1000),
+                "public": True,
+                "funding_udt_type_script": self.get_account_udt_script(
+                    self.fiber1.account_private
+                ),
+            }
+        )
+        time.sleep(5)
+        channel = self.fiber1.get_client().list_channels({})
+        print("channel:", channel)
+        assert channel["channels"] == []
+
+    def test_amount_eq_u128_max(self):
+        self.faucet(
+            self.fiber1.account_private,
+            0,
+            self.fiber2.account_private,
+            340282366920938463463374607431768211455,
+        )
+        self.faucet(
+            self.fiber1.account_private, 0, self.fiber2.account_private, 1 * 100000000
+        )
+        self.open_channel(
+            self.fiber1,
+            self.fiber2,
+            340282366920938463463374607431768211455 - 1 - 62 * 100000000,
+            1,
+            1000,
+            1000,
+            self.get_account_udt_script(self.fiber2.account_private),
+        )
+        self.fiber1.get_client().shutdown_channel(
+            {
+                "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
+                    "channel_id"
+                ],
+                "close_script": self.get_account_script(self.Config.ACCOUNT_PRIVATE_1),
+                "fee_rate": "0x3FC",
+            }
+        )
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 100)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        tx_msg = self.get_tx_message(tx_hash)
+        print("msg:", tx_msg)
+        assert (
+            tx_msg["input_cells"][0]["udt_capacity"]
+            == 340282366920938463463374607431768211455
+        )
+        assert {
+            "args": self.fiber2.get_account()["lock_arg"],
+            "capacity": 14300000000,
+            "udt_args": self.get_account_udt_script(self.fiber2.account_private)[
+                "args"
+            ],
+            "udt_capacity": 1,
+        } in tx_msg["output_cells"]
+        assert {
+            "args": self.fiber1.get_account()["lock_arg"],
+            "capacity": 14300000000 - tx_msg["fee"],
+            "udt_args": self.get_account_udt_script(self.fiber2.account_private)[
+                "args"
+            ],
+            "udt_capacity": 340282366920938463463374607431768211454,
+        } in tx_msg["output_cells"]
+
+    def test_node1_add_node2_amount_gt_u128_max(self):
+        """
+        Returns:
+        """
+        self.faucet(
+            self.fiber2.account_private,
+            0,
+            self.fiber1.account_private,
+            340282366920938463463374607431768211400,
+        )
+        self.faucet(
+            self.fiber1.account_private, 0, self.fiber1.account_private, 1 * 100000000
+        )
+        temporary_channel = self.fiber1.get_client().open_channel(
+            {
+                "peer_id": self.fiber2.get_peer_id(),
+                "funding_amount": hex(100000000 - 1),
+                "tlc_fee_proportional_millionths": hex(1000),
+                "public": True,
+                "funding_udt_type_script": self.get_account_udt_script(
+                    self.fiber1.account_private
+                ),
+            }
+        )
+        time.sleep(1)
+
+        with pytest.raises(Exception) as exc_info:
+            self.fiber2.get_client().accept_channel(
+                {
+                    "temporary_channel_id": temporary_channel["temporary_channel_id"],
+                    "funding_amount": hex(340282366920938463463374607431768211400 - 1),
+                    "tlc_fee_proportional_millionths": hex(1000),
+                }
+            )
+        expected_error_message = "The total UDT funding amount should be less than 340282366920938463463374607431768211455"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
+        )

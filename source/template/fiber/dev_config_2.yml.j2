@@ -8,6 +8,14 @@ fiber:
   open_channel_auto_accept_min_ckb_funding_amount: {{ fiber_open_channel_auto_accept_min_ckb_funding_amount | default(10000000000)}}
   watchtower_check_interval_seconds: {{ fiber_watchtower_check_interval_seconds | default(60) }}
   tlc_expiry_delta: {{ fiber_tlc_expiry_delta | default(86400000) }}
+  {% if fiber_disable_built_in_watchtower is defined %}
+  standalone_watchtower_rpc_url: {{ fiber_standalone_watchtower_rpc_url }}
+  disable_built_in_watchtower: {{ fiber_disable_built_in_watchtower }}
+  {% endif %}
+  {% if fiber_funding_timeout_seconds is defined %}
+  funding_timeout_seconds: {{ fiber_funding_timeout_seconds }}
+  {% endif %}
+
 
 rpc:
   listening_addr: {{ rpc_listening_addr | default("127.0.0.1:8227") }}
@@ -20,6 +28,7 @@ rpc:
     - invoice
     - peer
     - dev
+    - watchtower
 ckb:
   rpc_url: {{ ckb_rpc_url | default("http://127.0.0.1:8114") }}
   {% if ckb_udt_whitelist is defined %}

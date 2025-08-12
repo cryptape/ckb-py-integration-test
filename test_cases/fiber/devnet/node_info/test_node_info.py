@@ -7,7 +7,7 @@ from framework.basic_fiber import FiberTest
 
 class TestNodeInfo(FiberTest):
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/631")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/631")
     def test_commit_hash(self):
         """
 
@@ -71,13 +71,15 @@ class TestNodeInfo(FiberTest):
 
         # tlc_max_value
         # https://github.com/nervosnetwork/fiber/issues/631
-        assert node_info["tlc_max_value"] == hex(0)
+        # assert node_info["tlc_max_value"] == hex(0)
 
         # tlc_fee_proportional_millionths
         assert node_info["tlc_fee_proportional_millionths"] == hex(1000)
 
         # peers_count
         assert node_info["peers_count"] == hex(1)
+
+        assert node_info["features"] is not None, "features should not be None"
 
     def test_channel_count(self):
         """

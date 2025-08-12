@@ -179,7 +179,7 @@ class TestHopHint(FiberTest):  # a-b
         print(f"d-a, channel_outpoint:{da_channel_outpoint}")
         # b-a,怎么填d-私-a的信息
 
-        payment_hash = (
+        payment = (
             self.fibers[1]
             .get_client()
             .send_payment(  # b
@@ -195,20 +195,13 @@ class TestHopHint(FiberTest):  # a-b
                             # 填的是 d 的 pubkey，表示在 d 节点使用 channel_outpoint 到 a
                             "channel_outpoint": da_channel_outpoint,
                             "fee_rate": hex(1000),
-                            "tlc_expiry_delta": hex(1000),
+                            "tlc_expiry_delta": hex(86400000),
                         }
                     ],
                 }
             )
         )
-
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .get_payment({"payment_hash": payment_hash["payment_hash"]})
-        )
-        print("payment", payment)
-        assert payment["status"] == "Created"
+        self.wait_payment_state(self.fibers[1], payment["payment_hash"], "Success", 120)
 
     def test_use_hophit_simple(self):
         """
@@ -256,7 +249,7 @@ class TestHopHint(FiberTest):  # a-b
         print(f"d-a, channel_outpoint:{da_channel_outpoint}")
         # b-a,怎么填d-私-a的信息
 
-        payment_hash = (
+        payment = (
             self.fibers[1]
             .get_client()
             .send_payment(  # b
@@ -273,16 +266,10 @@ class TestHopHint(FiberTest):  # a-b
                             ],  # 填的是 d 的 pubkey，表示在 d 节点使用 channel_outpoint 到 a
                             "channel_outpoint": da_channel_outpoint,
                             "fee_rate": hex(1000),
-                            "tlc_expiry_delta": hex(1000),
+                            "tlc_expiry_delta": hex(86400000),
                         }
                     ],
                 }
             )
         )
-        payment = (
-            self.fibers[1]
-            .get_client()
-            .get_payment({"payment_hash": payment_hash["payment_hash"]})
-        )
-        print("payment", payment)
-        assert payment["status"] == "Created"
+        self.wait_payment_state(self.fibers[1], payment["payment_hash"], "Success", 120)

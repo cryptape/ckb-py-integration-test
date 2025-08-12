@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -49,10 +49,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -79,16 +79,16 @@ jobs:
           name: jfoa-open_channel-reports-${{ runner.os }}
           path: ./report
 
-  fiber_test_accept_channel_cancel_invoice_connect_peer_disconnect_peer:
+  fiber_test_accept_channel_cancel_invoice_connect_peer_disconnect_peer_backup:
     needs: prepare
     runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -106,7 +106,7 @@ jobs:
           tar -xzf prepare-backup.tar.gz
 
       - name: Run fiber_test_demo
-        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/accept_channel test_cases/fiber/devnet/cancel_invoice test_cases/fiber/devnet/connect_peer test_cases/fiber/devnet/disconnect_peer"
+        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/accept_channel test_cases/fiber/devnet/cancel_invoice test_cases/fiber/devnet/connect_peer test_cases/fiber/devnet/disconnect_peer test_cases/fiber/devnet/backup"
 
       - name: Publish reports
         if: failure()
@@ -121,10 +121,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -157,10 +157,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -193,10 +193,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -230,10 +230,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -267,10 +267,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -303,10 +303,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -340,10 +340,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -362,6 +362,124 @@ jobs:
 
       - name: Run fiber_test_demo
         run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/send_payment/debug test_cases/fiber/devnet/send_payment/mixed"
+
+      - name: Publish reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfoa-fiber_test_send_payment_debug_mixed-reports-${{ runner.os }}
+          path: ./report
+
+  fiber_test_wasm:
+    needs: prepare
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download prepare backup
+        uses: actions/download-artifact@v4
+        with:
+          name: prepare-backup-${{ runner.os }}
+          path: ./
+
+      - name: Extract tarball and restore permissions
+        run: |
+          tar -xzf prepare-backup.tar.gz
+      - name: prepare wasm env
+        run: |
+          git clone https://github.com/gpBlockchain/fiber-wasm-demo.git
+          cd fiber-wasm-demo
+          bash prepare.sh
+          cd ../
+      - name: Run fiber_test_demo
+        run: |
+           make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/wasm"
+
+      - name: Publish reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfoa-fiber_test_send_payment_debug_mixed-reports-${{ runner.os }}
+          path: ./report
+
+  fiber_test_send_payment_mpp:
+    needs: prepare
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download prepare backup
+        uses: actions/download-artifact@v4
+        with:
+          name: prepare-backup-${{ runner.os }}
+          path: ./
+
+      - name: Extract tarball and restore permissions
+        run: |
+          tar -xzf prepare-backup.tar.gz
+
+      - name: Run fiber_test_demo
+        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/devnet/send_payment/mpp"
+
+      - name: Publish reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfoa-fiber_test_send_payment_debug_mixed-reports-${{ runner.os }}
+          path: ./report
+
+  fiber_test_BiscuitAuth_config:
+    needs: prepare
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download prepare backup
+        uses: actions/download-artifact@v4
+        with:
+          name: prepare-backup-${{ runner.os }}
+          path: ./
+
+      - name: Extract tarball and restore permissions
+        run: |
+          tar -xzf prepare-backup.tar.gz
+
+      - name: Run fiber_test_demo
+        run: make fiber_test_demo FIBER_TEST_DEMO="test_cases/fiber/BiscuitAuth test_cases/fiber/config"
 
       - name: Publish reports
         if: failure()

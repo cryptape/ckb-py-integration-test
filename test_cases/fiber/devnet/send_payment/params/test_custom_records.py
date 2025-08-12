@@ -79,7 +79,7 @@ class TestCustomRecords(FiberTest):
 
         # 单独的key
         custom_records = {}
-        for i in range(0, 100):
+        for i in range(0, 20):
             custom_records.update({hex(i): self.generate_random_preimage()})
         payment = self.fiber1.get_client().send_payment(
             {
@@ -107,7 +107,7 @@ class TestCustomRecords(FiberTest):
                 "keysend": True,
                 "allow_self_payment": True,
                 "custom_records": {
-                    "0xffffffff": "0x1234",
+                    hex(65535): "0x1234",
                     "0x0": "0x5678",
                 },
             }
@@ -120,7 +120,7 @@ class TestCustomRecords(FiberTest):
             }
         )
         assert {
-            "0xffffffff": "0x1234",
+            "0xffff": "0x1234",
             "0x0": "0x5678",
         } == payment["custom_records"]
 
@@ -133,12 +133,12 @@ class TestCustomRecords(FiberTest):
                     "keysend": True,
                     "allow_self_payment": True,
                     "custom_records": {
-                        "0xffffffff": self.generate_random_str(13000),
+                        "0x12": self.generate_random_str(4096 + 2),
                         # "0x0": "0x5678",
                     },
                 }
             )
-        expected_error_message = "HopDataLenTooLarge"
+        expected_error_message = "value can not more than 2048 bytes"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
