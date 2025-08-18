@@ -316,6 +316,7 @@ class TestForceRestart(FiberTest):
             time.sleep(5)
             for payment in payments:
                 self.wait_payment_finished(self.fiber1, payment["payment_hash"], 120)
+
     @pytest.mark.skip("Musig2RoundFinalizeError")
     def test_restart_when_node_send_payment_mid_node(self):
 
