@@ -153,7 +153,7 @@ class TestGraphChannels(FiberTest):
         print("node4_channels", node4_channels)
         assert len(node4_channels["channels"]) == 2
 
-    @pytest.mark.skip("remove failed ")
+    # @pytest.mark.skip("remove failed ")
     def test_remove_channels_with_force(self):
         """
         force close channel
@@ -214,21 +214,22 @@ class TestGraphChannels(FiberTest):
         assert len(node3_channels["channels"]) == 1
 
         # force 关闭  channel
-        N2N3_CHANNEL_ID = self.fiber1.get_client().list_channels({})["channels"][0][
+        N2N3_CHANNEL_ID = self.fiber3.get_client().list_channels({})["channels"][0][
             "channel_id"
         ]
         self.fiber2.get_client().shutdown_channel(
             {
                 "channel_id": N2N3_CHANNEL_ID,
-                "close_script": self.get_account_script(self.fiber1.account_private),
-                "fee_rate": "0x3FC",
                 "force": True,
             }
         )
         self.wait_tx_pool(1)
         for i in range(10):
             self.Miner.miner_with_version(self.node, "0x0")
-        time.sleep(5)
+        self.wait_for_channel_state(
+            self.fiber3.get_client(), self.fiber2.get_peer_id(), "CLOSED", 120, True
+        )
+        time.sleep(10)
         node1_channels = self.fiber1.get_client().graph_channels()
         node2_channels = self.fiber2.get_client().graph_channels()
         node3_channels = self.fiber3.get_client().graph_channels()
