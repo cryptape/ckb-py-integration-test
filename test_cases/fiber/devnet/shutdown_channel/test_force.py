@@ -16,7 +16,7 @@ class TestForce(FiberTest):
         - xxx
     """
 
-    # FiberTest.debug = True
+    start_fiber_config = {"fiber_funding_timeout_seconds": 10}
 
     # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/333")
     def test_node_offline(self):
@@ -538,7 +538,7 @@ class TestForce(FiberTest):
             {"peer_id": self.fiber2.get_peer_id()}
         )
         N1N2_CHANNEL_ID = channels["channels"][0]["channel_id"]
-
+        self.fiber1.get_client().disconnect_peer({"peer_id": self.fiber2.get_peer_id()})
         # 5. Send payment using the created invoice
         self.fiber1.get_client().shutdown_channel(
             {
@@ -690,3 +690,42 @@ class TestForce(FiberTest):
         )
         print("after_account:", after_account)
         # todo check
+
+    def test_force_not_link_check_graph_channel(self):
+        self.fiber3 = self.start_new_fiber(self.generate_random_preimage())
+        self.open_channel(self.fiber1, self.fiber2, 1000 * 100000000, 1)
+        self.fiber1.connect_peer(self.fiber3)
+        self.fiber2.connect_peer(self.fiber3)
+        self.fiber1.get_client().disconnect_peer({"peer_id": self.fiber2.get_peer_id()})
+
+        self.fiber1.get_client().shutdown_channel(
+            {
+                "channel_id": self.fiber1.get_client().list_channels({})["channels"][0][
+                    "channel_id"
+                ],
+                "force": True,
+            }
+        )
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        self.node.getClient().generate_epochs("0x6", wait_time=0)
+        tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120 * 5)
+        self.Miner.miner_until_tx_committed(self.node, tx_hash)
+        self.wait_for_channel_state(
+            self.fiber1.get_client(),
+            self.fiber2.get_peer_id(),
+            "CLOSED",
+            10 + 5 * 60,
+            include_closed=True,
+        )
+        self.wait_for_channel_state(
+            self.fiber2.get_client(),
+            self.fiber1.get_peer_id(),
+            "CLOSED",
+            10 + 5 * 60,
+            include_closed=True,
+        )
+        time.sleep(5)
+        for fiber in self.fibers:
+            channels = fiber.get_client().graph_channels({})
+            assert channels["channels"] == []
