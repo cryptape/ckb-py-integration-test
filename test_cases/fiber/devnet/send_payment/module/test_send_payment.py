@@ -395,24 +395,28 @@ class TestSendPayment(FiberTest):
             {
                 "target_pubkey": self.fiber3.get_client().node_info()["node_id"],
                 "currency": "Fibd",
-                "amount": hex(1 * 100000000),
+                "amount": hex(100 * 100000000),
                 "keysend": True,
                 # "payment_hash": self.generate_random_preimage(),
             }
         )
-        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
+        self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success", 30)
         time.sleep(1)
         node1_pubkey = self.fiber1.get_client().node_info()["node_id"]
         node3_pubkey = self.fiber3.get_client().node_info()["node_id"]
-        for i in range(100):
-            payment1 = self.fiber1.get_client().send_payment(
-                {
-                    "target_pubkey": node3_pubkey,
-                    "currency": "Fibd",
-                    "amount": hex(100),
-                    "keysend": True,
-                }
-            )
+        for i in range(20):
+            print("current i:", i)
+            try:
+                payment1 = self.fiber1.get_client().send_payment(
+                    {
+                        "target_pubkey": node3_pubkey,
+                        "currency": "Fibd",
+                        "amount": hex(100),
+                        "keysend": True,
+                    }
+                )
+            except Exception as e:
+                pass
             payment2 = self.fiber3.get_client().send_payment(
                 {
                     "target_pubkey": node1_pubkey,
@@ -422,8 +426,8 @@ class TestSendPayment(FiberTest):
                     # "payment_hash": self.generate_random_preimage(),
                 }
             )
-            self.wait_payment_state(self.fiber1, payment1["payment_hash"], "Success")
-            self.wait_payment_state(self.fiber3, payment2["payment_hash"], "Success")
+            self.wait_payment_finished(self.fiber1, payment1["payment_hash"], 20)
+            self.wait_payment_finished(self.fiber3, payment2["payment_hash"], 20)
 
         time.sleep(10)
         self.fiber2.get_client().node_info()

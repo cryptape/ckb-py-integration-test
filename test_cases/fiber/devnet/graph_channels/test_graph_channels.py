@@ -227,7 +227,11 @@ class TestGraphChannels(FiberTest):
         for i in range(10):
             self.Miner.miner_with_version(self.node, "0x0")
         self.wait_for_channel_state(
-            self.fiber3.get_client(), self.fiber2.get_peer_id(), "CLOSED", 60*5+10, True
+            self.fiber3.get_client(),
+            self.fiber2.get_peer_id(),
+            "CLOSED",
+            60 * 5 + 10,
+            True,
         )
         time.sleep(10)
         node1_channels = self.fiber1.get_client().graph_channels()
