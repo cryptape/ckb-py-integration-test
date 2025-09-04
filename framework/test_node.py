@@ -11,6 +11,11 @@ from framework.rpc import RPCClient
 import shutil
 import telnetlib
 from websocket import create_connection, WebSocket
+import os
+
+
+DOCKER = os.getenv("DOCKER", False)
+DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.202.0-rc1")
 
 
 class CkbNodeConfigPath(Enum):
@@ -224,7 +229,9 @@ class CkbNode:
         self.ckb_pid = -1
         self.ckb_miner_pid = -1
         self.rpcUrl = "http://{url}".format(
-            url=self.ckb_config.get("ckb_rpc_listen_address", "127.0.0.1:8114")
+            url=self.ckb_config.get("ckb_rpc_listen_address", "127.0.0.1:8114").replace(
+                "0.0.0.0", "127.0.0.1"
+            )
         )
         self.client = RPCClient(self.rpcUrl)
 
@@ -244,6 +251,12 @@ class CkbNode:
     def connected(self, node):
         peer_id = node.get_peer_id()
         peer_address = node.get_peer_address()
+        peer_address = peer_address.replace(
+            "127.0.0.1", node.client.url.split(":")[1].replace("//", "")
+        )
+        # peer_address = peer_address.replace("127.0.0.1",node.ckb_dir.split("/")[-1])
+        peer_address = peer_address.replace("127.0.0.1", "172.17.0.1")
+
         print("add node response:", self.getClient().add_node(peer_id, peer_address))
 
     def connected_ws(self, node):
@@ -282,13 +295,27 @@ class CkbNode:
         self.start()
 
     def start(self):
+        time.sleep(1)
+        if DOCKER and self.ckb_config_path == CkbNodeConfigPath.CURRENT_TEST:
+            p2p_port = self.ckb_config["ckb_network_listen_addresses"][0].split("/")[-1]
+            rpc_port = self.ckb_config["ckb_rpc_listen_address"].split(":")[-1]
+            # --network host
+            # self.ckb_pid = run_command(
+            #     f"docker run  -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} --add-host=host.docker.internal:host-gateway  -v {self.ckb_dir}:/var/lib/ckb nervos/ckb:v0.202.0-rc1  run -C /var/lib/ckb "
+            #     f"--indexer  --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
+            # )
+            self.ckb_pid = run_command(
+                f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} --network my-network -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
+                f"--indexer  --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
+            )
+            time.sleep(3)
+            return
         version = run_command(
             "cd {ckb_dir} && ./ckb --version".format(ckb_dir=self.ckb_dir)
         )
         print("\n================= CKB Version =================")
         print(version.strip())
         print("===============================================\n")
-
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --indexer  --skip-spec-check > node.log 2>&1 &".format(
                 ckb_dir=self.ckb_dir
@@ -314,6 +341,14 @@ class CkbNode:
         self.stop_miner()
         # run_command("kill {pid}".format(pid=self.ckb_pid))
         # self.ckb_pid = -1
+        if DOCKER:
+            run_command(
+                f"docker stop {self.ckb_dir.split('/')[-1]}", check_exit_code=False
+            )
+            run_command(
+                f"docker rm {self.ckb_dir.split('/')[-1]}", check_exit_code=False
+            )
+            return
         port = self.rpcUrl.split(":")[-1]
 
         run_command(f"kill $(lsof -t -i:{port})", check_exit_code=False)

@@ -32,7 +32,7 @@ def get_ckb_configs(p2p_port, rpc_port, spec='{ file = "dev.toml" }'):
             "ckb_network_listen_addresses": [
                 "/ip4/0.0.0.0/tcp/{p2p_port}".format(p2p_port=p2p_port)
             ],
-            "ckb_rpc_listen_address": "127.0.0.1:{rpc_port}".format(rpc_port=rpc_port),
+            "ckb_rpc_listen_address": "0.0.0.0:{rpc_port}".format(rpc_port=rpc_port),
             "ckb_rpc_modules": [
                 "Net",
                 "Pool",
