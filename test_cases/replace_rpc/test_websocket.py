@@ -18,17 +18,17 @@ class TestWebsocket(CkbTest):
 
         """
         cls.node113 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115
+            cls.CkbNodeConfigPath.CURRENT_TEST, "telnet2/node", 8114, 8115
         )
         cls.node113.prepare(
             other_ckb_config={
                 "ckb_logger_filter": "debug",
-                "ckb_tcp_listen_address": "127.0.0.1:18114",
-                "ckb_ws_listen_address": "127.0.0.1:18124",
+                "ckb_tcp_listen_address": "0.0.0.0:18114",
+                "ckb_ws_listen_address": "0.0.0.0:18124",
             }
         )
         cls.node112 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V112, "telnet/node2", 8116, 8117
+            cls.CkbNodeConfigPath.V112, "telnet2/node2", 8116, 8117
         )
         cls.node112.prepare(
             other_ckb_config={
@@ -131,7 +131,7 @@ class TestWebsocket(CkbTest):
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
         client = self.node113.getClient()
-        client.url = f"http://{self.node113.ckb_config['ckb_ws_listen_address']}"
+        client.url = f"http://{self.node113.ckb_config['ckb_ws_listen_address'].replace('0.0.0.0','127.0.0.1')}"
 
         response = client.call("get_tip_block_number", [], 1)
 
@@ -174,6 +174,9 @@ class TestWebsocket(CkbTest):
         2. 112: stop successful
         3. 113: stop failed
         """
+        if self.skip_docker():
+            pytest.skip("docker not support lsof")
+            return
         self.node112.restart()
         socket = self.node112.subscribe_websocket("new_tip_header")
         self.node112.stop()
