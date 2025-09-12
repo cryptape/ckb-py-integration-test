@@ -9,7 +9,7 @@ class TestCommitmentDelayEpoch(FiberTest):
                 "peer_id": self.fiber2.get_peer_id(),
                 "funding_amount": hex(1000 * 100000000),
                 "public": True,
-                "commitment_delay_epoch": hex(2),
+                "commitment_delay_epoch": hex(4),
             }
         )
         self.wait_for_channel_state(
@@ -25,7 +25,7 @@ class TestCommitmentDelayEpoch(FiberTest):
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
-        self.node.getClient().generate_epochs(hex(2))
+        self.node.getClient().generate_epochs(hex(4))
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 1200)
         self.Miner.miner_until_tx_committed(self.node, tx_hash)
         message = self.get_tx_message(tx_hash)
