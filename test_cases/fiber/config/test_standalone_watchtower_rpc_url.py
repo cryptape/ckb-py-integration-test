@@ -45,7 +45,7 @@ class TestWatchTower(FiberTest):
         )
         self.fiber2.start()
         time.sleep(5)
-        self.node.getClient().generate_epochs("0x6")
+        self.node.getClient().generate_epochs("0x1",0)
         with pytest.raises(Exception) as exc_info:
             tx = self.wait_and_check_tx_pool_fee(1000, False, 20 * 5)
         expected_error_message = "expected_state"
@@ -86,7 +86,7 @@ class TestWatchTower(FiberTest):
         tx = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.fiber1.stop()
-        self.node.getClient().generate_epochs("0x6")
+        self.node.getClient().generate_epochs("0x1",0)
         with pytest.raises(Exception) as exc_info:
             tx = self.wait_and_check_tx_pool_fee(1000, False, 20 * 5)
         expected_error_message = "expected_state"
@@ -124,7 +124,7 @@ class TestWatchTower(FiberTest):
         tx = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.fiber1.stop()
-        self.node.getClient().generate_epochs("0x6")
+        self.node.getClient().generate_epochs("0x1",0)
         with pytest.raises(Exception) as exc_info:
             tx = self.wait_and_check_tx_pool_fee(1000, False, 20 * 5)
         expected_error_message = "expected_state"
@@ -176,7 +176,7 @@ class TestWatchTower(FiberTest):
         tx = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx)
         self.fiber1.stop()
-        self.node.getClient().generate_epochs("0x6")
+        self.node.getClient().generate_epochs("0x1",0)
         tx = self.wait_and_check_tx_pool_fee(1000, False, 120 * 5)
         self.Miner.miner_until_tx_committed(self.node, tx)
         msg = self.get_tx_message(tx)
@@ -228,7 +228,7 @@ class TestWatchTower(FiberTest):
         )
         tx = self.wait_and_check_tx_pool_fee(1000, False)
         self.Miner.miner_until_tx_committed(self.node, tx)
-        self.node.getClient().generate_epochs("0x6")
+        self.node.getClient().generate_epochs("0x1",0)
 
         tx = self.wait_and_check_tx_pool_fee(1000, False, 120 * 5)
         self.Miner.miner_until_tx_committed(self.node, tx)

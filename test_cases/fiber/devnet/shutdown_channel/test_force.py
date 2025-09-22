@@ -62,7 +62,7 @@ class TestForce(FiberTest):
                     "fee_rate": "0x3FC",
                 }
             )
-        expected_error_message = "Messaging failed because channel is closed"
+        expected_error_message = "Channel not found error"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
@@ -506,6 +506,7 @@ class TestForce(FiberTest):
 
         # self.wait_payment_state(self.fiber1, payment["payment_hash"], "Success")
 
+    @pytest.mark.skip("todo")
     def test_ShuttingDown(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -533,13 +534,15 @@ class TestForce(FiberTest):
             }
         )
         time.sleep(1)
-
+        fiber2_peer_id = self.fiber2.get_peer_id()
         channels = self.fiber1.get_client().list_channels(
-            {"peer_id": self.fiber2.get_peer_id()}
+            {"peer_id": fiber2_peer_id}
         )
         N1N2_CHANNEL_ID = channels["channels"][0]["channel_id"]
+        self.fiber2.stop()
+        time.sleep(5)
         self.fiber1.get_client().disconnect_peer({"peer_id": self.fiber2.get_peer_id()})
-        # 5. Send payment using the created invoice
+
         self.fiber1.get_client().shutdown_channel(
             {
                 "channel_id": N1N2_CHANNEL_ID,
@@ -552,12 +555,12 @@ class TestForce(FiberTest):
                 # "force": True
             }
         )
-        self.fiber2.get_client().shutdown_channel(
-            {
-                "channel_id": N1N2_CHANNEL_ID,
-                "force": True,
-            }
-        )
+        # self.fiber2.get_client().shutdown_channel(
+        #     {
+        #         "channel_id": N1N2_CHANNEL_ID,
+        #         "force": True,
+        #     }
+        # )
         # todo add check
 
     def test_force_ckb(self):

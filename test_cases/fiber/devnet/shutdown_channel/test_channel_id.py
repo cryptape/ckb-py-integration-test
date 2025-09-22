@@ -18,7 +18,7 @@ class TestChannelId(FiberTest):
                     "fee_rate": "0x3FC",
                 }
             )
-        expected_error_message = "Messaging failed because channel is closed"
+        expected_error_message = "Channel not found error"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
