@@ -14,14 +14,14 @@ run_test() {
     echo "$pytest_output"
 
     # Check if pytest output contains "failed"
-    if grep -q " FAILED " <<< "$pytest_output"; then
+    if grep -q "FAILED test_cases" <<< "$pytest_output"; then
         # Handle failed test case
         echo "Test case $1 failed"
         failed_cases+=" $1"
         return 1
     fi
 
-    if grep -q " ERROR " <<< "$pytest_output"; then
+    if grep -q "ERROR test_cases" <<< "$pytest_output"; then
         # Handle failed test case
         echo "Test case $1 error"
         error_cases+=" $1"

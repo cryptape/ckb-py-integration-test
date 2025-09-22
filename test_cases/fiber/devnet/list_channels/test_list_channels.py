@@ -264,7 +264,7 @@ class TestListChannels(FiberTest):
         assert channels["channels"][0]["enabled"] is True
 
         # tlc_expiry_delta
-        assert channels["channels"][0]["tlc_expiry_delta"] == hex(86400000)
+        assert channels["channels"][0]["tlc_expiry_delta"] == hex(14400000)
 
         # tlc_fee_proportional_millionths
         assert channels["channels"][0]["tlc_fee_proportional_millionths"] == hex(1000)

@@ -31,24 +31,26 @@ class TestTlcLocktimeExpiryDelta(FiberTest):
                     # "tlc_fee_proportional_millionths": "0x4B0",
                 }
             )
-        expected_error_message = (
-            "TLC expiry delta is too small, expect larger than 900000"
-        )
+        expected_error_message = "TLC expiry delta is too small, expect larger than"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        temporary_channel_id = self.fiber1.get_client().open_channel(
-            {
-                "peer_id": self.fiber2.get_peer_id(),
-                "funding_amount": hex(200 * 100000000),
-                "public": True,
-                "tlc_expiry_delta": "0xffffffff",
-                # "tlc_fee_proportional_millionths": "0x4B0",
-            }
-        )
-        self.wait_for_channel_state(
-            self.fiber1.get_client(), self.fiber2.get_peer_id(), "CHANNEL_READY", 120
+
+        with pytest.raises(Exception) as exc_info:
+            self.fiber1.get_client().open_channel(
+                {
+                    "peer_id": self.fiber2.get_peer_id(),
+                    "funding_amount": hex(200 * 100000000),
+                    "public": True,
+                    "tlc_expiry_delta": "0xffffffff",
+                    # "tlc_fee_proportional_millionths": "0x4B0",
+                }
+            )
+        expected_error_message = "expected to be smaller than"
+        assert expected_error_message in exc_info.value.args[0], (
+            f"Expected substring '{expected_error_message}' "
+            f"not found in actual string '{exc_info.value.args[0]}'"
         )
 
     @pytest.mark.skip("todo")

@@ -7,7 +7,7 @@ from framework.basic_fiber import FiberTest
 
 class WithTx(FiberTest):
 
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/503")
+    #    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/503")
     def test_send_force_shutdown_with_tx(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(
             {
@@ -83,9 +83,12 @@ class WithTx(FiberTest):
         } in message["output_cells"]
 
         # todo
-        payment_hash = self.send_payment(self.fiber2, self.fiber1, 1, False)
-        self.wait_payment_finished(self.fiber2, payment_hash, 120)
-        self.wait_payment_state(self.fiber2, payment_hash, "Failed")
+        try:
+            payment_hash = self.send_payment(self.fiber2, self.fiber1, 1, False)
+            self.wait_payment_state(self.fiber2, payment_hash, "Failed")
+        except Exception as e:
+            print(f"Expected failure when sending payment after force shutdown: {e}")
+            assert "no path found" in f"{e}"
 
     def test_receive_force_shutdown_with_tx(self):
         temporary_channel_id = self.fiber1.get_client().open_channel(

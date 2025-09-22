@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic_fiber import FiberTest
 
 
@@ -34,3 +36,15 @@ class TestConnectPeer(FiberTest):
 
         # Step 5: Assert that the peer count is 1
         assert node_info["peers_count"] == "0x1"
+
+    @pytest.mark.skip("restart ,list_peer will empty ,not stable")
+    def test_restart(self):
+        self.open_channel(self.fiber1, self.fiber2, 1000 * 100000000, 1000 * 100000000)
+        for i in range(5):
+            self.fiber1.stop()
+            self.fiber1.start()
+            peers = self.fiber1.get_client().list_peers()
+        time.sleep(2)
+        self.fiber1.get_client().list_channels({})
+        peers = self.fiber1.get_client().list_peers()
+        assert len(peers["peers"]) == 1

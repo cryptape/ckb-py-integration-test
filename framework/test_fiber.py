@@ -17,34 +17,25 @@ from framework.config import get_tmp_path
 
 class FiberConfigPath(Enum):
     CURRENT_DEV = (
-        "/source/template/fiber/dev_config_2.yml.j2",
+        "/source/fiber/dev_config.yml.j2",
         # "download/fiber/0.5.0/fnn",
         "download/fiber/current/fnn",
     )
 
     CURRENT_DEV_DEBUG = (
-        "/source/template/fiber/dev_config_2.yml.j2",
+        "/source/fiber/dev_config.yml.j2",
         "download/fiber/current/fnn.debug",
     )
 
     CURRENT_TESTNET = (
         "/source/template/fiber/testnet_config_2.yml.j2",
-        "download/fiber/0.5.1/fnn",
+        "download/fiber/0.6.0/fnn",
     )
 
-    V042_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.2/fnn")
-    V040_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.4.0/fnn")
-    V031_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.1/fnn")
-    V030_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.3.0/fnn")
-    V020_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.2.0/fnn")
-    V010_TESTNET = ("/source/template/fiber/config.yml.j2", "download/fiber/0.1.0/fnn")
-
-    V040_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.4.0/fnn")
-    V031_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.1/fnn")
-    V030_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.3.0/fnn")
-    V021_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.1/fnn")
-    V020_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.2.0/fnn")
-    V010_DEV = ("/source/template/fiber/dev_config.yml.j2", "download/fiber/0.1.0/fnn")
+    V050_DEV = (
+        "/source/template/fiber/dev_config_2.yml.j2",
+        "download/fiber/0.5.0/fnn",
+    )
 
     def __init__(self, fiber_config_path, fiber_bin_path):
         self.fiber_config_path = fiber_config_path
@@ -105,9 +96,7 @@ class Fiber:
             self.fiber_config_path,
         )
         shutil.copy(
-            "{root_path}/source/template/ckb/fiber/dev.toml".format(
-                root_path=get_project_root()
-            ),
+            "{root_path}/source/fiber/dev.toml".format(root_path=get_project_root()),
             self.tmp_path,
         )
         target_dir = os.path.join(self.tmp_path, "ckb")
@@ -182,23 +171,36 @@ class Fiber:
             f"echo YES | RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path}-migrate -p {self.tmp_path}/fiber/store"
         )
 
-    def start(self, password="password0"):
+    def start(
+        self,
+        password="password0",
+        fnn_log_level="debug",
+        rpc_biscuit_public_key=None,
+    ):
         # env_map = dict(os.environ)  # Make a copy of the current environment
-        # if node:
+        # if node:,
         #     contract_map = self.get_contract_env_map(node)
         #     env_map.update(contract_map)
         # for key in env_map:
         #     print(f"{key}={env_map[key]}")
+        rpc_biscuit_public_key_option = ""
+        if rpc_biscuit_public_key != None:
+            rpc_biscuit_public_key_option = (
+                f" --rpc-biscuit-public-key {rpc_biscuit_public_key}"
+            )
         run_command(
-            f"FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn=debug {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} > {self.tmp_path}/node.log 2>&1 &"
+            f" FIBER_SECRET_KEY_PASSWORD='{password}' RUST_LOG=info,fnn={fnn_log_level} {get_project_root()}/{self.fiber_config_enum.fiber_bin_path} -c {self.tmp_path}/config.yml -d {self.tmp_path} {rpc_biscuit_public_key_option}  >> {self.tmp_path}/node.log 2>&1 &"
             # env=env_map,
         )
         # wait rpc start
-        time.sleep(1)
+        time.sleep(0.1)
         print("start fiber client ")
 
     def stop(self):
-        run_command(f"kill $(lsof -t -i:{self.rpc_port})", False)
+        run_command(
+            "kill $(lsof -i:" + self.rpc_port + " | grep LISTEN | awk '{print $2}')",
+            False,
+        )
         time.sleep(1)
 
     def force_stop(self):

@@ -3,15 +3,19 @@ import socket
 
 from framework.helper.udt_contract import UdtContract, issue_udt_tx
 from framework.test_fiber import Fiber, FiberConfigPath
-from framework.util import generate_account_privakey
-from framework.util import ACCOUNT_PRIVATE_KEY_INDEX
+from framework.util import generate_account_privakey, get_project_root
+from framework.util import run_command
 import time
 import random
-import datetime
-from framework.util import (
-    to_int_from_big_uint128_le,
-)
+from datetime import datetime
+from framework.util import to_int_from_big_uint128_le, change_time
 import logging
+import os
+import subprocess
+
+# FIBER_TAR_GZ = "ckb-py-integration-test/source/fiber/data.fiber.tar.gz"
+XUDT_TX_HASH = "0x03c4475655a46dc4984c49fce03316f80bf666236bd95118112731082758d686"
+XUDT_CODE_HASH = "0x102583443ba6cfe5a3ac268bbb4475fb63eb497dce077f126ad3b148d4f4f8f8"
 
 
 class FiberTest(CkbTest):
@@ -25,6 +29,7 @@ class FiberTest(CkbTest):
     fiber_version = FiberConfigPath.CURRENT_DEV
     logger = logging.getLogger(__name__)
     start_fiber_config = {}
+    fnn_log_level = "debug"
 
     @classmethod
     def setup_class(cls):
@@ -46,7 +51,7 @@ class FiberTest(CkbTest):
             cls.account2_private_key
         )
         cls.node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_FIBER, "contract/node", 8114, 8125
+            cls.CkbNodeConfigPath.CURRENT_TEST, "contract/node", 8114, 8125
         )
 
         if cls.debug:
@@ -58,9 +63,11 @@ class FiberTest(CkbTest):
             cls.first_debug = True
 
         cls.node.prepare()
+        tar_file(
+            f"{get_project_root()}/source/fiber/data.fiber.tar.gz", cls.node.ckb_dir
+        )
         cls.node.start()
         cls.node.getClient().get_consensus()
-        cls.Miner.make_tip_height_number(cls.node, 20)
 
     def setup_method(cls, method):
         """
@@ -92,12 +99,8 @@ class FiberTest(CkbTest):
         )
         cls.fibers.append(cls.fiber1)
         cls.fibers.append(cls.fiber2)
-        # # deploy xudt
-        xudt_contract_hash = cls.node.getClient().get_block_by_number("0x0")[
-            "transactions"
-        ][0]["hash"]
         #
-        cls.udtContract = UdtContract(xudt_contract_hash, 9)
+        cls.udtContract = UdtContract(XUDT_TX_HASH, 0)
         #
         deploy_hash, deploy_index = cls.udtContract.get_deploy_hash_and_index()
 
@@ -130,10 +133,10 @@ class FiberTest(CkbTest):
         update_config.update(cls.start_fiber_config)
 
         cls.fiber1.prepare(update_config=update_config)
-        cls.fiber1.start()
+        cls.fiber1.start(fnn_log_level=cls.fnn_log_level)
 
         cls.fiber2.prepare(update_config=update_config)
-        cls.fiber2.start()
+        cls.fiber2.start(fnn_log_level=cls.fnn_log_level)
         before_balance1 = cls.Ckb_cli.wallet_get_capacity(
             cls.account1["address"]["testnet"], api_url=cls.node.getClient().url
         )
@@ -250,16 +253,22 @@ class FiberTest(CkbTest):
             account_private_key,
             f"fiber/node{3 + i}",
             str(8251 + i),
-            str(8302 + i),
+            str(8402 + i),
         )
         self.fibers.append(fiber)
         self.new_fibers.append(fiber)
         fiber.prepare(update_config=update_config)
-        fiber.start()
+        fiber.start(fnn_log_level=self.fnn_log_level)
         return fiber
 
     def wait_for_channel_state(
-        self, client, peer_id, expected_state, timeout=120, include_closed=False
+        self,
+        client,
+        peer_id,
+        expected_state,
+        timeout=120,
+        include_closed=False,
+        channel_id=None,
     ):
         """Wait for a channel to reach a specific state.
         1. NEGOTIATING_FUNDING
@@ -274,13 +283,30 @@ class FiberTest(CkbTest):
             if len(channels["channels"]) == 0:
                 time.sleep(1)
                 continue
-            if channels["channels"][0]["state"]["state_name"] == expected_state:
-                self.logger.debug(f"Channel reached expected state: {expected_state}")
-                # todo wait broading
-                time.sleep(2)
-                return channels["channels"][0]["channel_id"]
+            idx = 0
+            if channel_id is not None:
+                for i in range(len(channels["channels"])):
+                    print("channel_id:", channel_id)
+                    if channels["channels"][i]["channel_id"] == channel_id:
+                        idx = i
+            if type(expected_state) == str:
+                if channels["channels"][idx]["state"]["state_name"] == expected_state:
+                    self.logger.debug(
+                        f"Channel reached expected state: {expected_state}"
+                    )
+                    # todo wait broading
+                    time.sleep(1)
+                    return channels["channels"][idx]["channel_id"]
+            if type(expected_state) == dict:
+                if channels["channels"][idx]["state"] == expected_state:
+                    self.logger.debug(
+                        f"Channel reached expected state: {expected_state}"
+                    )
+                    # todo wait broading
+                    time.sleep(1)
+                    return channels["channels"][idx]["channel_id"]
             self.logger.debug(
-                f"Waiting for channel state: {expected_state}, current state: {channels['channels'][0]['state']['state_name']}"
+                f"Waiting for channel state: {expected_state}, current state: {channels['channels'][0]['state']}"
             )
             time.sleep(1)
         raise TimeoutError(
@@ -304,6 +330,7 @@ class FiberTest(CkbTest):
         fiber1_fee=1000,
         fiber2_fee=1000,
         udt=None,
+        other_config={},
     ):
         fiber1.connect_peer(fiber2)
         time.sleep(1)
@@ -313,14 +340,14 @@ class FiberTest(CkbTest):
             ],
             16,
         ):
-            temporary_channel = fiber1.get_client().open_channel(
-                {
-                    "peer_id": fiber2.get_peer_id(),
-                    "funding_amount": hex(fiber1_balance + 62 * 100000000),
-                    "tlc_fee_proportional_millionths": hex(fiber1_fee),
-                    "public": True,
-                }
-            )
+            open_channel_config = {
+                "peer_id": fiber2.get_peer_id(),
+                "funding_amount": hex(fiber1_balance + 62 * 100000000),
+                "tlc_fee_proportional_millionths": hex(fiber1_fee),
+                "public": True,
+            }
+            open_channel_config.update(other_config)
+            temporary_channel = fiber1.get_client().open_channel(open_channel_config)
             time.sleep(1)
             fiber2.get_client().accept_channel(
                 {
@@ -334,15 +361,15 @@ class FiberTest(CkbTest):
                 fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
             )
             return
-        fiber1.get_client().open_channel(
-            {
-                "peer_id": fiber2.get_peer_id(),
-                "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
-                "tlc_fee_proportional_millionths": hex(fiber1_fee),
-                "public": True,
-                "funding_udt_type_script": udt,
-            }
-        )
+        open_channel_config = {
+            "peer_id": fiber2.get_peer_id(),
+            "funding_amount": hex(fiber1_balance + fiber2_balance + 62 * 100000000),
+            "tlc_fee_proportional_millionths": hex(fiber1_fee),
+            "public": True,
+            "funding_udt_type_script": udt,
+        }
+        open_channel_config.update(other_config)
+        fiber1.get_client().open_channel(open_channel_config)
         self.wait_for_channel_state(
             fiber1.get_client(), fiber2.get_peer_id(), "CHANNEL_READY"
         )
@@ -354,13 +381,15 @@ class FiberTest(CkbTest):
         #         "keysend": True,
         #     }
         # )
-        self.send_payment(fiber1, fiber2, fiber2_balance, True, udt, 10)
-        fiber2.get_client().update_channel(
-            {
-                "channel_id": channels["channels"][0]["channel_id"],
-                "tlc_fee_proportional_millionths": hex(fiber2_fee),
-            }
-        )
+        if fiber2_balance != 0:
+            self.send_payment(fiber1, fiber2, fiber2_balance, True, udt, 10)
+        if fiber2_fee != 1000:
+            fiber2.get_client().update_channel(
+                {
+                    "channel_id": channels["channels"][0]["channel_id"],
+                    "tlc_fee_proportional_millionths": hex(fiber2_fee),
+                }
+            )
         # self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
         # channels = fiber1.get_client().list_channels({"peer_id": fiber2.get_peer_id()})
         # assert channels["channels"][0]["local_balance"] == hex(fiber1_balance)
@@ -374,18 +403,27 @@ class FiberTest(CkbTest):
                 "amount": hex(amount),
                 "currency": "Fibd",
                 "description": "test invoice generated by node2",
-                "expiry": "0xe10",
-                "final_cltv": "0x28",
                 "payment_preimage": self.generate_random_preimage(),
                 "hash_algorithm": "sha256",
                 "udt_type_script": udt,
+                "allow_mpp": True,
             }
         )
         for i in range(try_count):
+            # payment = fiber1.get_client().send_payment(
+            #     {
+            #         "invoice": invoice["invoice_address"],
+            #         "allow_self_payment": True,
+            #         "dry_run": True,
+            #         "max_parts":"0x40",
+            #     }
+            # )
             try:
                 payment = fiber1.get_client().send_payment(
                     {
                         "invoice": invoice["invoice_address"],
+                        "allow_self_payment": True,
+                        "max_parts": "0x40",
                     }
                 )
                 if wait:
@@ -397,6 +435,8 @@ class FiberTest(CkbTest):
         payment = fiber1.get_client().send_payment(
             {
                 "invoice": invoice["invoice_address"],
+                "allow_self_payment": True,
+                "max_parts": "0x40",
             }
         )
         if wait:
@@ -413,10 +453,13 @@ class FiberTest(CkbTest):
                         "keysend": True,
                         "allow_self_payment": True,
                         "udt_type_script": udt,
+                        # "final_tlc_expiry_delta": hex(120960000),
                     }
                 )
                 if wait:
-                    self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+                    self.wait_payment_state(
+                        fiber1, payment["payment_hash"], "Success", 600, 0.1
+                    )
                 return payment["payment_hash"]
             except Exception as e:
                 time.sleep(1)
@@ -431,7 +474,9 @@ class FiberTest(CkbTest):
             }
         )
         if wait:
-            self.wait_payment_state(fiber1, payment["payment_hash"], "Success")
+            self.wait_payment_state(
+                fiber1, payment["payment_hash"], "Success", 600, 0.1
+            )
         return payment["payment_hash"]
 
     def get_account_script(self, account_private_key):
@@ -442,14 +487,18 @@ class FiberTest(CkbTest):
             "args": account1["lock_arg"],
         }
 
-    def wait_payment_state(self, client, payment_hash, status="Success", timeout=360):
+    def wait_payment_state(
+        self, client, payment_hash, status="Success", timeout=360, interval=1
+    ):
         for i in range(timeout):
             result = client.get_client().get_payment({"payment_hash": payment_hash})
             if result["status"] == status:
                 return
-            time.sleep(1)
+            if result["status"] == "Failed" or result["status"] == "Success":
+                raise Exception(f"payment failed, reason:{result['status']}")
+            time.sleep(interval)
         raise TimeoutError(
-            f"status did not reach state: {status} within timeout period."
+            f"payment:{payment_hash} status did not reach state: {result['status']}, expected:{status} , within timeout period."
         )
 
     def wait_payment_finished(self, client, payment_hash, timeout=120):
@@ -467,15 +516,76 @@ class FiberTest(CkbTest):
         for fiber in self.fibers:
             messages.append(self.get_fiber_balance(fiber))
         for i in range(len(messages)):
-            self.logger.debug(f"fiber{i} balance:{messages[i]}")
+            self.logger.info(f"fiber{i} balance:{messages[i]}")
+
+    def get_fiber_graph_balance(self):
+        """显示fiber网络中所有通道的余额信息"""
+        # 初始化节点映射表
+        peer_id_map = {}
+        idx = 0
+        for fiber in self.fibers:
+            peer_id = fiber.get_peer_id()
+            peer_id_map[peer_id] = idx
+            idx += 1
+
+        # 初始化通道映射表
+        channel_maps = {}
+        for i in range(len(self.fibers)):
+            channel_maps[i] = {}
+            for j in range(len(self.fibers)):
+                channel_maps[i][j] = {}
+
+        datas = {}
+        # 遍历所有fiber节点获取通道信息
+        for fiber in self.fibers:
+            peer_id = fiber.get_peer_id()
+            channels = fiber.get_client().list_channels({})
+
+            # 遍历该节点的所有通道
+            for channel in channels["channels"]:
+                remote_peer_id = channel["peer_id"]
+                # 记录通道信息到映射表
+                # channel_maps[peer_id_map[peer_id]][peer_id_map[remote_peer_id]][channel['channel_id']] = {
+                #     'local_balance': int(channel["local_balance"], 16),
+                #     'remote_balance': int(channel["remote_balance"], 16),
+                #     'offered_balance': int(channel["offered_tlc_balance"], 16),
+                #     'received_balance': int(channel["received_tlc_balance"], 16),
+                #     'udt_type_script': channel.get("funding_udt_type_script", None),
+                #     'state': channel["state"]["state_name"]
+                # }
+                # self.logger.debug(
+                #     f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16)},{int(channel["offered_tlc_balance"], 16)})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16)},{int(channel["received_tlc_balance"], 16)}),udt_type_script:{channel.get("funding_udt_type_script", None)}")
+                # datas.append(f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16)},{int(channel["offered_tlc_balance"], 16)})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16)},{int(channel["received_tlc_balance"], 16)}),udt_type_script:{channel.get("funding_udt_type_script", None)}")
+                datas[channel["channel_id"]] = (
+                    f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16) / 100000000},{int(channel["offered_tlc_balance"], 16) / 100000000})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16) / 100000000},{int(channel["received_tlc_balance"], 16) / 100000000}),udt_type_script:{channel.get("funding_udt_type_script", None)}"
+                )
+        for key in datas:
+            self.logger.debug(f"{key}:{datas[key]}")
+            # self.logger.debug(datas[key])
 
     def get_fiber_balance(self, fiber):
         channels = fiber.get_client().list_channels({})
         balance_map = {}
 
-        channels_balance = 0
-        channels_offered_tlc_balance = 0
-        channels_received_tlc_balance = 0
+        lock_script = self.get_account_script(fiber.account_private)
+
+        chain_udt_balance = self.udtContract.balance(
+            self.node.getClient(),
+            self.fiber1.account_private,
+            lock_script["args"],
+        )
+
+        chain_ckb_balance = int(
+            self.node.getClient().get_cells_capacity(
+                {
+                    "script": lock_script,
+                    "script_type": "lock",
+                    "script_search_mode": "exact",
+                }
+            )["capacity"],
+            16,
+        )
+
         for i in range(len(channels["channels"])):
             channel = channels["channels"][i]
             if channel["state"]["state_name"] == "CHANNEL_READY":
@@ -495,6 +605,9 @@ class FiberTest(CkbTest):
                 balance_map[key]["received_tlc_balance"] += int(
                     channel["received_tlc_balance"], 16
                 )
+        balance_map["chain"] = {}
+        balance_map["chain"]["ckb"] = chain_ckb_balance
+        balance_map["chain"]["udt"] = chain_udt_balance
         return balance_map
 
     def calculate_tx_fee(self, balance, fee_list):
@@ -815,6 +928,124 @@ class FiberTest(CkbTest):
             return
         raise TimeoutError(f"{fiber_balance}")
 
+    def wait_graph_channels_sync(self, fiber, channels_count, timeout=120):
+        """
+        等待图形通道同步
+        :param fiber: Fiber实例
+        :param channels_count: 期望的通道数量
+        :param timeout: 超时时间，单位为秒
+        """
+        for i in range(timeout):
+            graph_channels = fiber.get_client().graph_channels()["channels"]
+            if len(graph_channels) == channels_count:
+                print(f"Graph channels synced successfully,cost time:{i}")
+                return True
+            time.sleep(1)
+        raise TimeoutError(
+            f"Graph channels did not sync to {channels_count} within {timeout} seconds."
+        )
+
+    def add_time_and_generate_epoch(self, hour, epoch):
+        change_time(hour)
+        client = self.node.getClient()
+        header = client.get_tip_header()
+        before_median_time = client.get_block_median_time(header["hash"])
+        self.node.getClient().generate_epochs(hex(epoch), 0)
+        header = client.get_tip_header()
+        median_time = client.get_block_median_time(header["hash"])
+        print(
+            "before_median_time datetime:",
+            datetime.fromtimestamp(int(before_median_time, 16) / 1000),
+        )
+        print(
+            "median_time datetime:", datetime.fromtimestamp(int(median_time, 16) / 1000)
+        )
+
+    def add_time_and_generate_block(self, hour, block_num):
+        change_time(hour)
+        client = self.node.getClient()
+        header = client.get_tip_header()
+        before_median_time = client.get_block_median_time(header["hash"])
+        for i in range(block_num):
+            self.Miner.miner_with_version(self.node, "0x0")
+        header = client.get_tip_header()
+        median_time = client.get_block_median_time(header["hash"])
+        print(
+            "before_median_time datetime:",
+            datetime.fromtimestamp(int(before_median_time, 16) / 1000),
+        )
+        print(
+            "median_time datetime:", datetime.fromtimestamp(int(median_time, 16) / 1000)
+        )
+
+    def get_commit_cells(self):
+        #         code_hash: 0x2d7d93e3347ddf9f10f6690af75f1e24debaa6c4363f3b2c068f61c757253d38
+        #         hash_type: type
+        #         args: 0x
+        return self.node.getClient().get_cells(
+            {
+                "script": {
+                    "code_hash": "0x2d7d93e3347ddf9f10f6690af75f1e24debaa6c4363f3b2c068f61c757253d38",
+                    "hash_type": "type",
+                    "args": "0x",
+                },
+                "script_type": "lock",
+                "script_search_mode": "prefix",
+            },
+            "asc",
+            "0xfff",
+            None,
+        )["objects"]
+
+    def restore_time(self):
+        """恢复系统时间"""
+        print("开始恢复系统时间...")
+        print("current time:", time.time())
+        print("current datetime:", datetime.now())
+
+        try:
+            # 检测是否在Docker容器中运行
+            is_docker = os.path.exists("/.dockerenv")
+
+            if is_docker:
+                # 在Docker容器中，尝试从网络同步时间
+                cmd = "ntpdate -s time.nist.gov"
+                print(f"Docker环境 - 执行命令: {cmd}")
+            else:
+                # 在宿主机上，使用sntp同步网络时间
+                cmd = f"echo hyperchain | sudo -S sntp -sS time.apple.com"
+                print(f"宿主机环境 - 执行命令: sudo sntp -sS time.apple.com")
+
+            # 执行系统命令
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+            if result.returncode == 0:
+                print("系统时间恢复成功")
+            else:
+                print(f"系统时间恢复失败: {result.stderr}")
+                # 如果网络同步失败，尝试手动减去1小时
+                print("尝试手动恢复时间（减去1小时）...")
+                current_time = datetime.now()
+                restore_time_dt = current_time - timedelta(hours=1)
+                time_str = restore_time_dt.strftime("%m%d%H%M%Y")
+
+                if is_docker:
+                    cmd = f"date {time_str}"
+                else:
+                    cmd = f"echo '{password}' | sudo -S date {time_str}"
+
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                if result.returncode == 0:
+                    print("手动时间恢复成功")
+                else:
+                    print(f"手动时间恢复失败: {result.stderr}")
+
+        except Exception as e:
+            print(f"恢复系统时间时发生错误: {e}")
+
+        print("restored time:", time.time())
+        print("restored datetime:", datetime.now())
+
 
 def check_port(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -824,3 +1055,7 @@ def check_port(port):
             return True  # 端口开放
         except (socket.timeout, socket.error):
             return False  # 端口未开放
+
+
+def tar_file(src_tar, dec_data):
+    run_command(f"tar -xvf {src_tar} -C {dec_data}")

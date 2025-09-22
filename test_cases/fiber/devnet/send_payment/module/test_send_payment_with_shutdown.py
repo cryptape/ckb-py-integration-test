@@ -4,8 +4,7 @@ from framework.basic_fiber import FiberTest
 
 
 class TestSendPaymentWithShutdown(FiberTest):
-
-    @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/503")
+    # @pytest.mark.skip("https://github.com/nervosnetwork/fiber/issues/503")
     def test_shutdown_in_send_payment(self):
         self.start_new_fiber(self.generate_account(10000))
         self.start_new_fiber(self.generate_account(10000))
@@ -84,13 +83,13 @@ class TestSendPaymentWithShutdown(FiberTest):
         self.fibers[3].get_client().shutdown_channel(
             {
                 "channel_id": N3N4_CHANNEL_ID,
-                "close_script": {
-                    "code_hash": "0x1bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                    "hash_type": "type",
-                    "args": self.fibers[3].get_account()["lock_arg"],
-                },
+                # "close_script": {
+                #     "code_hash": "0x1bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                #     "hash_type": "type",
+                #     "args": self.fibers[3].get_account()["lock_arg"],
+                # },
                 "force": True,
-                "fee_rate": "0x3FC",
+                # "fee_rate": "0x3FC",
             }
         )
         tx_hash = self.wait_and_check_tx_pool_fee(1000, False, 120)

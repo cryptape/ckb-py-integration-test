@@ -32,7 +32,7 @@ class LinkedTest(FiberTest):
                 }
             )
 
-        expected_error_message = "pubkey not found"
+        expected_error_message = "feature not found"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
