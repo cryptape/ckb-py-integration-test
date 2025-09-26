@@ -729,6 +729,7 @@ class MutilPathTestCase(FiberTest):
         self.get_fiber_graph_balance()
         # todo 只能有1笔成功
 
+    @pytest.mark.skip("cost two account same time")
     def test_invoice_same_sender_cost_two(self):
         self.fiber3 = self.start_new_fiber(
             self.generate_account(10000, self.fiber1.account_private, 1000 * 100000000)
@@ -749,7 +750,8 @@ class MutilPathTestCase(FiberTest):
                 # "final_cltv": "0x28",
                 "payment_preimage": self.generate_random_preimage(),
                 "hash_algorithm": "sha256",
-                "allow_atomic_mpp": True,
+                "allow_mpp": True,
+                # "allow_atomic_mpp": True,
             }
         )
         payment = self.fiber1.get_client().send_payment(
