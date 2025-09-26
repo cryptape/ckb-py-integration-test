@@ -491,7 +491,7 @@ class MutilPathTestCase(FiberTest):
                 assert balance["ckb"]["received_tlc_balance"] == 0
                 if key == "ckb":
                     assert balance["ckb"]["local_balance"] == 200000000000
-                elif key == 'chain':
+                elif key == "chain":
                     continue
                 else:
                     assert balance[key]["local_balance"] == 212400000000
@@ -703,7 +703,7 @@ class MutilPathTestCase(FiberTest):
                 "final_cltv": "0x28",
                 "payment_preimage": self.generate_random_preimage(),
                 "hash_algorithm": "sha256",
-                "allow_mpp": True,
+                "allow_atomic_mpp": True,
             }
         )
         self.fiber1.get_client().send_payment(
@@ -770,6 +770,6 @@ class MutilPathTestCase(FiberTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        self.wait_payment_finished(self.fiber1, payment["payment_hash"],30)
+        self.wait_payment_finished(self.fiber1, payment["payment_hash"], 30)
         balance = self.get_fiber_balance(self.fiber3)
         assert balance["ckb"]["local_balance"] == 300000000000

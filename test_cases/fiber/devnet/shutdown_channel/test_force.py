@@ -535,9 +535,7 @@ class TestForce(FiberTest):
         )
         time.sleep(1)
         fiber2_peer_id = self.fiber2.get_peer_id()
-        channels = self.fiber1.get_client().list_channels(
-            {"peer_id": fiber2_peer_id}
-        )
+        channels = self.fiber1.get_client().list_channels({"peer_id": fiber2_peer_id})
         N1N2_CHANNEL_ID = channels["channels"][0]["channel_id"]
         self.fiber2.stop()
         time.sleep(5)

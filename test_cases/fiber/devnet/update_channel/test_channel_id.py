@@ -13,7 +13,7 @@ class TestChanelId(FiberTest):
             self.fiber1.get_client().update_channel(
                 {"channel_id": self.generate_random_preimage()}
             )
-        expected_error_message = "Messaging failed because channel is closed"
+        expected_error_message = "Channel not found error"
         assert expected_error_message in exc_info.value.args[0], (
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
