@@ -642,6 +642,7 @@ location = {{ file = "{contract_bin_path}" }}
 
 [[dep_groups]]
 name = "my_dep_group"
+enable_type_id = {str(enable_type_id).lower()}
 cells = []
 
 [lock]
