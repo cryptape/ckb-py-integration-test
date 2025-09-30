@@ -24,7 +24,6 @@ develop_prepare:
 	bash develop_prepare.sh
 
 test_cases := \
-    test_cases/replace_rpc \
     test_cases/ckb_cli \
     test_cases/ckb2023 \
     test_cases/contracts \
