@@ -2,6 +2,7 @@ import json
 import time
 
 from framework.basic import CkbTest
+from framework.test_node import DOCKER
 
 
 class TestTelnetAndWebsocket(CkbTest):
@@ -21,8 +22,8 @@ class TestTelnetAndWebsocket(CkbTest):
         cls.node113.prepare(
             other_ckb_config={
                 "ckb_logger_filter": "debug",
-                "ckb_tcp_listen_address": "127.0.0.1:18116",
-                "ckb_ws_listen_address": "127.0.0.1:18124",
+                "ckb_tcp_listen_address": "0.0.0.0:18116",
+                "ckb_ws_listen_address": "0.0.0.0:18124",
             }
         )
         cls.node112 = cls.CkbNode.init_dev_by_port(
