@@ -12,6 +12,8 @@ import framework.test_light_client
 import framework.test_cluster
 import framework.config
 import shutil
+
+from framework.test_node import DOCKER
 from framework.util import get_project_root
 
 
@@ -56,3 +58,7 @@ class CkbTest(ABC, unittest.TestCase):
                 f"{get_project_root()}/tmp",
                 f"{get_project_root()}/report/{method.__name__}",
             )
+
+    @staticmethod
+    def skip_docker():
+        return DOCKER

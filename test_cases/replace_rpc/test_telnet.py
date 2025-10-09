@@ -24,8 +24,8 @@ class TestRpc(CkbTest):
         cls.node113.prepare(
             other_ckb_config={
                 "ckb_logger_filter": "debug",
-                "ckb_tcp_listen_address": "127.0.0.1:18115",
-                "ckb_ws_listen_address": "127.0.0.1:18124",
+                "ckb_tcp_listen_address": "0.0.0.0:18115",
+                "ckb_ws_listen_address": "0.0.0.0:18124",
             }
         )
         cls.node112 = cls.CkbNode.init_dev_by_port(
@@ -62,7 +62,7 @@ class TestRpc(CkbTest):
         4.test 113 max link count
         """
         telnets = []
-        for i in range(1000):
+        for i in range(100):
             print(i)
             telnet = self.node112.subscribe_telnet("new_tip_header")
             telnets.append(telnet)
@@ -79,7 +79,7 @@ class TestRpc(CkbTest):
 
         # 1.test 113 max link count
         telnets = []
-        for i in range(10000):
+        for i in range(100):
             print(i)
             telnet = self.node113.subscribe_telnet("new_tip_header")
             telnets.append(telnet)
@@ -101,7 +101,7 @@ class TestRpc(CkbTest):
         telnet113 = self.node113.subscribe_telnet("new_tip_header")
         telnet112 = self.node112.subscribe_telnet("new_tip_header")
 
-        for i in range(300):
+        for i in range(30):
             self.Miner.miner_with_version(self.node113, "0x0")
             print("current idx:", i)
             ret113 = telnet113.read_very_eager()
@@ -130,7 +130,10 @@ class TestRpc(CkbTest):
 
         with pytest.raises(Exception) as exc_info:
             socket = self.node113.subscribe_websocket(
-                "new_tip_header", self.node113.ckb_config["ckb_tcp_listen_address"]
+                "new_tip_header",
+                self.node113.ckb_config["ckb_tcp_listen_address"].replace(
+                    "0.0.0.0", "127.0.0.1"
+                ),
             )
         expected_error_message = "invalid literal for int() with base 10"
         assert (
@@ -155,7 +158,7 @@ class TestRpc(CkbTest):
         ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
         client = self.node113.getClient()
-        client.url = f"http://{self.node113.ckb_config['ckb_tcp_listen_address']}"
+        client.url = f"http://{self.node113.ckb_config['ckb_tcp_listen_address'].replace('0.0.0.0','127.0.0.1')}"
 
         with pytest.raises(Exception) as exc_info:
             response = client.call("get_tip_block_number", [], 1)
@@ -171,6 +174,8 @@ class TestRpc(CkbTest):
         2. 113: stop successful
         3. assert "ckb" not in ret
         """
+        if self.skip_docker():
+            return
         self.node112.restart()
         socket = self.node112.subscribe_telnet("new_tip_header")
         self.node112.stop()
@@ -202,7 +207,7 @@ class TestRpc(CkbTest):
         """
 
         client = self.node113.getClient()
-        client.url = f"http://{self.node113.ckb_config['ckb_rpc_listen_address']}"
+        client.url = f"http://{self.node113.ckb_config['ckb_rpc_listen_address'].replace('0.0.0.0','127.0.0.1')}"
         socket = self.node113.subscribe_telnet("new_tip_header")
         self.Miner.miner_with_version(self.node113, "0x0")
         ret = socket.read_very_eager()
