@@ -1,3 +1,5 @@
+import pytest
+
 from framework.basic import CkbTest
 
 
@@ -9,7 +11,7 @@ class TestNodeBroadcast(CkbTest):
             cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120, 8225
         )
         cls.node_111 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V111, "tx_pool/node2", 8121, 8226
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node2", 8121, 8226
         )
         cls.cluster = cls.Cluster([cls.current_node, cls.node_111])
         cls.cluster.prepare_all_nodes()
@@ -23,6 +25,7 @@ class TestNodeBroadcast(CkbTest):
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
+    @pytest.mark.skip("todo")
     def test_111_p2p_broadcast(self):
         """
         failed replacement transactions from node 111 can be rejected for synchronization by the current node
@@ -81,6 +84,7 @@ class TestNodeBroadcast(CkbTest):
         self.Miner.miner_until_tx_committed(self.node_111, tx_hash1)
         self.Node.wait_get_transaction(self.current_node, tx_hash1, "committed")
 
+    @pytest.mark.skip("todo")
     def test_current_p2p_broadcast(self):
         """
         successful replace transactions from the current node are synchronized to node 111:

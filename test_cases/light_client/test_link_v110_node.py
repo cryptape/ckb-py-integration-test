@@ -41,7 +41,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         """
         nodes = [
             self.CkbNode.init_dev_by_port(
-                self.CkbNodeConfigPath.V110_MAIN,
+                self.CkbNodeConfigPath.CURRENT_TEST,
                 "cluster/hardfork/node{i}".format(i=i),
                 8124 + i,
                 8225 + i,
@@ -100,7 +100,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         """
         nodes = [
             self.CkbNode.init_dev_by_port(
-                self.CkbNodeConfigPath.V110_TEST,
+                self.CkbNodeConfigPath.CURRENT_TEST,
                 "cluster/hardfork/node{i}".format(i=i),
                 8124 + i,
                 8225 + i,
@@ -158,7 +158,7 @@ class CKbLightClientLinkV110Node(CkbTest):
         """
         nodes = [
             self.CkbNode.init_dev_by_port(
-                self.CkbNodeConfigPath.V110,
+                self.CkbNodeConfigPath.CURRENT_TEST,
                 "cluster/hardfork/node{i}".format(i=i),
                 8114 + i,
                 8225 + i,

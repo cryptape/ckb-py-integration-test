@@ -13,33 +13,8 @@ from framework.util import run_command
 cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
 
 
-def exception_use_old_ckb():
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                if "SoftFork" in str(e):
-                    global cli_path
-                    cli_path = f"cd {get_project_root()}/source && ./ckb-cli-old"
-                    print("------ change use old ckb-cli -------")
-                    try:
-                        ret = func(*args, **kwargs)
-                        cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
-                        return ret
-                    except Exception as e:
-                        cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
-                        raise e
-                else:
-                    raise e
-
-        return wrapper
-
-    return decorator
 
 
-@exception_use_old_ckb()
 def wallet_get_capacity(ckb_address, api_url="http://127.0.0.1:8114"):
     """
     MacBook-Pro-4 0.111.0 % ./ckb-cli  wallet get-capacity
@@ -67,7 +42,6 @@ def wallet_get_capacity(ckb_address, api_url="http://127.0.0.1:8114"):
         Exception(f"Number not found :{capacity_response}")
 
 
-@exception_use_old_ckb()
 def wallet_get_live_cells(ckb_address, api_url="http://127.0.0.1:8114"):
     """
     ./ckb-cli wallet get-live-cells --address
@@ -132,7 +106,6 @@ def wallet_get_live_cells(ckb_address, api_url="http://127.0.0.1:8114"):
     return json.loads(run_command(cmd))
 
 
-@exception_use_old_ckb()
 def wallet_transfer_by_private_key(
     private_key,
     to_ckb_address,

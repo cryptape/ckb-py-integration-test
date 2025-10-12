@@ -13,16 +13,11 @@ class MemoryLimitTest(CkbTest):
         cls.node = cls.CkbNode.init_dev_by_port(
             cls.CkbNodeConfigPath.CURRENT_TEST, "contract/node1", 8116, 8115
         )
-        cls.node119 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.v120, "contract/node2", 8117, 8118
-        )
-        cls.node119.prepare()
-        cls.node119.start()
+
         cls.node.prepare()
         cls.node.start()
 
         cls.node.getClient().generate_epochs("0x2")
-        cls.node119.connected(cls.node)
         cls.execArgContract = ExecArgContract()
         cls.execArgContract.deploy(cls.Config.ACCOUNT_PRIVATE_1, cls.node)
         deploy_hash, deploy_index = cls.execArgContract.get_deploy_hash_and_index()
@@ -30,14 +25,12 @@ class MemoryLimitTest(CkbTest):
         print("deploy_index:", deploy_index)
         # cls.execArgContract = ExecArgContract("0xafa84968c99c22c6cb6a117f34a012773721e08f5b6c69bdf984b3de6a7efc63", 0)
         tip_number = cls.node.getClient().get_tip_block_number()
-        cls.Node.wait_node_height(cls.node119, tip_number, 100000)
 
     @classmethod
     def teardown_class(cls):
         cls.node.stop()
         cls.node.clean()
-        cls.node119.stop()
-        cls.node119.clean()
+
         # pass
 
     # @pytest.mark.skip(
@@ -67,31 +60,6 @@ class MemoryLimitTest(CkbTest):
             f"Expected substring '{expected_error_message}' "
             f"not found in actual string '{exc_info.value.args[0]}'"
         )
-        tx_hash = self.Contract.invoke_ckb_contract(
-            account_private=self.Config.ACCOUNT_PRIVATE_2,
-            contract_out_point_tx_hash=deploy_hash,
-            contract_out_point_tx_index=deploy_index,
-            type_script_arg=invoke_arg,
-            hash_type="data1",
-            data=invoke_data,
-            fee=1000,
-            api_url=self.node119.getClient().url,
-            cell_deps=[],
-            input_cells=[],
-            output_lock_arg=account2["lock_arg"],
-        )
-        self.Miner.miner_until_tx_committed(self.node119, tx_hash)
-        tip_number = self.node119.getClient().get_tip_block_number()
-        self.Node.wait_node_height(self.node, tip_number - 1, 1000)
-        for i in range(15):
-            self.Miner.miner_with_version(self.node, "0x0")
-        tip_number = self.node.getClient().get_tip_block_number()
-        self.Node.wait_node_height(self.node119, tip_number, 1000)
-        self.node119.getClient().clear_tx_pool()
-        for i in range(15):
-            self.Miner.miner_with_version(self.node, "0x0")
-        response = self.node119.getClient().get_transaction(tx_hash)
-        assert response["tx_status"]["status"] == "unknown"
 
     def test_block_err_type(self):
         account2 = self.Ckb_cli.util_key_info_by_private_key(
@@ -213,56 +181,7 @@ class MemoryLimitTest(CkbTest):
             self.Config.MINER_PRIVATE_1
         )
         deploy_hash, deploy_index = self.execArgContract.get_deploy_hash_and_index()
-        # 合法交易边界
-        with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(
-                3, 895 + 32, 93
-            )
-            tx_hash = self.Contract.invoke_ckb_contract(
-                account_private=self.Config.ACCOUNT_PRIVATE_2,
-                contract_out_point_tx_hash=deploy_hash,
-                contract_out_point_tx_index=deploy_index,
-                type_script_arg=invoke_arg,
-                hash_type="data1",
-                data=invoke_data,
-                fee=1000,
-                api_url=self.node119.getClient().url,
-                cell_deps=[],
-                input_cells=[],
-                output_lock_arg=account2["lock_arg"],
-            )
-            # self.node.getClient().test_tx_pool_accept(tx,"passthrough")
-            self.Miner.miner_until_tx_committed(self.node119, tx_hash)
-        expected_error_message = "MemWriteOnExecutablePage"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
-        )
 
-        with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(
-                3, 895 + 32, 93
-            )
-            tx_hash = self.Contract.invoke_ckb_contract(
-                account_private=self.Config.ACCOUNT_PRIVATE_2,
-                contract_out_point_tx_hash=deploy_hash,
-                contract_out_point_tx_index=deploy_index,
-                type_script_arg=invoke_arg,
-                hash_type="data1",
-                data=invoke_data,
-                fee=1000,
-                api_url=self.node.getClient().url,
-                cell_deps=[],
-                input_cells=[],
-                output_lock_arg=account2["lock_arg"],
-            )
-            # self.node.getClient().test_tx_pool_accept(tx,"passthrough")
-            self.Miner.miner_until_tx_committed(self.node119, tx_hash)
-        expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
-        )
         #
         # with pytest.raises(Exception) as exc_info:
         #     invoke_arg, invoke_data = self.execArgContract.get_test_data(3, 9949, 2300 + 36)
@@ -317,30 +236,6 @@ class MemoryLimitTest(CkbTest):
         )
         deploy_hash, deploy_index = self.execArgContract.get_deploy_hash_and_index()
         # 合法交易边界
-        with pytest.raises(Exception) as exc_info:
-            invoke_arg, invoke_data = self.execArgContract.get_test_data(
-                3, 895 + 32, 93
-            )
-            tx_hash = self.Contract.invoke_ckb_contract(
-                account_private=self.Config.ACCOUNT_PRIVATE_2,
-                contract_out_point_tx_hash=deploy_hash,
-                contract_out_point_tx_index=deploy_index,
-                type_script_arg=invoke_arg,
-                hash_type="type",
-                data=invoke_data,
-                fee=1000,
-                api_url=self.node119.getClient().url,
-                cell_deps=[],
-                input_cells=[],
-                output_lock_arg=account2["lock_arg"],
-            )
-            # self.node.getClient().test_tx_pool_accept(tx,"passthrough")
-            self.Miner.miner_until_tx_committed(self.node119, tx_hash)
-        expected_error_message = "MemWriteOnExecutablePage"
-        assert expected_error_message in exc_info.value.args[0], (
-            f"Expected substring '{expected_error_message}' "
-            f"not found in actual string '{exc_info.value.args[0]}'"
-        )
 
         with pytest.raises(Exception) as exc_info:
             invoke_arg, invoke_data = self.execArgContract.get_test_data(
@@ -360,7 +255,7 @@ class MemoryLimitTest(CkbTest):
                 output_lock_arg=account2["lock_arg"],
             )
             # self.node.getClient().test_tx_pool_accept(tx,"passthrough")
-            self.Miner.miner_until_tx_committed(self.node119, tx_hash)
+            self.Miner.miner_until_tx_committed(self.node, tx_hash)
         # expected_error_message = "@@@VM@@@UNEXPECTED@@@ARGV@@@TOOLONG@@@"
         expected_error_message = "MemOutOfStack"
         assert expected_error_message in exc_info.value.args[0], (

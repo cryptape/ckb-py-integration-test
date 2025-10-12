@@ -51,7 +51,7 @@ class CkbLightClientConfigPath(Enum):
 
     CURRENT_TEST = (
         "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.5.0/ckb-light-client",
+        "download/0.5.3/ckb-light-client",
     )
 
     def __init__(self, ckb_light_client_config_path, ckb_light_bin_path):
