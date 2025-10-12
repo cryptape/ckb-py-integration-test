@@ -7,10 +7,8 @@ from framework.util import generate_account_privakey, get_project_root
 from framework.util import run_command
 import time
 import random
-import datetime
-from framework.util import (
-    to_int_from_big_uint128_le,
-)
+from datetime import datetime
+from framework.util import to_int_from_big_uint128_le, change_time
 import logging
 
 # FIBER_TAR_GZ = "ckb-py-integration-test/source/fiber/data.fiber.tar.gz"
@@ -455,6 +453,7 @@ class FiberTest(CkbTest):
                         "keysend": True,
                         "allow_self_payment": True,
                         "udt_type_script": udt,
+                        "final_tlc_expiry_delta": hex(120960000),
                     }
                 )
                 if wait:
@@ -558,7 +557,7 @@ class FiberTest(CkbTest):
                 #     f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16)},{int(channel["offered_tlc_balance"], 16)})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16)},{int(channel["received_tlc_balance"], 16)}),udt_type_script:{channel.get("funding_udt_type_script", None)}")
                 # datas.append(f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16)},{int(channel["offered_tlc_balance"], 16)})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16)},{int(channel["received_tlc_balance"], 16)}),udt_type_script:{channel.get("funding_udt_type_script", None)}")
                 datas[channel["channel_id"]] = (
-                    f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16)/100000000},{int(channel["offered_tlc_balance"], 16)/100000000})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16)/100000000},{int(channel["received_tlc_balance"], 16)/100000000}),udt_type_script:{channel.get("funding_udt_type_script", None)}"
+                    f"{channel['channel_id']}-{peer_id_map[peer_id]}({int(channel["local_balance"], 16) / 100000000},{int(channel["offered_tlc_balance"], 16) / 100000000})-{peer_id_map[remote_peer_id]}({int(channel["remote_balance"], 16) / 100000000},{int(channel["received_tlc_balance"], 16) / 100000000}),udt_type_script:{channel.get("funding_udt_type_script", None)}"
                 )
         for key in datas:
             self.logger.debug(f"{key}:{datas[key]}")
@@ -568,9 +567,25 @@ class FiberTest(CkbTest):
         channels = fiber.get_client().list_channels({})
         balance_map = {}
 
-        channels_balance = 0
-        channels_offered_tlc_balance = 0
-        channels_received_tlc_balance = 0
+        lock_script = self.get_account_script(fiber.account_private)
+
+        chain_udt_balance = self.udtContract.balance(
+            self.node.getClient(),
+            self.fiber1.account_private,
+            lock_script["args"],
+        )
+
+        chain_ckb_balance = int(
+            self.node.getClient().get_cells_capacity(
+                {
+                    "script": lock_script,
+                    "script_type": "lock",
+                    "script_search_mode": "exact",
+                }
+            )["capacity"],
+            16,
+        )
+
         for i in range(len(channels["channels"])):
             channel = channels["channels"][i]
             if channel["state"]["state_name"] == "CHANNEL_READY":
@@ -590,6 +605,9 @@ class FiberTest(CkbTest):
                 balance_map[key]["received_tlc_balance"] += int(
                     channel["received_tlc_balance"], 16
                 )
+        balance_map["chain"] = {}
+        balance_map["chain"]["ckb"] = chain_ckb_balance
+        balance_map["chain"]["udt"] = chain_udt_balance
         return balance_map
 
     def calculate_tx_fee(self, balance, fee_list):
@@ -926,6 +944,107 @@ class FiberTest(CkbTest):
         raise TimeoutError(
             f"Graph channels did not sync to {channels_count} within {timeout} seconds."
         )
+
+    def add_time_and_generate_epoch(self, hour, epoch):
+        change_time(hour)
+        client = self.node.getClient()
+        header = client.get_tip_header()
+        before_median_time = client.get_block_median_time(header["hash"])
+        self.node.getClient().generate_epochs(hex(epoch), 0)
+        header = client.get_tip_header()
+        median_time = client.get_block_median_time(header["hash"])
+        print(
+            "before_median_time datetime:",
+            datetime.fromtimestamp(int(before_median_time, 16) / 1000),
+        )
+        print(
+            "median_time datetime:", datetime.fromtimestamp(int(median_time, 16) / 1000)
+        )
+
+    def add_time_and_generate_block(self, hour, block_num):
+        change_time(hour)
+        client = self.node.getClient()
+        header = client.get_tip_header()
+        before_median_time = client.get_block_median_time(header["hash"])
+        for i in range(block_num):
+            self.Miner.miner_with_version(self.node, "0x0")
+        header = client.get_tip_header()
+        median_time = client.get_block_median_time(header["hash"])
+        print(
+            "before_median_time datetime:",
+            datetime.fromtimestamp(int(before_median_time, 16) / 1000),
+        )
+        print(
+            "median_time datetime:", datetime.fromtimestamp(int(median_time, 16) / 1000)
+        )
+
+    def get_commit_cells(self):
+        #         code_hash: 0x2d7d93e3347ddf9f10f6690af75f1e24debaa6c4363f3b2c068f61c757253d38
+        #         hash_type: type
+        #         args: 0x
+        return self.node.getClient().get_cells(
+            {
+                "script": {
+                    "code_hash": "0x2d7d93e3347ddf9f10f6690af75f1e24debaa6c4363f3b2c068f61c757253d38",
+                    "hash_type": "type",
+                    "args": "0x",
+                },
+                "script_type": "lock",
+                "script_search_mode": "prefix",
+            },
+            "asc",
+            "0xfff",
+            None,
+        )["objects"]
+
+    def restore_time(self):
+        """恢复系统时间"""
+        print("开始恢复系统时间...")
+        print("current time:", time.time())
+        print("current datetime:", datetime.now())
+
+        try:
+            # 检测是否在Docker容器中运行
+            is_docker = os.path.exists("/.dockerenv")
+
+            if is_docker:
+                # 在Docker容器中，尝试从网络同步时间
+                cmd = "ntpdate -s time.nist.gov"
+                print(f"Docker环境 - 执行命令: {cmd}")
+            else:
+                # 在宿主机上，使用sntp同步网络时间
+                cmd = f"echo hyperchain | sudo -S sntp -sS time.apple.com"
+                print(f"宿主机环境 - 执行命令: sudo sntp -sS time.apple.com")
+
+            # 执行系统命令
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+            if result.returncode == 0:
+                print("系统时间恢复成功")
+            else:
+                print(f"系统时间恢复失败: {result.stderr}")
+                # 如果网络同步失败，尝试手动减去1小时
+                print("尝试手动恢复时间（减去1小时）...")
+                current_time = datetime.now()
+                restore_time_dt = current_time - timedelta(hours=1)
+                time_str = restore_time_dt.strftime("%m%d%H%M%Y")
+
+                if is_docker:
+                    cmd = f"date {time_str}"
+                else:
+                    cmd = f"echo '{password}' | sudo -S date {time_str}"
+
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                if result.returncode == 0:
+                    print("手动时间恢复成功")
+                else:
+                    print(f"手动时间恢复失败: {result.stderr}")
+
+        except Exception as e:
+            print(f"恢复系统时间时发生错误: {e}")
+
+        print("restored time:", time.time())
+        print("restored datetime:", datetime.now())
 
 
 def check_port(port):

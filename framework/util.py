@@ -14,7 +14,10 @@ U128_MIN_COMPATIBLE = 0  # Adjust according to your definition
 U128_MAX_COMPATIBLE = 2**128 - 1
 ACCOUNT_PRIVATE_KEY_INDEX = 0
 import random
-
+import time
+import subprocess
+import os
+from datetime import datetime, timedelta
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -207,6 +210,94 @@ def generate_account_privakey():
     global ACCOUNT_PRIVATE_KEY_INDEX
     ACCOUNT_PRIVATE_KEY_INDEX = ACCOUNT_PRIVATE_KEY_INDEX + 1
     return f"{ACCOUNT_PRIVATE_KEY_INDEX}".zfill(64)
+
+
+def change_time(hour):
+    # 修改系统时间,加速1h
+    try:
+        # 获取当前时间并加1小时
+        current_time = datetime.now()
+        new_time = current_time + timedelta(hours=hour)
+
+        # 格式化时间为系统命令需要的格式
+        time_str = new_time.strftime("%m%d%H%M%Y")
+
+        # 检测是否在Docker容器中运行
+        is_docker = os.path.exists("/.dockerenv")
+
+        if is_docker:
+            # 在Docker容器中使用date命令修改系统时间（不需要sudo）
+            cmd = f"date {time_str}"
+            print(f"Docker环境 - 执行命令: {cmd}")
+        else:
+            # 在宿主机上使用sudo date命令修改系统时间
+
+            cmd = f"echo hyperchain | sudo -S date {time_str}"
+            print(f"宿主机环境 - 执行命令: sudo date {time_str}")
+
+        # 执行系统命令
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            print("系统时间修改成功")
+        else:
+            print(f"系统时间修改失败: {result.stderr}")
+
+    except Exception as e:
+        print(f"修改系统时间时发生错误: {e}")
+
+    print("updated time:", time.time())
+    print("updated datetime:", datetime.now())
+
+
+def restore_time():
+    """恢复系统时间"""
+    print("开始恢复系统时间...")
+    print("current time:", time.time())
+    print("current datetime:", datetime.now())
+
+    try:
+        # 检测是否在Docker容器中运行
+        is_docker = os.path.exists("/.dockerenv")
+
+        if is_docker:
+            # 在Docker容器中，尝试从网络同步时间
+            cmd = "ntpdate -s time.nist.gov"
+            print(f"Docker环境 - 执行命令: {cmd}")
+        else:
+            # 在宿主机上，使用sntp同步网络时间
+            cmd = f"echo hyperchain | sudo -S sntp -sS time.apple.com"
+            print(f"宿主机环境 - 执行命令: sudo sntp -sS time.apple.com")
+
+        # 执行系统命令
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            print("系统时间恢复成功")
+        else:
+            print(f"系统时间恢复失败: {result.stderr}")
+            # 如果网络同步失败，尝试手动减去1小时
+            print("尝试手动恢复时间（减去1小时）...")
+            current_time = datetime.now()
+            restore_time_dt = current_time - timedelta(hours=1)
+            time_str = restore_time_dt.strftime("%m%d%H%M%Y")
+
+            if is_docker:
+                cmd = f"date {time_str}"
+            else:
+                cmd = f"echo '{password}' | sudo -S date {time_str}"
+
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            if result.returncode == 0:
+                print("手动时间恢复成功")
+            else:
+                print(f"手动时间恢复失败: {result.stderr}")
+
+    except Exception as e:
+        print(f"恢复系统时间时发生错误: {e}")
+
+    print("restored time:", time.time())
+    print("restored datetime:", datetime.now())
 
 
 if __name__ == "__main__":
