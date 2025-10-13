@@ -11,6 +11,7 @@ prepare:
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
 	sh prepare.sh
+
 develop_prepare:
 	python3 -m venv venv
 	. venv/bin/activate

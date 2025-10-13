@@ -21,10 +21,10 @@ class TestDiffOverflow(CkbTest):
 
         """
         node1 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node1", 8115, 8227
+            cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node1", 8115, 8227
         )
         node2 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V110_MAIN, "tx_pool_main/node2", 8116, 8228
+            cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool_main/node2", 8116, 8228
         )
 
         cls.node = node1
@@ -111,4 +111,4 @@ class TestDiffOverflow(CkbTest):
         self.Miner.make_tip_height_number(self.node2, 500)
         self.node2.getClient().set_network_active(True)
         self.Node.wait_node_height(self.node, 500, 1000)
-        self.Node.wait_light_sync_height(self.ckb_light_node, 500, 30000)
+        self.Node.wait_light_sync_height(self.ckb_light_node, 500, 3000)
