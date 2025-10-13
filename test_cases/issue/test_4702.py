@@ -35,21 +35,22 @@ class Test4702(CkbTest):
         1.启动node1和node2两个节点
         """
         cls.local_node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120, 8225
+            cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool/node1", 8120, 8225
         )
         cls.remote_node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node2", 8121, 8226
+            cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool/node2", 8121, 8226
         )
         cls.cluster = cls.Cluster([cls.local_node, cls.remote_node])
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
-        cls.Miner.make_tip_height_number(cls.local_node, 200)
+        cls.Miner.make_tip_height_number(cls.local_node, 5500)
 
     @classmethod
     def teardown_class(cls):
         # cls.cluster.stop_all_nodes()
         # cls.cluster.clean_all_nodes()
         pass
+
     @parameterized.expand(failed_files)
     def test_4702(self, path):
         """
@@ -71,6 +72,7 @@ class Test4702(CkbTest):
         # node1和node2两个节点建立p2p连接
         self.cluster.connected_all_nodes()
         self.Node.wait_cluster_height(self.cluster, int(block_number, 16) - 1, 200)
+        time.sleep(2)
         tip = self.remote_node.getClient().get_tip_block_number()
         assert tip == int(block_number, 16) - 1
         # 接着node2的ckb-vm执行这个交易的过程中，发送 ctrl-c 给node2. 然后 node2 执行交易就会报错
