@@ -12,7 +12,8 @@ run_test() {
 
     # Print pytest output
     echo "$pytest_output"
-
+    pkill -9 ckb
+    rm -rf tmp
     # Check if pytest output contains "failed"
     if grep -q " FAILED " <<< "$pytest_output"; then
         # Handle failed test case
