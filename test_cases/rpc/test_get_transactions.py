@@ -72,7 +72,10 @@ class TestGetTransactions:
         search_mode_exact_results = get_transaction_with_script_search_mode(
             cluster, codehash, "0x02", "exact"
         )
-        assert search_mode_exact_results == ["0x454", "0x454"]
+        assert search_mode_exact_results == [
+            tx["tx_status"]["block_number"],
+            tx["tx_status"]["block_number"],
+        ]
 
         # partial search mode
         # partial search mode & indexer:Error: Indexer: Invalid params the CKB indexer doesn't support search_key.script_search_mode partial search mode, please use the CKB rich-indexer for such search
@@ -81,7 +84,7 @@ class TestGetTransactions:
                 cluster, codehash, "0x02", "partial"
             )
         )
-        assert search_mode_partial_results == ["0x454"]
+        assert search_mode_partial_results == [tx["tx_status"]["block_number"]]
 
         # partial/exact/prefix not support by indexer
         cell_data_filter_types = ["prefix", "exact", "partial"]
