@@ -18,16 +18,15 @@ class TestWebsocket(CkbTest):
 
         """
         cls.node113 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "telnet/node", 8114, 8115
+            cls.CkbNodeConfigPath.CURRENT_TEST, "telnet2/node", 8114, 8115
         )
         cls.node113.prepare(
             other_ckb_config={
                 "ckb_logger_filter": "debug",
-                "ckb_tcp_listen_address": "127.0.0.1:18114",
-                "ckb_ws_listen_address": "127.0.0.1:18124",
+                "ckb_tcp_listen_address": "0.0.0.0:18114",
+                "ckb_ws_listen_address": "0.0.0.0:18124",
             }
         )
-
         cls.node113.start()
         cls.Miner.make_tip_height_number(cls.node113, 100)
 
@@ -89,7 +88,7 @@ class TestWebsocket(CkbTest):
         3. 113: support
         """
         client = self.node113.getClient()
-        client.url = f"http://{self.node113.ckb_config['ckb_ws_listen_address']}"
+        client.url = f"http://{self.node113.ckb_config['ckb_ws_listen_address'].replace('0.0.0.0','127.0.0.1')}"
 
         response = client.call("get_tip_block_number", [], 1)
 
