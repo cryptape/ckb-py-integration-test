@@ -20,7 +20,17 @@ class TestGetTransactions:
             api_url=cluster.ckb_nodes[0].getClient().url,
         )
         miner_until_tx_committed(cluster.ckb_nodes[0], deploy_hash)
-        for i in range(1, 10):
+        first_invoke_hash = invoke_ckb_contract(
+            account_private=MINER_PRIVATE_1,
+            contract_out_point_tx_hash=deploy_hash,
+            contract_out_point_tx_index=0,
+            type_script_arg="0x02",
+            data=f"0x{1:02x}{1:02x}",
+            hash_type="type",
+            api_url=cluster.ckb_nodes[0].getClient().url,
+        )
+        miner_until_tx_committed(cluster.ckb_nodes[0], first_invoke_hash)
+        for i in range(2, 10):
             invoke_hash = invoke_ckb_contract(
                 account_private=MINER_PRIVATE_1,
                 contract_out_point_tx_hash=deploy_hash,
@@ -41,7 +51,6 @@ class TestGetTransactions:
             api_url=cluster.ckb_nodes[0].getClient().url,
         )
         miner_until_tx_committed(cluster.ckb_nodes[0], invoke_hash)
-
         codehash = get_ckb_contract_codehash(
             deploy_hash,
             0,
@@ -52,7 +61,12 @@ class TestGetTransactions:
         search_mode_prefix_results = get_transaction_with_script_search_mode(
             cluster, codehash, "0x02", "prefix"
         )
-        assert search_mode_prefix_results == ["0x454", "0x454"]
+        tx = cluster.ckb_nodes[0].getClient().get_transaction(first_invoke_hash)
+        print("first_invoke_hash:", tx)
+        assert search_mode_prefix_results == [
+            tx["tx_status"]["block_number"],
+            tx["tx_status"]["block_number"],
+        ]
 
         # exact search mode
         search_mode_exact_results = get_transaction_with_script_search_mode(
