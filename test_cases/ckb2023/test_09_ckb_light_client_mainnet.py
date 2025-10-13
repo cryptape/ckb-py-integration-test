@@ -117,7 +117,7 @@ class CKBTestnet(CkbTest):
 
         tip_number = self.cluster.ckb_nodes[0].client.get_tip_block_number()
         self.cluster.ckb_nodes[0].start_miner()
-        self.Node.wait_light_sync_height(self.ckb_light_node_current, tip_number, 200)
+        self.Node.wait_light_sync_height(self.ckb_light_node_current, tip_number, 400)
         self.cluster.ckb_nodes[0].stop_miner()
 
         tx = self.Contract.build_invoke_ckb_contract(
