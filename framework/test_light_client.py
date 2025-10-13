@@ -6,44 +6,6 @@ from enum import Enum
 
 
 class CkbLightClientConfigPath(Enum):
-    V0_2_4 = (
-        "source/template/ckb_light_client/0.2.4/testnet.toml.j2",
-        "download/0.2.4/ckb-light-client",
-    )
-    V0_3_0 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.0/ckb-light-client",
-    )
-    V0_3_1 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.1/ckb-light-client",
-    )
-    V0_3_2 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.2/ckb-light-client",
-    )
-    V0_3_3 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.3/ckb-light-client",
-    )
-    V0_3_4 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.4/ckb-light-client",
-    )
-    V0_3_5 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.5/ckb-light-client",
-    )
-    V0_3_6 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.3.6/ckb-light-client",
-    )
-
-    V0_4_1 = (
-        "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
-        "download/0.4.2/ckb-light-client",
-    )
-
     V0_5_0 = (
         "source/template/ckb_light_client/0.3.0/testnet.toml.j2",
         "download/0.5.0/ckb-light-client",
