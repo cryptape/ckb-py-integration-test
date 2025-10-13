@@ -47,9 +47,9 @@ class Test4702(CkbTest):
 
     @classmethod
     def teardown_class(cls):
-        cls.cluster.stop_all_nodes()
-        cls.cluster.clean_all_nodes()
-
+        # cls.cluster.stop_all_nodes()
+        # cls.cluster.clean_all_nodes()
+        pass
     @parameterized.expand(failed_files)
     def test_4702(self, path):
         """
@@ -71,7 +71,6 @@ class Test4702(CkbTest):
         # node1和node2两个节点建立p2p连接
         self.cluster.connected_all_nodes()
         self.Node.wait_cluster_height(self.cluster, int(block_number, 16) - 1, 200)
-        time.sleep(2)
         tip = self.remote_node.getClient().get_tip_block_number()
         assert tip == int(block_number, 16) - 1
         # 接着node2的ckb-vm执行这个交易的过程中，发送 ctrl-c 给node2. 然后 node2 执行交易就会报错
