@@ -28,28 +28,18 @@ class TestRpc(CkbTest):
                 "ckb_ws_listen_address": "0.0.0.0:18124",
             }
         )
-        cls.node112 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V112, "telnet/node2", 8116, 8117
-        )
-        cls.node112.prepare(
-            other_ckb_config={"ckb_tcp_listen_address": "127.0.0.1:18114"}
-        )
-        cls.node112.start()
+
         cls.node113.start()
-        cls.node112.connected(cls.node113)
         cls.Miner.make_tip_height_number(cls.node113, 100)
-        cls.Node.wait_node_height(cls.node112, 90, 1000)
 
     @classmethod
     def teardown_class(cls):
         """
-        1. stop ckb 112 and 113 version
-        2. clear ckb 112 and 113 dir
+        1. stop ckb 113 version
+        2. clear ckb 113 dir
         Returns:
 
         """
-        cls.node112.stop()
-        cls.node112.clean()
 
         cls.node113.stop()
         cls.node113.clean()
@@ -61,22 +51,6 @@ class TestRpc(CkbTest):
         3.113: > 10234
         4.test 113 max link count
         """
-        telnets = []
-        for i in range(100):
-            print(i)
-            telnet = self.node112.subscribe_telnet("new_tip_header")
-            telnets.append(telnet)
-
-        self.Miner.miner_with_version(self.node112, "0x0")
-        time.sleep(1)
-        for i in range(len(telnets)):
-            telnet = telnets[i]
-            ret = telnet.read_very_eager()
-            print(ret)
-            print(i, ":", len(ret))
-            assert len(ret) > 700
-            telnet.close()
-
         # 1.test 113 max link count
         telnets = []
         for i in range(100):
@@ -99,18 +73,14 @@ class TestRpc(CkbTest):
         3. 113: keep link
         """
         telnet113 = self.node113.subscribe_telnet("new_tip_header")
-        telnet112 = self.node112.subscribe_telnet("new_tip_header")
 
         for i in range(30):
             self.Miner.miner_with_version(self.node113, "0x0")
             print("current idx:", i)
             ret113 = telnet113.read_very_eager()
-            ret112 = telnet112.read_very_eager()
             print(ret113)
-            print(ret112)
             time.sleep(1)
         telnet113.close()
-        telnet112.close()
 
     def test_link_websocket(self):
         """
@@ -119,15 +89,6 @@ class TestRpc(CkbTest):
         3. 113: not support
         4. assert invalid literal for int() with base 10
         """
-        with pytest.raises(Exception) as exc_info:
-            socket = self.node112.subscribe_websocket(
-                "new_tip_header", self.node112.ckb_config["ckb_tcp_listen_address"]
-            )
-        expected_error_message = "invalid literal for int() with base 10"
-        assert (
-            expected_error_message in exc_info.value.args[0]
-        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
-
         with pytest.raises(Exception) as exc_info:
             socket = self.node113.subscribe_websocket(
                 "new_tip_header",
@@ -143,19 +104,9 @@ class TestRpc(CkbTest):
     def test_rpc(self):
         """
         support rpc
-        1. 112: not support
         2. 113: not support
         3. assert request time out
         """
-        client = self.node112.getClient()
-        client.url = f"http://{self.node112.ckb_config['ckb_tcp_listen_address']}"
-
-        with pytest.raises(Exception) as exc_info:
-            response = client.call("get_tip_block_number", [], 1)
-        expected_error_message = "request time out"
-        assert (
-            expected_error_message in exc_info.value.args[0]
-        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
 
         client = self.node113.getClient()
         client.url = f"http://{self.node113.ckb_config['ckb_tcp_listen_address'].replace('0.0.0.0','127.0.0.1')}"
@@ -170,21 +121,9 @@ class TestRpc(CkbTest):
     def test_stop_node_when_link_telnet(self):
         """
         stop ckb when socker is keep live
-        1. 112: stop successful
         2. 113: stop successful
         3. assert "ckb" not in ret
         """
-        if self.skip_docker():
-            return
-        self.node112.restart()
-        socket = self.node112.subscribe_telnet("new_tip_header")
-        self.node112.stop()
-        port = self.node112.ckb_config["ckb_tcp_listen_address"].split(":")[-1]
-        ret = run_command(f"lsof -i:{port} | grep ckb", check_exit_code=False)
-        assert "ckb" not in str(ret)
-        socket.close()
-        ret = run_command(f"lsof -i:{port} | grep ckb", check_exit_code=False)
-        assert "ckb" not in str(ret)
 
         self.node113.restart()
         socket = self.node113.subscribe_telnet("new_tip_header")
@@ -195,7 +134,6 @@ class TestRpc(CkbTest):
         socket.close()
         ret = run_command(f"lsof -i:{port} | grep ckb", check_exit_code=False)
         assert "ckb" not in str(ret)
-        self.node112.restart()
         self.node113.restart()
 
     def test_unsubscribe(self):

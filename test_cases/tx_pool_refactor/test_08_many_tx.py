@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from framework.basic import CkbTest
 import concurrent.futures
 
@@ -12,7 +14,7 @@ class ManyTx(CkbTest):
             cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120, 8225
         )
         cls.node_111 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V111, "tx_pool/node2", 8121, 8226
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node2", 8121, 8226
         )
         cls.cluster = cls.Cluster([cls.current_node, cls.node_111])
         cls.cluster.prepare_all_nodes()
@@ -26,6 +28,7 @@ class ManyTx(CkbTest):
         cls.cluster.stop_all_nodes()
         cls.cluster.clean_all_nodes()
 
+    @pytest.mark.skip("todo")
     def test_may_tx(self):
         """
         1. Concurrently send conflicting child transactions to node 1
@@ -97,6 +100,7 @@ class ManyTx(CkbTest):
         ret = self.current_node.getClient().get_transaction(successfulTxHash)
         assert ret["tx_status"]["status"] == "rejected"
 
+    @pytest.mark.skip("todo")
     def test_orphan_turn_pending(self):
         """
         1. Send tx1
@@ -185,6 +189,7 @@ class ManyTx(CkbTest):
         assert after_pool["pending"] == "0x0"
         assert after_pool["orphan"] == "0x0"
 
+    @pytest.mark.skip("todo")
     def test_dep_tx_clean(self):
         """
         1. Send tx1

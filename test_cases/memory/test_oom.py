@@ -13,29 +13,15 @@ class TestOom(CkbTest):
         cls.node = cls.CkbNode.init_dev_by_port(
             cls.CkbNodeConfigPath.CURRENT_TEST, "contract/node1", 8116, 8115
         )
-        cls.node119 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.v120, "contract/node2", 8117, 8118
-        )
-        cls.node119.prepare(
-            # {"ckb_logger_filter": "debug"}
-        )
-        cls.node119.start()
-        cls.node.prepare(
-            # {"ckb_logger_filter": "debug"}
-        )
+        cls.node.prepare()
         cls.node.start()
         cls.Miner.make_tip_height_number(cls.node, 2000)
         cls.node.getClient().generate_epochs("0x2")
-        cls.node119.connected(cls.node)
-        tip_number = cls.node.getClient().get_tip_block_number()
-        cls.Node.wait_node_height(cls.node119, tip_number, 1000)
 
     @classmethod
     def teardown_class(cls):
         cls.node.stop()
         cls.node.clean()
-        cls.node119.stop()
-        cls.node119.clean()
 
     def test_spawn(self):
         with pytest.raises(Exception) as exc_info:

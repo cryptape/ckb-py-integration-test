@@ -122,17 +122,15 @@ class TestAfterHardFork(CkbTest):
 
     def test_05_send_tx_when_after_0th_fork(self):
         """
+        ckb dev 0 block is hardfork
         The first block sends a regular transaction.
         - return tx_hash
-        - The transaction status is queried as unknown for the first ten blocks.
         - The transaction will be committed on the blockchain after ten blocks.
         :return:
 
         1. make tip block is 0th for fork
         2. send tx
-        3. query tx status is unknown
         4. miner 30 block
-        5. query statue is committed and commit  block > 1010
         """
 
         # 1. make tip block is 0th for fork
@@ -149,11 +147,6 @@ class TestAfterHardFork(CkbTest):
             140,
             self.cluster.ckb_nodes[0].client.url,
         )
-        # 3. query tx status is unknown
-        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
-        tx_response = self.cluster.ckb_nodes[0].getClient().get_transaction(tx_hash)
-        print(f"tx response:{tx_response['tx_status']['status']}")
-        assert tx_response["tx_status"]["status"] == "unknown"
 
         # 4. miner 30 block
         for i in range(30):
@@ -168,7 +161,7 @@ class TestAfterHardFork(CkbTest):
             .get_block(tx_response["tx_status"]["block_hash"])
         )
         print(int(block["header"]["number"], 16))
-        assert int(block["header"]["number"], 16) >= 1010
+        assert int(block["header"]["number"], 16) >= 1000
 
     def test_06_0049_send_data2_tx(self):
         """

@@ -18,171 +18,21 @@ DOCKER = os.getenv("DOCKER", False)
 DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.202.0-rc1")
 
 
-class CkbNodeConfigPath(Enum):
-    CURRENT_TEST = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/ckb/v200/specs/dev.toml",
-        "download/0.202.0",
-    )
-    TESTNET = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/specs/testnet.toml.j2",
-        "download/0.202.0",
-    )
 
-    CURRENT_MAIN = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/specs/mainnet.toml.j2",
-        "download/0.202.0",
-    )
+DOCKER = os.getenv("DOCKER", False)
+DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.203.0-rc1")
 
-    PREVIEW_DUMMY = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/specs/preview_dev.toml",
-        "download/0.202.0",
-    )
 
-    v202 = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/ckb/v200/specs/dev.toml",
-        "download/0.202.0",
-    )
-
-    v201 = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/ckb/v200/specs/dev.toml",
-        "download/0.201.0",
-    )
-
-    v200 = (
-        "source/template/ckb/v200/ckb.toml.j2",
-        "source/template/ckb/v200/ckb-miner.toml.j2",
-        "source/template/ckb/v200/specs/dev.toml",
-        "download/0.200.0",
-    )
-
-    v121 = (
-        "source/template/ckb/v121/ckb.toml.j2",
-        "source/template/ckb/v121/ckb-miner.toml.j2",
-        "source/template/ckb/v121/specs/dev.toml",
-        "download/0.121.0",
-    )
-
-    v120 = (
-        "source/template/ckb/v120/ckb.toml.j2",
-        "source/template/ckb/v120/ckb-miner.toml.j2",
-        "source/template/ckb/v120/specs/dev.toml",
-        "download/0.120.0",
-    )
-
-    v119 = (
-        "source/template/ckb/v118/ckb.toml.j2",
-        "source/template/ckb/v118/ckb-miner.toml.j2",
-        "source/template/ckb/v118/specs/dev.toml",
-        "download/0.119.0",
-    )
-
-    v118 = (
-        "source/template/ckb/v118/ckb.toml.j2",
-        "source/template/ckb/v118/ckb-miner.toml.j2",
-        "source/template/ckb/v118/specs/dev.toml",
-        "download/0.118.0",
-    )
-
-    v117 = (
-        "source/template/ckb/v117/ckb.toml.j2",
-        "source/template/ckb/v117/ckb-miner.toml.j2",
-        "source/template/ckb/v117/specs/dev.toml",
-        "download/0.117.0",
-    )
-
-    v116 = (
-        "source/template/ckb/v116/ckb.toml.j2",
-        "source/template/ckb/v116/ckb-miner.toml.j2",
-        "source/template/ckb/v116/specs/dev.toml",
-        "download/0.116.1",
-    )
-    v115 = (
-        "source/template/ckb/v115/ckb.toml.j2",
-        "source/template/ckb/v115/ckb-miner.toml.j2",
-        "source/template/ckb/v115/specs/dev.toml",
-        "download/0.115.0",
-    )
-    v114 = (
-        "source/template/ckb/v114/ckb.toml.j2",
-        "source/template/ckb/v114/ckb-miner.toml.j2",
-        "source/template/ckb/v114/specs/dev.toml",
-        "download/0.114.0",
-    )
-
-    V113 = (
-        "source/template/ckb/v113/ckb.toml.j2",
-        "source/template/ckb/v113/ckb-miner.toml.j2",
-        "source/template/ckb/v113/specs/dev.toml",
-        "download/0.113.1",
-    )
-
-    V112 = (
-        "source/template/ckb/v112/ckb.toml.j2",
-        "source/template/ckb/v112/ckb-miner.toml.j2",
-        "source/template/ckb/v112/specs/dev.toml",
-        "download/0.112.1",
-    )
-
-    V112_MAIN = (
-        "source/template/ckb/v112/ckb.toml.j2",
-        "source/template/ckb/v112/ckb-miner.toml.j2",
-        "source/template/specs/mainnet.toml.j2",
-        "download/0.112.1",
-    )
-
-    V111 = (
-        "source/template/ckb/v111/ckb.toml.j2",
-        "source/template/ckb/v111/ckb-miner.toml.j2",
-        "source/template/ckb/v111/specs/dev.toml",
-        "download/0.111.0",
-    )
-    V110 = (
-        "source/template/ckb/v110/ckb.toml.j2",
-        "source/template/ckb/v110/ckb-miner.toml.j2",
-        "source/template/ckb/v110/specs/dev.toml",
-        "download/0.110.2",
-    )
-
-    V110_MAIN = (
-        "source/template/ckb/v110/ckb.toml.j2",
-        "source/template/ckb/v110/ckb-miner.toml.j2",
-        "source/template/specs/mainnet.toml.j2",
-        "download/0.110.2",
-    )
-    V110_TEST = (
-        "source/template/ckb/v110/ckb.toml.j2",
-        "source/template/ckb/v110/ckb-miner.toml.j2",
-        "source/template/specs/testnet.toml.j2",
-        "download/0.110.2",
-    )
-
-    V109 = (
-        "source/template/ckb/v109/ckb.toml.j2",
-        "source/template/ckb/v109/ckb-miner.toml.j2",
-        "source/template/ckb/v109/specs/dev.toml",
-        "download/0.109.0",
-    )
-
-    V109_MAIN = (
-        "source/template/ckb/v109/ckb.toml.j2",
-        "source/template/ckb/v109/ckb-miner.toml.j2",
-        "source/template/specs/mainnet.toml.j2",
-        "download/0.109.0",
-    )
-
-    v108 = ("", "", "", "")
+class CkbNodeConfigPath:
+    CURRENT_TEST = None
+    TESTNET = None
+    PREVIEW_DUMMY = None
+    CURRENT_MAIN = None
+    v202 = None
+    v201 = None
+    v200 = None
+    TESTNET_SPEC_PATH = "source/template/specs/testnet.toml.j2"
+    MAINNET_SPEC_PATH = "source/template/specs/mainnet.toml.j2"
 
     def __init__(
         self, ckb_config_path, ckb_miner_config_path, ckb_spec_path, ckb_bin_path
@@ -194,6 +44,55 @@ class CkbNodeConfigPath(Enum):
 
     def __str__(self):
         return self.ckb_bin_path.split("/")[-1]
+
+
+CkbNodeConfigPath.CURRENT_TEST = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/ckb/v200/specs/dev.toml",
+    "download/0.203.0",
+)
+CkbNodeConfigPath.TESTNET = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/specs/testnet.toml.j2",
+    "download/0.203.0",
+)
+
+CkbNodeConfigPath.CURRENT_MAIN = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/specs/mainnet.toml.j2",
+    "download/0.203.0",
+)
+
+CkbNodeConfigPath.PREVIEW_DUMMY = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/specs/preview_dev.toml",
+    "download/0.203.0",
+)
+
+CkbNodeConfigPath.v202 = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/ckb/v200/specs/dev.toml",
+    "download/0.202.0",
+)
+
+CkbNodeConfigPath.v201 = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/ckb/v200/specs/dev.toml",
+    "download/0.201.0",
+)
+
+CkbNodeConfigPath.v200 = CkbNodeConfigPath(
+    "source/template/ckb/v200/ckb.toml.j2",
+    "source/template/ckb/v200/ckb-miner.toml.j2",
+    "source/template/ckb/v200/specs/dev.toml",
+    "download/0.200.0",
+)
 
 
 class CkbNode:
@@ -343,6 +242,29 @@ class CkbNode:
         Returns:
 
         """
+        if DOCKER and self.ckb_config_path == CkbNodeConfigPath.CURRENT_TEST:
+            p2p_port = self.ckb_config["ckb_network_listen_addresses"][0].split("/")[-1]
+            rpc_port = self.ckb_config["ckb_rpc_listen_address"].split(":")[-1]
+            # --network host
+            # self.ckb_pid = run_command(
+            #     f"docker run  -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} --add-host=host.docker.internal:host-gateway  -v {self.ckb_dir}:/var/lib/ckb nervos/ckb:v0.202.0-rc1  run -C /var/lib/ckb "
+            #     f"--indexer  --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
+            # )
+            if self.ckb_config.get("ckb_ws_listen_address") != None:
+                ws_port = self.ckb_config["ckb_ws_listen_address"].split(":")[-1]
+                tcp_port = self.ckb_config["ckb_tcp_listen_address"].split(":")[-1]
+                self.ckb_pid = run_command(
+                    f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} -p {ws_port}:{ws_port} -p {tcp_port}:{tcp_port} -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
+                    f" --rich-indexer  --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
+                )
+                time.sleep(3)
+                return
+            self.ckb_pid = run_command(
+                f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
+                f"  --rich-indexer --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
+            )
+            time.sleep(3)
+            return
         self.ckb_pid = run_command(
             "cd {ckb_dir} && ./ckb run --rich-indexer  --skip-spec-check > node.log 2>&1 &".format(
                 ckb_dir=self.ckb_dir
@@ -407,7 +329,7 @@ class CkbNode:
                     root_path=get_project_root(),
                     spec_path=self.ckb_config_path.ckb_spec_path,
                 ),
-                self.ckb_dir,
+                "{ckb_dir}/dev.toml".format(ckb_dir=self.ckb_dir),
             )
 
         shutil.copy(

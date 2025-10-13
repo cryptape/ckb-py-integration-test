@@ -11,6 +11,7 @@ prepare:
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
 	sh prepare.sh
+
 develop_prepare:
 	python3 -m venv venv
 	. venv/bin/activate
@@ -25,7 +26,6 @@ develop_prepare:
 #    test_cases/ckb2023 \
 
 test_cases := \
-    test_cases/replace_rpc \
     test_cases/ckb_cli \
     test_cases/contracts \
     test_cases/example \
