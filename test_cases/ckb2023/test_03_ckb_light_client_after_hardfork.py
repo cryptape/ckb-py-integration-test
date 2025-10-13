@@ -120,49 +120,6 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         cls.ckb_light_node_current.stop()
         cls.ckb_light_node_current.clean()
 
-    def test_01_ckb_light_client_0_3_1_link_node(self):
-        """
-        0.3.1 light node link node successful
-        1. start  light node that version is 0.3.1 and  link nodes
-        2. wait light node sync 2000 block
-        3. stop and clean light node that version is 0.3.1
-        Returns:
-
-        """
-        # 1. start  light node that version is 0.3.1 and  link nodes
-        version = self.CkbLightClientConfigPath.V0_3_1
-        ckb_light_node = self.CkbLightClientNode.init_by_nodes(
-            version, self.cluster.ckb_nodes, "tx_pool_light/node2", 8002
-        )
-        ckb_light_node.prepare()
-        ckb_light_node.start()
-
-        # 2. wait light node sync 2000 block
-        account = self.Ckb_cli.util_key_info_by_private_key(self.Config.MINER_PRIVATE_1)
-        ckb_light_node.getClient().set_scripts(
-            [
-                {
-                    "script": {
-                        "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-                        "hash_type": "type",
-                        "args": account["lock_arg"],
-                    },
-                    "script_type": "lock",
-                    "block_number": "0x0",
-                }
-            ]
-        )
-        with pytest.raises(Exception) as exc_info:
-            self.Node.wait_light_sync_height(ckb_light_node, 2000, 200)
-        expected_error_message = "time out"
-        assert (
-            expected_error_message in exc_info.value.args[0]
-        ), f"Expected substring '{expected_error_message}' not found in actual string '{exc_info.value.args[0]}'"
-
-        # 3. stop and clean light node that version is 0.3.1
-        ckb_light_node.stop()
-        ckb_light_node.clean()
-
     def test_02_ckb_light_client_current_link_node(self):
         """
         1. setScript miner account

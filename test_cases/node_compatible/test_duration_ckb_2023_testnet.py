@@ -1,0 +1,191 @@
+import time
+
+from framework.basic import CkbTest
+from framework.helper.spawn_contract import SpawnContract
+from framework.test_node import CkbNodeConfigPath
+
+# https://github.com/nervosnetwork/ckb/commit/50e2ae35841aad2813f155cc913c8e954b6158a7
+# pub const CKB2023_START_EPOCH: u64 = 9690;
+
+
+class CKBAfter2023Testnet(CkbTest):
+
+    @classmethod
+    def setup_class(cls):
+        """
+        1. star 4 node in tmp/cluster/hardFork dir
+        2. link ckb node each other
+        Returns:
+
+        """
+
+        # 1. star 4 node in tmp/cluster/hardFork dir
+
+        nodes = [
+            cls.CkbNode.init_dev_by_port(
+                cls.CkbNodeConfigPath.CURRENT_MAIN,
+                "cluster/hardFork/node0",
+                8114,
+                8225,
+            ),
+            cls.CkbNode.init_dev_by_port(
+                CkbNodeConfigPath(
+                    "source/template/ckb/v200/ckb.toml.j2",
+                    "source/template/ckb/v200/ckb-miner.toml.j2",
+                    CkbNodeConfigPath.MAINNET_SPEC_PATH,
+                    "download/0.200.0",
+                ),
+                "cluster/hardFork/node1",
+                8115,
+                8226,
+            ),
+            cls.CkbNode.init_dev_by_port(
+                CkbNodeConfigPath(
+                    "source/template/ckb/v200/ckb.toml.j2",
+                    "source/template/ckb/v200/ckb-miner.toml.j2",
+                    CkbNodeConfigPath.MAINNET_SPEC_PATH,
+                    "download/0.202.0",
+                ),
+                "cluster/hardFork/node2",
+                8116,
+                8227,
+            ),
+            cls.CkbNode.init_dev_by_port(
+                CkbNodeConfigPath(
+                    "source/template/ckb/v200/ckb.toml.j2",
+                    "source/template/ckb/v200/ckb-miner.toml.j2",
+                    CkbNodeConfigPath.MAINNET_SPEC_PATH,
+                    "download/0.202.0",
+                ),
+                "cluster/hardFork/node3",
+                8117,
+                8228,
+            ),
+        ]
+
+        cls.cluster = cls.Cluster(nodes)
+        cls.cluster.prepare_all_nodes(
+            other_ckb_spec_config={
+                "ckb_params_genesis_epoch_length": "1",
+                "ckb_name": "ckb_testnet",
+            }
+        )
+        cls.cluster.start_all_nodes()
+
+        # 2. link ckb node each other
+        cls.cluster.connected_all_nodes()
+
+    @classmethod
+    def teardown_class(cls):
+        print("\nTeardown TestClass1")
+        cls.cluster.stop_all_nodes()
+        cls.cluster.clean_all_nodes()
+
+    def test_duration_hardFork(self):
+        """
+        1. generate_epochs(hex(9690))
+        2. get_consensus(0048) == 9690
+        3. get_consensus(0049) == 9690
+        4. miner with 0x1
+        5. transfer data2
+        6. invoke spawn
+        Returns:
+        """
+        self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 1000)
+        self.Node.wait_cluster_height(self.cluster, 1000, 200)
+
+        self.cluster.ckb_nodes[0].getClient().get_consensus()
+
+        account = self.Ckb_cli.util_key_info_by_private_key(
+            self.Config.ACCOUNT_PRIVATE_1
+        )
+        for i in range(len(self.cluster.ckb_nodes)):
+            tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
+                self.Config.ACCOUNT_PRIVATE_1,
+                account["address"]["testnet"],
+                140,
+                self.cluster.ckb_nodes[i].client.url,
+            )
+
+            # 3. miner until tx committed
+            self.Miner.miner_with_version(self.cluster.ckb_nodes[i], "0x0")
+            self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[i], tx_hash)
+            tip_number = self.cluster.ckb_nodes[i].getClient().get_tip_block_number()
+            self.Node.wait_cluster_height(self.cluster, tip_number, 250)
+
+        self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 9690)
+        self.Node.wait_cluster_height(self.cluster, 9690, 200)
+        # generate_epochs will cause HeadersIsInvalid
+
+        tip_number = self.cluster.ckb_nodes[0].client.get_tip_block_number()
+        print("tip number:", tip_number)
+        consensus = self.cluster.ckb_nodes[0].getClient().get_consensus()
+        res = get_epoch_number_by_consensus_response(consensus, "0048")
+        assert res == 9690
+        res = get_epoch_number_by_consensus_response(consensus, "0049")
+        assert res == 9690
+        time.sleep(5)
+        # 0048 miner with other version block
+        for i in range(20):
+            self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x1")
+
+        # transfer data2
+        # 2. send tx contains data2
+        # send account 1 transfer data2
+        # @ckb-lumos/helpers.encodeToAddress(
+        #     {
+        #         hashType:"data2",
+        #         args:"0x",
+        #         codeHash:"0x69c80d6a8104994bddc132bb568c953d60fae0ac928ad887c96de8434ca2a790"
+        #     }
+        # )
+        tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
+            self.Config.MINER_PRIVATE_1,
+            "ckt1qp5usrt2syzfjj7acyetk45vj57kp7hq4jfg4ky8e9k7ss6v52neqpqh7xtq0",
+            140,
+            self.cluster.ckb_nodes[0].client.url,
+        )
+
+        # 3. miner until tx committed
+        self.Miner.miner_with_version(self.cluster.ckb_nodes[0], "0x0")
+        self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[0], tx_hash)
+        # spawn
+        spawn = SpawnContract()
+        spawn.deploy(self.Config.MINER_PRIVATE_1, self.cluster.ckb_nodes[0])
+        code_tx_hash, code_tx_index = spawn.get_deploy_hash_and_index()
+        invoke_arg, invoke_data = spawn.get_arg_and_data("demo")
+        for i in range(len(self.cluster.ckb_nodes)):
+            tx_hash = self.Contract.invoke_ckb_contract(
+                self.Config.MINER_PRIVATE_1,
+                code_tx_hash,
+                code_tx_index,
+                invoke_arg,
+                "data2",
+                invoke_data,
+                api_url=self.cluster.ckb_nodes[i].getClient().url,
+            )
+            self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[i], tx_hash)
+            tip_number = self.cluster.ckb_nodes[i].getClient().get_tip_block_number()
+            self.Node.wait_cluster_height(self.cluster, tip_number, 250)
+
+
+def get_epoch_number_by_consensus_response(consensus_response, rfc_name):
+    """
+    get ckb epoch number
+    "hardfork_features": [
+            { "rfc": "0028", "epoch_number": "0x1526" },
+         ]
+    Example:
+    get_epoch_number_by_consensus_response(consensus_response,"0028")
+    return int(0x1526,16)
+    :param consensus_response:  rpc get_consensus response
+    :param rfc_name: example : 0048
+    :return:
+    """
+    hardfork_features = consensus_response["hardfork_features"]
+    return int(
+        list(filter(lambda obj: rfc_name in obj["rfc"], hardfork_features))[0][
+            "epoch_number"
+        ].replace("0x", ""),
+        16,
+    )

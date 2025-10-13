@@ -21,7 +21,6 @@ class CkbContract(ABC):
         pass
 
 
-@exception_use_old_ckb()
 def deploy_ckb_contract(
     private_key,
     contract_path,
@@ -79,7 +78,6 @@ def deploy_ckb_contract(
     return run_command(cmd).replace("\n", "")
 
 
-@exception_use_old_ckb()
 def get_ckb_contract_codehash(
     tx_hash, tx_index, enable_type_id=True, api_url="http://127.0.0.1:8114"
 ):
@@ -110,7 +108,6 @@ def get_ckb_contract_codehash(
     return f"0x{hex_digest}"
 
 
-@exception_use_old_ckb()
 def invoke_ckb_contract(
     account_private,
     contract_out_point_tx_hash,
@@ -260,7 +257,6 @@ def invoke_ckb_contract(
     return tx_send(tmp_tx_file, api_url).strip()
 
 
-@exception_use_old_ckb()
 def build_invoke_ckb_contract(
     account_private,
     contract_out_point_tx_hash,

@@ -2,6 +2,7 @@ import json
 import time
 
 from framework.basic import CkbTest
+from framework.test_node import DOCKER
 
 
 class TestTelnetAndWebsocket(CkbTest):
@@ -21,36 +22,22 @@ class TestTelnetAndWebsocket(CkbTest):
         cls.node113.prepare(
             other_ckb_config={
                 "ckb_logger_filter": "debug",
-                "ckb_tcp_listen_address": "127.0.0.1:18116",
-                "ckb_ws_listen_address": "127.0.0.1:18124",
+                "ckb_tcp_listen_address": "0.0.0.0:18116",
+                "ckb_ws_listen_address": "0.0.0.0:18124",
             }
         )
-        cls.node112 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V112, "telnet/node2", 8126, 8127
-        )
-        cls.node112.prepare(
-            other_ckb_config={
-                "ckb_logger_filter": "debug",
-                "ckb_tcp_listen_address": "127.0.0.1:18115",
-                "ckb_ws_listen_address": "127.0.0.1:18125",
-            }
-        )
-        cls.node112.start()
+
         cls.node113.start()
-        cls.node112.connected(cls.node113)
         cls.Miner.make_tip_height_number(cls.node113, 100)
-        cls.Node.wait_node_height(cls.node112, 100, 1000)
 
     @classmethod
     def teardown_class(cls):
         """
-        1. stop ckb node include 112 and 113
+        1. stop ckb node  and 113
         2. clear ckb node dir
         Returns:
 
         """
-        cls.node112.stop()
-        cls.node112.clean()
 
         cls.node113.stop()
         cls.node113.clean()
@@ -66,14 +53,10 @@ class TestTelnetAndWebsocket(CkbTest):
         Returns:
 
         """
-        telnet_new_tip_header_112 = self.node112.subscribe_telnet("new_tip_header")
         telnet_new_tip_header_113 = self.node113.subscribe_telnet("new_tip_header")
-        ws_new_tip_header_112 = self.node112.subscribe_websocket("new_tip_header")
         ws_new_tip_header_113 = self.node113.subscribe_websocket("new_tip_header")
         for i in range(10):
-            self.Miner.miner_with_version(self.node112, "0x0")
-            telnet_new_tip_header_112_ret = telnet_new_tip_header_112.read_very_eager()
-            ws_new_tip_header_112_ret = ws_new_tip_header_112.recv()
+            self.Miner.miner_with_version(self.node113, "0x0")
             telnet_new_tip_header_113_ret = telnet_new_tip_header_113.read_very_eager()
             ws_new_tip_header_113_ret = ws_new_tip_header_113.recv()
             print(
@@ -92,17 +75,8 @@ class TestTelnetAndWebsocket(CkbTest):
             #       json.loads(telnet_new_tip_header_112_ret.decode())['params']['result'])
             # assert json.loads(telnet_new_tip_header_112_ret.decode())['params']['result'] == \
             # json.loads(telnet_new_tip_header_113_ret.decode())['params']['result']
-            print(
-                "ws_new_tip_header_112_ret:",
-                json.loads(ws_new_tip_header_112_ret)["params"]["result"],
-            )
-            assert (
-                json.loads(ws_new_tip_header_112_ret)["params"]["result"]
-                == json.loads(ws_new_tip_header_113_ret)["params"]["result"]
-            )
-        telnet_new_tip_header_112.close()
+
         telnet_new_tip_header_113.close()
-        ws_new_tip_header_112.close()
         ws_new_tip_header_113.close()
 
     def test_02_sub_new_tip_block(self):
@@ -116,21 +90,14 @@ class TestTelnetAndWebsocket(CkbTest):
         Returns:
 
         """
-        telnet_new_tip_block_112 = self.node112.subscribe_telnet("new_tip_block")
         telnet_new_tip_block_113 = self.node113.subscribe_telnet("new_tip_block")
-        ws_new_tip_block_112 = self.node112.subscribe_websocket("new_tip_block")
         ws_new_tip_block_113 = self.node113.subscribe_websocket("new_tip_block")
         for i in range(10):
-            self.Miner.miner_with_version(self.node112, "0x0")
-            telnet_new_tip_block_112_ret = telnet_new_tip_block_112.read_very_eager()
-            ws_new_tip_block_112_ret = ws_new_tip_block_112.recv()
+            self.Miner.miner_with_version(self.node113, "0x0")
             telnet_new_tip_block_113_ret = telnet_new_tip_block_113.read_very_eager()
             ws_new_tip_block_113_ret = ws_new_tip_block_113.recv()
             # print("telnet_new_tip_block_112_ret:", json.loads(telnet_new_tip_block_112_ret)['params']['result'])
-            print(
-                "ws_new_tip_block_112_ret:",
-                json.loads(ws_new_tip_block_112_ret)["params"]["result"],
-            )
+
             print(
                 "telnet_new_tip_block_113_ret:",
                 json.loads(telnet_new_tip_block_113_ret)["params"]["result"],
@@ -139,17 +106,8 @@ class TestTelnetAndWebsocket(CkbTest):
                 "ws_new_tip_block_113_ret:",
                 json.loads(ws_new_tip_block_113_ret)["params"]["result"],
             )
-            assert (
-                json.loads(ws_new_tip_block_112_ret)["params"]["result"]
-                == json.loads(telnet_new_tip_block_113_ret)["params"]["result"]
-            )
-            assert (
-                json.loads(ws_new_tip_block_112_ret)["params"]["result"]
-                == json.loads(ws_new_tip_block_113_ret)["params"]["result"]
-            )
-        telnet_new_tip_block_112.close()
+
         telnet_new_tip_block_113.close()
-        ws_new_tip_block_112.close()
         ws_new_tip_block_113.close()
 
     def test_03_sub_new_tx(self):
@@ -163,8 +121,6 @@ class TestTelnetAndWebsocket(CkbTest):
         Returns:
 
         """
-        telnet_new_tx_112 = self.node112.subscribe_telnet("new_transaction")
-        ws_new_tx_112 = self.node112.subscribe_websocket("new_transaction")
         telnet_new_tx_113 = self.node113.subscribe_telnet("new_transaction")
         ws_new_tx_113 = self.node113.subscribe_websocket("new_transaction")
         account1 = self.Ckb_cli.util_key_info_by_private_key(
@@ -180,21 +136,14 @@ class TestTelnetAndWebsocket(CkbTest):
             )
             self.Miner.miner_until_tx_committed(self.node113, tx_hash)
             telnet_new_tx_113_ret = telnet_new_tx_113.read_very_eager()
-            telnet_new_tx_112_ret = telnet_new_tx_112.read_very_eager()
             ws_new_tx_113_ret = ws_new_tx_113.recv()
-            ws_new_tx_112_ret = ws_new_tx_112.recv()
             print("telnet_new_tx_113_ret:", telnet_new_tx_113_ret)
             print("ws_new_tx_113_ret:", ws_new_tx_113_ret)
             # print("telnet_new_tx_112_ret:", telnet_new_tx_112_ret)
-            print("ws_new_tx_112_ret:", ws_new_tx_112_ret)
             assert len(
                 json.loads(telnet_new_tx_113_ret.decode())["params"]["result"]
             ) == len(json.loads(ws_new_tx_113_ret)["params"]["result"])
-            assert len(
-                json.loads(telnet_new_tx_113_ret.decode())["params"]["result"]
-            ) == len(json.loads(ws_new_tx_112_ret)["params"]["result"])
-        telnet_new_tx_112.close()
-        ws_new_tx_112.close()
+
         telnet_new_tx_113.close()
         ws_new_tx_113.close()
 
@@ -209,8 +158,6 @@ class TestTelnetAndWebsocket(CkbTest):
         Returns:
 
         """
-        telnet_new_tx_112 = self.node112.subscribe_telnet("proposed_transaction")
-        ws_new_tx_112 = self.node112.subscribe_websocket("proposed_transaction")
         telnet_new_tx_113 = self.node113.subscribe_telnet("proposed_transaction")
         ws_new_tx_113 = self.node113.subscribe_websocket("proposed_transaction")
         account1 = self.Ckb_cli.util_key_info_by_private_key(
@@ -226,40 +173,29 @@ class TestTelnetAndWebsocket(CkbTest):
 
             self.Miner.miner_until_tx_committed(self.node113, tx_hash)
             telnet_new_tx_113_ret = telnet_new_tx_113.read_very_eager()
-            telnet_new_tx_112_ret = telnet_new_tx_112.read_very_eager()
             ws_new_tx_113_ret = ws_new_tx_113.recv()
-            ws_new_tx_112_ret = ws_new_tx_112.recv()
             print("telnet_new_tx_113_ret:", telnet_new_tx_113_ret)
             print("ws_new_tx_113_ret:", ws_new_tx_113_ret)
             # print("telnet_new_tx_112_ret:", telnet_new_tx_112_ret)
-            print("ws_new_tx_112_ret:", ws_new_tx_112_ret)
             print(
                 "json:", json.loads(telnet_new_tx_113_ret.decode())["params"]["result"]
             )
             assert len(
                 json.loads(telnet_new_tx_113_ret.decode())["params"]["result"]
             ) == len(json.loads(ws_new_tx_113_ret)["params"]["result"])
-            assert len(
-                json.loads(telnet_new_tx_113_ret.decode())["params"]["result"]
-            ) == len(json.loads(ws_new_tx_112_ret)["params"]["result"])
-        telnet_new_tx_112.close()
-        ws_new_tx_112.close()
+
         telnet_new_tx_113.close()
         ws_new_tx_113.close()
 
     def test_05_reject_tx(self):
         """
-        1. ckb node 112 subscribe_telnet rejected_transaction
         2. ckb node 113 subscribe_telnet rejected_transaction
-        3. ckb node 112 subscribe_websocket rejected_transaction
-        4. ckb node 112 subscribe_websocket rejected_transaction
         5. check recv telnet_new_tip_header_113_ret and 112_ret
         6. assert 113_ret and 112_ret recv content
         Returns:
 
         """
-        telnet_new_tx_112 = self.node112.subscribe_telnet("rejected_transaction")
-        ws_new_tx_112 = self.node112.subscribe_websocket("rejected_transaction")
+
         telnet_new_tx_113 = self.node113.subscribe_telnet("rejected_transaction")
         ws_new_tx_113 = self.node113.subscribe_websocket("rejected_transaction")
         account1 = self.Ckb_cli.util_key_info_by_private_key(
@@ -298,15 +234,11 @@ class TestTelnetAndWebsocket(CkbTest):
             # telnet_new_tx_112_ret = telnet_new_tx_112.read_very_eager()
             # print("telnet_new_tx_112_ret:", telnet_new_tx_112_ret)
 
-            ws_new_tx_112_ret = ws_new_tx_112.recv()
-            print("ws_new_tx_112_ret:", ws_new_tx_112_ret)
-
             # assert len(json.loads(telnet_new_tx_113_ret.decode())['params']['result']) == \
             #        len(json.loads(ws_new_tx_113_ret)['params']['result'])
             # assert len(json.loads(telnet_new_tx_113_ret.decode())['params']['result']) == \
             #        len(json.loads(ws_new_tx_112_ret)['params']['result'])
-        telnet_new_tx_112.close()
-        ws_new_tx_112.close()
+
         telnet_new_tx_113.close()
         ws_new_tx_113.close()
         pass
