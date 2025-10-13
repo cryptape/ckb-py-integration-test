@@ -111,4 +111,5 @@ class TestDiffOverflow(CkbTest):
         self.Miner.make_tip_height_number(self.node2, 500)
         self.node2.getClient().set_network_active(True)
         self.Node.wait_node_height(self.node, 500, 1000)
+        self.node.start_miner()
         self.Node.wait_light_sync_height(self.ckb_light_node, 500, 3000)
