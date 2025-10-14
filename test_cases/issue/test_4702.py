@@ -47,9 +47,8 @@ class Test4702(CkbTest):
 
     @classmethod
     def teardown_class(cls):
-        # cls.cluster.stop_all_nodes()
-        # cls.cluster.clean_all_nodes()
-        pass
+        cls.cluster.stop_all_nodes()
+        cls.cluster.clean_all_nodes()
 
     @parameterized.expand(failed_files)
     def test_4702(self, path):
