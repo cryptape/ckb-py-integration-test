@@ -91,27 +91,6 @@ class CKBAfter2023Testnet(CkbTest):
         6. invoke spawn
         Returns:
         """
-        self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 1000)
-        self.Node.wait_cluster_height(self.cluster, 1000, 200)
-
-        self.cluster.ckb_nodes[0].getClient().get_consensus()
-
-        account = self.Ckb_cli.util_key_info_by_private_key(
-            self.Config.ACCOUNT_PRIVATE_1
-        )
-        for i in range(len(self.cluster.ckb_nodes)):
-            tx_hash = self.Ckb_cli.wallet_transfer_by_private_key(
-                self.Config.ACCOUNT_PRIVATE_1,
-                account["address"]["testnet"],
-                140,
-                self.cluster.ckb_nodes[i].client.url,
-            )
-
-            # 3. miner until tx committed
-            self.Miner.miner_with_version(self.cluster.ckb_nodes[i], "0x0")
-            self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[i], tx_hash)
-            tip_number = self.cluster.ckb_nodes[i].getClient().get_tip_block_number()
-            self.Node.wait_cluster_height(self.cluster, tip_number, 250)
 
         self.Miner.make_tip_height_number(self.cluster.ckb_nodes[0], 9690)
         self.Node.wait_cluster_height(self.cluster, 9690, 200)
@@ -164,7 +143,9 @@ class CKBAfter2023Testnet(CkbTest):
                 invoke_data,
                 api_url=self.cluster.ckb_nodes[i].getClient().url,
             )
-            self.Miner.miner_until_tx_committed(self.cluster.ckb_nodes[i], tx_hash)
+            self.Miner.miner_until_tx_committed(
+                self.cluster.ckb_nodes[0], tx_hash, True
+            )
             tip_number = self.cluster.ckb_nodes[i].getClient().get_tip_block_number()
             self.Node.wait_cluster_height(self.cluster, tip_number, 250)
 
