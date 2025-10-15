@@ -10,6 +10,7 @@ import random
 from datetime import datetime
 from framework.util import to_int_from_big_uint128_le, change_time
 import logging
+import os
 
 # FIBER_TAR_GZ = "ckb-py-integration-test/source/fiber/data.fiber.tar.gz"
 XUDT_TX_HASH = "0x03c4475655a46dc4984c49fce03316f80bf666236bd95118112731082758d686"
@@ -453,7 +454,7 @@ class FiberTest(CkbTest):
                         "keysend": True,
                         "allow_self_payment": True,
                         "udt_type_script": udt,
-                        "final_tlc_expiry_delta": hex(120960000),
+                        # "final_tlc_expiry_delta": hex(120960000),
                     }
                 )
                 if wait:
