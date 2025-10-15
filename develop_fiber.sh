@@ -16,8 +16,8 @@ BUILD_FIBER="${BuildFIBER:-$DEFAULT_BUILD_FIBER}"
 if [ "$BUILD_FIBER" == "true" ]; then
   git clone -b $GitFIBERBranch $GitFIBERUrl
   cd fiber
-  cargo build
-  cp target/debug/fnn ../download/fiber/current/fnn
+  cargo build --release
+  cp target/release/fnn ../download/fiber/current/fnn
   cd migrate
   cargo build
   cp target/debug/fnn-migrate ../../download/fiber/current/fnn-migrate
