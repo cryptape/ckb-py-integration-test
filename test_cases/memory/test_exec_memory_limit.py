@@ -16,8 +16,7 @@ class MemoryLimitTest(CkbTest):
 
         cls.node.prepare()
         cls.node.start()
-
-        cls.node.getClient().generate_epochs("0x2")
+        cls.Miner.make_tip_height_number(cls.node, 100)
         cls.execArgContract = ExecArgContract()
         cls.execArgContract.deploy(cls.Config.ACCOUNT_PRIVATE_1, cls.node)
         deploy_hash, deploy_index = cls.execArgContract.get_deploy_hash_and_index()

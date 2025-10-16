@@ -15,8 +15,7 @@ class TestOom(CkbTest):
         )
         cls.node.prepare()
         cls.node.start()
-        cls.Miner.make_tip_height_number(cls.node, 2000)
-        cls.node.getClient().generate_epochs("0x2")
+        cls.Miner.make_tip_height_number(cls.node, 100)
 
     @classmethod
     def teardown_class(cls):

@@ -18,8 +18,7 @@ class MemoryLimitTest(CkbTest):
         cls.node.prepare()
         cls.node.start()
 
-        cls.Miner.make_tip_height_number(cls.node, 2000)
-        cls.node.getClient().generate_epochs("0x2")
+        cls.Miner.make_tip_height_number(cls.node, 100)
         cls.spawnArgContract = SpawnArgContract()
         cls.spawnArgContract.deploy(cls.Config.ACCOUNT_PRIVATE_1, cls.node)
         deploy_hash, deploy_index = cls.spawnArgContract.get_deploy_hash_and_index()
