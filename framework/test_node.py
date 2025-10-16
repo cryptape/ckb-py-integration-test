@@ -18,7 +18,6 @@ DOCKER = os.getenv("DOCKER", False)
 DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.202.0-rc1")
 
 
-
 DOCKER = os.getenv("DOCKER", False)
 DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.203.0-rc1")
 
