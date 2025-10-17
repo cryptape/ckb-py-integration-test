@@ -26,6 +26,8 @@ def deploy_ckb_contract(
     contract_path,
     fee_rate=2000,
     enable_type_id=True,
+    dep_groups_enable_type_id="old",
+    return_tx="cell_tx",
     api_url="http://127.0.0.1:8114",
 ):
     """
@@ -44,7 +46,7 @@ def deploy_ckb_contract(
         tmp_tx_info_path = f"/tmp/tx-{time.time_ns().real}.json"
         tmp_deploy_toml_path = "/tmp/deploy1.toml"
         deploy_toml_str = get_deploy_toml_config(
-            private_key, contract_path, enable_type_id
+            private_key, contract_path, enable_type_id, dep_groups_enable_type_id
         )
         with open(tmp_deploy_toml_path, "w") as f:
             f.write(deploy_toml_str)
@@ -62,6 +64,8 @@ def deploy_ckb_contract(
         )
         deploy_sign_txs(private_key, tmp_tx_info_path, api_url)
         deploy_tx_result = deploy_apply_txs(tmp_tx_info_path, api_url)
+        if return_tx == "dep_group_tx":
+            return deploy_tx_result["dep_group_tx"]
         return deploy_tx_result["cell_tx"]
 
     # rand ckb address ,provider contract cell cant be used

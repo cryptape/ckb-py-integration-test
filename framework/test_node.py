@@ -15,6 +15,10 @@ import os
 
 
 DOCKER = os.getenv("DOCKER", False)
+DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.202.0-rc1")
+
+
+DOCKER = os.getenv("DOCKER", False)
 DOCKER_CKB_VERSION = os.getenv("DOCKER_CKB_VERSION", "nervos/ckb:v0.203.0-rc1")
 
 
@@ -206,13 +210,13 @@ class CkbNode:
                 ws_port = self.ckb_config["ckb_ws_listen_address"].split(":")[-1]
                 tcp_port = self.ckb_config["ckb_tcp_listen_address"].split(":")[-1]
                 self.ckb_pid = run_command(
-                    f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} -p {ws_port}:{ws_port} -p {tcp_port}:{tcp_port} -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
+                    f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} -p {ws_port}:{ws_port} -p {tcp_port}:{tcp_port} --network my-network -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
                     f"--indexer  --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
                 )
                 time.sleep(3)
                 return
             self.ckb_pid = run_command(
-                f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
+                f"docker run --name {self.ckb_dir.split('/')[-1]} -p {p2p_port}:{p2p_port}  -p {rpc_port}:{rpc_port} --network my-network -v {self.ckb_dir}:/var/lib/ckb {DOCKER_CKB_VERSION}  run -C /var/lib/ckb "
                 f"--indexer  --skip-spec-check > {self.ckb_dir}/node.log 2>&1 &"
             )
             time.sleep(3)

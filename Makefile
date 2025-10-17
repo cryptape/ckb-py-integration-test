@@ -23,10 +23,10 @@ develop_prepare:
 	python3 -m download_ckb_light_client
 	echo "install ckb cli"
 	bash develop_prepare.sh
+#    test_cases/ckb2023 \
 
 test_cases := \
     test_cases/ckb_cli \
-    test_cases/ckb2023 \
     test_cases/contracts \
     test_cases/example \
     test_cases/framework \

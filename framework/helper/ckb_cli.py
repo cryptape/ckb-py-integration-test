@@ -601,19 +601,30 @@ def tx_add_header_dep(block_hash, tx_file):
         f.write(tx_info_str)
 
 
-def get_deploy_toml_config(account_private, contract_bin_path, enable_type_id):
+def get_deploy_toml_config(
+    account_private, contract_bin_path, enable_type_id, dep_groups_enable_type_id="old"
+):
     # get account script
     account = util_key_info_by_private_key(account_private)
+    # handle enable_type_id line in dep_groups
+    dep_groups_enable_line = ""
+    if not (
+        isinstance(dep_groups_enable_type_id, str)
+        and dep_groups_enable_type_id.lower() == "old"
+    ):
+        dep_groups_enable_line = (
+            f"\nenable_type_id = {str(dep_groups_enable_type_id).lower()}"
+        )
+
     # return format toml
     return f"""
-    [[cells]]
+[[cells]]
 name = "compact_udt_lock"
 enable_type_id = {str(enable_type_id).lower()}
 location = {{ file = "{contract_bin_path}" }}
 
 [[dep_groups]]
-name = "my_dep_group"
-enable_type_id = {str(enable_type_id).lower()}
+name = "my_dep_group"{dep_groups_enable_line}
 cells = []
 
 [lock]
