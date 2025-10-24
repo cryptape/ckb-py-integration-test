@@ -1,10 +1,10 @@
 set -e
- git clone https://github.com/nervosnetwork/ckb-cli.git
- cd ckb-cli
- git checkout develop
- make prod
- cp target/release/ckb-cli ../source/ckb-cli
-#cp download/0.203.0/ckb-cli ./source/ckb-cli
+# git clone https://github.com/nervosnetwork/ckb-cli.git
+# cd ckb-cli
+# git checkout develop
+# make prod
+# cp target/release/ckb-cli ../source/ckb-cli
+cp download/0.203.0/ckb-cli ./source/ckb-cli
 #cp download/0.117.0/ckb-cli ./source/ckb-cli
 #git clone https://github.com/quake/ckb-light-client.git
 #cd ckb-light-client
