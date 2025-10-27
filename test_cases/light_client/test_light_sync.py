@@ -18,10 +18,10 @@ class TestLightSync(CkbTest):
 
         """
         node1 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V113, "tx_pool_main/node1", 8115, 8227
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool_main/node1", 8115, 8227
         )
         node2 = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.V113, "tx_pool_main/node2", 8116, 8228
+            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool_main/node2", 8116, 8228
         )
 
         cls.node = node1
@@ -138,7 +138,7 @@ class TestLightSync(CkbTest):
             )
             # 4. compare new account data
             for acc in new_sync_account:
-                print("------------~~~----------------------")
+                print("----------------------------------")
                 acc = self.Ckb_cli.util_key_info_by_private_key(acc)
                 light_cells = self.ckb_light_node.getClient().get_cells(
                     {

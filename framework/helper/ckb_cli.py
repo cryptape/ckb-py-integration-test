@@ -13,33 +13,6 @@ from framework.util import run_command
 cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
 
 
-def exception_use_old_ckb():
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                if "SoftFork" in str(e):
-                    global cli_path
-                    cli_path = f"cd {get_project_root()}/source && ./ckb-cli-old"
-                    print("------ change use old ckb-cli -------")
-                    try:
-                        ret = func(*args, **kwargs)
-                        cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
-                        return ret
-                    except Exception as e:
-                        cli_path = f"cd {get_project_root()}/source && ./ckb-cli"
-                        raise e
-                else:
-                    raise e
-
-        return wrapper
-
-    return decorator
-
-
-@exception_use_old_ckb()
 def wallet_get_capacity(ckb_address, api_url="http://127.0.0.1:8114"):
     """
     MacBook-Pro-4 0.111.0 % ./ckb-cli  wallet get-capacity
@@ -67,7 +40,6 @@ def wallet_get_capacity(ckb_address, api_url="http://127.0.0.1:8114"):
         Exception(f"Number not found :{capacity_response}")
 
 
-@exception_use_old_ckb()
 def wallet_get_live_cells(ckb_address, api_url="http://127.0.0.1:8114"):
     """
     ./ckb-cli wallet get-live-cells --address
@@ -132,7 +104,6 @@ def wallet_get_live_cells(ckb_address, api_url="http://127.0.0.1:8114"):
     return json.loads(run_command(cmd))
 
 
-@exception_use_old_ckb()
 def wallet_transfer_by_private_key(
     private_key,
     to_ckb_address,
@@ -630,18 +601,30 @@ def tx_add_header_dep(block_hash, tx_file):
         f.write(tx_info_str)
 
 
-def get_deploy_toml_config(account_private, contract_bin_path, enable_type_id):
+def get_deploy_toml_config(
+    account_private, contract_bin_path, enable_type_id, dep_groups_enable_type_id="old"
+):
     # get account script
     account = util_key_info_by_private_key(account_private)
+    # handle enable_type_id line in dep_groups
+    dep_groups_enable_line = ""
+    if not (
+        isinstance(dep_groups_enable_type_id, str)
+        and dep_groups_enable_type_id.lower() == "old"
+    ):
+        dep_groups_enable_line = (
+            f"\nenable_type_id = {str(dep_groups_enable_type_id).lower()}"
+        )
+
     # return format toml
     return f"""
-    [[cells]]
+[[cells]]
 name = "compact_udt_lock"
 enable_type_id = {str(enable_type_id).lower()}
 location = {{ file = "{contract_bin_path}" }}
 
 [[dep_groups]]
-name = "my_dep_group"
+name = "my_dep_group"{dep_groups_enable_line}
 cells = []
 
 [lock]

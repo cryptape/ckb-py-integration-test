@@ -36,8 +36,8 @@ class TestCkbLightClientAfterHardFork(CkbTest):
         )
         cls.spawn_contract = contracts["SpawnContract"]
 
-        cls.Miner.make_tip_height_number(cls.cluster.ckb_nodes[0], 20)
-        cls.Node.wait_cluster_height(cls.cluster, 20, 100)
+        cls.Miner.make_tip_height_number(cls.cluster.ckb_nodes[0], 2000)
+        cls.Node.wait_cluster_height(cls.cluster, 2000, 100)
 
         cls.ckb_light_node_current = cls.CkbLightClientNode.init_by_nodes(
             cls.CkbLightClientConfigPath.CURRENT_TEST,
@@ -62,7 +62,7 @@ class TestCkbLightClientAfterHardFork(CkbTest):
                 }
             ]
         )
-        cls.Node.wait_light_sync_height(cls.ckb_light_node_current, 20, 200)
+        cls.Node.wait_light_sync_height(cls.ckb_light_node_current, 2000, 200)
 
     @classmethod
     def teardown_class(cls):

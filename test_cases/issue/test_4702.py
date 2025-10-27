@@ -35,15 +35,15 @@ class Test4702(CkbTest):
         1.启动node1和node2两个节点
         """
         cls.local_node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node1", 8120, 8225
+            cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool/node1", 8120, 8225
         )
         cls.remote_node = cls.CkbNode.init_dev_by_port(
-            cls.CkbNodeConfigPath.CURRENT_TEST, "tx_pool/node2", 8121, 8226
+            cls.CkbNodeConfigPath.CURRENT_MAIN, "tx_pool/node2", 8121, 8226
         )
         cls.cluster = cls.Cluster([cls.local_node, cls.remote_node])
         cls.cluster.prepare_all_nodes()
         cls.cluster.start_all_nodes()
-        cls.Miner.make_tip_height_number(cls.local_node, 200)
+        cls.Miner.make_tip_height_number(cls.local_node, 5500)
 
     @classmethod
     def teardown_class(cls):
