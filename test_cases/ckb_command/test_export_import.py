@@ -59,9 +59,7 @@ class TestCkbExportImport(CkbTest):
 
     def _export_blocks(self, from_block, to_block):
         """Export a range from the source node, return the output file path."""
-        expected = os.path.join(
-            self.export_dir, f"ckb-{from_block}-{to_block}.jsonl"
-        )
+        expected = os.path.join(self.export_dir, f"ckb-{from_block}-{to_block}.jsonl")
         if os.path.exists(expected):
             return expected
         run_command(
@@ -114,9 +112,9 @@ class TestCkbExportImport(CkbTest):
             f"--target {self.export_dir} --from 50 --to 10",
             check_exit_code=False,
         )
-        assert isinstance(result, int) and result != 0, (
-            "Export should fail when from > to"
-        )
+        assert (
+            isinstance(result, int) and result != 0
+        ), "Export should fail when from > to"
 
     # ------------------------------------------------------------------ import
 
@@ -143,9 +141,9 @@ class TestCkbExportImport(CkbTest):
                 f"cd {target.ckb_dir} && ./ckb import {export_file}",
                 check_exit_code=False,
             )
-            assert isinstance(result, int) and result != 0, (
-                "Import should fail when parent block is missing"
-            )
+            assert (
+                isinstance(result, int) and result != 0
+            ), "Import should fail when parent block is missing"
         finally:
             target.clean()
 
@@ -206,8 +204,7 @@ class TestCkbExportImport(CkbTest):
         target = self._init_target_node("ckb_command/num_threads", 8526, 8527)
         try:
             run_command(
-                f"cd {target.ckb_dir} && ./ckb import "
-                f"--num-threads 2 {export_file}"
+                f"cd {target.ckb_dir} && ./ckb import " f"--num-threads 2 {export_file}"
             )
             target.start()
             tip = target.getClient().get_tip_block_number()
