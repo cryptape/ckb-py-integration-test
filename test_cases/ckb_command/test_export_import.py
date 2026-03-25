@@ -59,7 +59,9 @@ class TestCkbExportImport(CkbTest):
 
     def _export_blocks(self, from_block, to_block):
         """Export a range from the source node, return the output file path."""
-        expected = os.path.join(self.export_dir, f"ckb_dev-{from_block}-{to_block}.jsonl")
+        expected = os.path.join(
+            self.export_dir, f"ckb_dev-{from_block}-{to_block}.jsonl"
+        )
         if os.path.exists(expected):
             return expected
         run_command(
